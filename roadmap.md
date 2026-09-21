@@ -17,3 +17,4 @@
 - [x] Replace the merchant edit dialog with a dedicated tabbed enterprise edit page
 - [x] Add full-page offer create/edit flows and merchant-scoped offer management
 - [x] Add the Catalog Cashback Offers listing with filters and pagination
+- [x] Split merchant Details and Page Sections tabs with interactive section controls

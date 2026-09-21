@@ -199,7 +199,7 @@ function IconButton({ label, children, className, onClick }: { label: string; ch
 
 function Sidebar({ view, setView, open, setOpen }: { view: View; setView: (v: View) => void; open: boolean; setOpen: (v: boolean) => void }) {
   const [expanded, setExpanded] = useState<string | null>(() => {
-    const activeView = view === "merchant-edit" ? "merchants" : view === "offer-edit" ? "offers" : view;
+    const activeView = view === "merchant-edit" ? "merchants" : view === "offer-edit" ? "offers" : view === "category-edit" || view === "category-new" ? "categories" : view;
     const activeGroup = groups.find((group) => group.items.some((item) => item.view === activeView));
     return activeGroup?.label ?? "Catalog";
   });
@@ -227,7 +227,7 @@ function Sidebar({ view, setView, open, setOpen }: { view: View; setView: (v: Vi
                   <group.icon className="h-3.5 w-3.5" /><span className="flex-1 text-left">{group.label}</span><ChevronRight className={cn("h-3.5 w-3.5 transition-transform", isOpen && "rotate-90")} />
                 </Button>
                 {isOpen && <div className="ml-4 border-l border-sidebar-border pl-2">
-                  {group.items.map((item) => <Button key={item.label} variant="ghost" disabled={!item.view} className={cn("my-0.5 h-9 w-full justify-start gap-2.5 px-3 text-[13px] text-sidebar-foreground disabled:opacity-55", (item.view === view || (view === "merchant-edit" && item.view === "merchants") || (view === "offer-edit" && item.view === "offers")) && "bg-sidebar-accent font-semibold text-sidebar-primary hover:bg-sidebar-accent")} onClick={() => item.view && chooseGroupedItem(item.view, group.label)}><item.icon className="h-4 w-4" />{item.label}</Button>)}
+                  {group.items.map((item) => <Button key={item.label} variant="ghost" disabled={!item.view} className={cn("my-0.5 h-9 w-full justify-start gap-2.5 px-3 text-[13px] text-sidebar-foreground disabled:opacity-55", (item.view === view || (view === "merchant-edit" && item.view === "merchants") || (view === "offer-edit" && item.view === "offers") || ((view === "category-edit" || view === "category-new") && item.view === "categories")) && "bg-sidebar-accent font-semibold text-sidebar-primary hover:bg-sidebar-accent")} onClick={() => item.view && chooseGroupedItem(item.view, group.label)}><item.icon className="h-4 w-4" />{item.label}</Button>)}
                 </div>}
               </div>;
             })}

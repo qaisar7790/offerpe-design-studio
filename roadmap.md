@@ -40,3 +40,5 @@
 - [x] Add uploaded Communication template events, variables, and channel copy as dropdown options
 - [x] Build Dispatches & Notifications with Analytics Events, Communication Dispatches, Notifications tabs, filters, User ID columns, and CSV export
 - [x] Build System Users with dense table, filtering, import dialog, PI/non-PI export, horizontal scroll, and pagination
+
+- [x] Build System Roles with listing, add dialog, full-page edit, grouped searchable permissions, generated descriptions, and delete confirmations

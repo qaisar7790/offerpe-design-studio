@@ -113,7 +113,7 @@ import {
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
 
-type View = "dashboard" | "merchants" | "reviews" | "merchant-onboarding-queue" | "trackier-queue" | "affiliate-networks" | "affiliate-network-new" | "affiliate-network-edit" | "merchant-edit" | "offers" | "offer-edit" | "promo-banners" | "promo-banner-edit" | "promo-banner-new" | "categories" | "category-mapping" | "category-edit" | "category-new" | "cashback-claims" | "transactions" | "clicks" | "withdrawals" | "rejection-reasons" | "communication-templates" | "communication-dispatches" | "users" | "app-versions" | "settings" | "cities" | "admin-users" | "roles" | "role-edit" | "conversions";
+type View = "dashboard" | "merchants" | "reviews" | "merchant-onboarding-queue" | "trackier-queue" | "affiliate-networks" | "affiliate-network-new" | "affiliate-network-edit" | "merchant-edit" | "offers" | "offer-edit" | "promo-banners" | "promo-banner-edit" | "promo-banner-new" | "categories" | "category-mapping" | "category-edit" | "category-new" | "cashback-claims" | "transactions" | "clicks" | "withdrawals" | "rejection-reasons" | "communication-templates" | "communication-dispatches" | "users" | "app-versions" | "settings" | "cities" | "onboarding-screens" | "onboarding-slide-edit" | "onboarding-slide-new" | "admin-users" | "roles" | "role-edit" | "conversions";
 type RawMapping = { raw: string; mappedTo: string };
 type ReviewStatus = "Pending" | "Approved" | "Rejected";
 type Review = { id: string; user: string; merchant: string; rating: number; comment: string; photos: string[]; submitted: string; status: ReviewStatus; reason: string; note: string };
@@ -134,7 +134,7 @@ const groups = [
   { label: "Operations", icon: Settings2, items: [{ label: "Merchant Onboarding Queue", icon: ClipboardCheck, view: "merchant-onboarding-queue" as View }, { label: "Trackier Import Queue", icon: DownloadCloud, view: "trackier-queue" as View }, { label: "Affiliate Networks", icon: Share2, view: "affiliate-networks" as View }, { label: "Online Conversions", icon: CircleDollarSign, view: "conversions" as View }, { label: "Category Mapping", icon: Tag, view: "category-mapping" as View }] },
   { label: "Financial", icon: WalletCards, items: [{ label: "Cashback Claims", icon: CircleDollarSign, view: "cashback-claims" as View }, { label: "Transactions", icon: ArrowDown, view: "transactions" as View }, { label: "Clicks", icon: MousePointerClick, view: "clicks" as View }, { label: "Withdrawals", icon: BadgeIndianRupee, view: "withdrawals" as View }, { label: "Rejection Reasons", icon: Flag, view: "rejection-reasons" as View }, { label: "Missing Claims", icon: FileSpreadsheet }] },
   { label: "Communication", icon: Megaphone, items: [{ label: "Templates", icon: MessageSquare, view: "communication-templates" as View }, { label: "Dispatches & Notifications", icon: Bell, view: "communication-dispatches" as View }] },
-  { label: "System", icon: SlidersHorizontal, items: [{ label: "Users", icon: Users, view: "users" as View }, { label: "Cities", icon: Building2, view: "cities" as View }, { label: "App Versions", icon: Smartphone, view: "app-versions" as View }, { label: "Admins", icon: Mail, view: "admin-users" as View }, { label: "Roles", icon: ShieldCheck, view: "roles" as View }, { label: "Settings", icon: Settings2, view: "settings" as View }] },
+  { label: "System", icon: SlidersHorizontal, items: [{ label: "Users", icon: Users, view: "users" as View }, { label: "Cities", icon: Building2, view: "cities" as View }, { label: "App Versions", icon: Smartphone, view: "app-versions" as View }, { label: "Onboarding Screens", icon: ImageIcon, view: "onboarding-screens" as View }, { label: "Admins", icon: Mail, view: "admin-users" as View }, { label: "Roles", icon: ShieldCheck, view: "roles" as View }, { label: "Settings", icon: Settings2, view: "settings" as View }] },
 ];
 
 const merchants = [
@@ -626,7 +626,7 @@ function IconButton({ label, children, className, onClick }: { label: string; ch
 
 function Sidebar({ view, setView, open, setOpen }: { view: View; setView: (v: View) => void; open: boolean; setOpen: (v: boolean) => void }) {
   const [expanded, setExpanded] = useState<string | null>(() => {
-    const activeView = view === "merchant-edit" ? "merchants" : view === "offer-edit" ? "offers" : view === "promo-banner-edit" || view === "promo-banner-new" ? "promo-banners" : view === "category-edit" || view === "category-new" ? "categories" : view === "affiliate-network-edit" || view === "affiliate-network-new" ? "affiliate-networks" : view === "role-edit" ? "roles" : view;
+    const activeView = view === "merchant-edit" ? "merchants" : view === "offer-edit" ? "offers" : view === "promo-banner-edit" || view === "promo-banner-new" ? "promo-banners" : view === "category-edit" || view === "category-new" ? "categories" : view === "affiliate-network-edit" || view === "affiliate-network-new" ? "affiliate-networks" : view === "role-edit" ? "roles" : view === "onboarding-slide-edit" || view === "onboarding-slide-new" ? "onboarding-screens" : view;
     const activeGroup = groups.find((group) => group.items.some((item) => item.view === activeView));
     return activeGroup?.label ?? "Catalog";
   });
@@ -654,7 +654,7 @@ function Sidebar({ view, setView, open, setOpen }: { view: View; setView: (v: Vi
                   <group.icon className="h-3.5 w-3.5" /><span className="flex-1 text-left">{group.label}</span><ChevronRight className={cn("h-3.5 w-3.5 transition-transform", isOpen && "rotate-90")} />
                 </Button>
                 {isOpen && <div className="ml-4 border-l border-sidebar-border pl-2">
-                   {group.items.map((item) => <Button key={item.label} variant="ghost" disabled={!item.view} className={cn("my-0.5 h-9 w-full justify-start gap-2.5 px-3 text-[13px] text-sidebar-foreground disabled:opacity-55", (item.view === view || (view === "merchant-edit" && item.view === "merchants") || (view === "offer-edit" && item.view === "offers") || ((view === "promo-banner-edit" || view === "promo-banner-new") && item.view === "promo-banners") || ((view === "category-edit" || view === "category-new") && item.view === "categories") || ((view === "affiliate-network-edit" || view === "affiliate-network-new") && item.view === "affiliate-networks") || (view === "role-edit" && item.view === "roles")) && "bg-sidebar-accent font-semibold text-sidebar-primary hover:bg-sidebar-accent")} onClick={() => item.view && chooseGroupedItem(item.view, group.label)}><item.icon className="h-4 w-4" />{item.label}</Button>)}
+                   {group.items.map((item) => <Button key={item.label} variant="ghost" disabled={!item.view} className={cn("my-0.5 h-9 w-full justify-start gap-2.5 px-3 text-[13px] text-sidebar-foreground disabled:opacity-55", (item.view === view || (view === "merchant-edit" && item.view === "merchants") || (view === "offer-edit" && item.view === "offers") || ((view === "promo-banner-edit" || view === "promo-banner-new") && item.view === "promo-banners") || ((view === "category-edit" || view === "category-new") && item.view === "categories") || ((view === "affiliate-network-edit" || view === "affiliate-network-new") && item.view === "affiliate-networks") || (view === "role-edit" && item.view === "roles") || ((view === "onboarding-slide-edit" || view === "onboarding-slide-new") && item.view === "onboarding-screens")) && "bg-sidebar-accent font-semibold text-sidebar-primary hover:bg-sidebar-accent")} onClick={() => item.view && chooseGroupedItem(item.view, group.label)}><item.icon className="h-4 w-4" />{item.label}</Button>)}
                 </div>}
               </div>;
             })}
@@ -718,6 +718,112 @@ function SettingsCard({ title, description, children, footer }: { title: string;
     <div className="grid gap-4 p-5 sm:grid-cols-2">{children}</div>
     <div className="flex items-center justify-end gap-2 border-t border-border px-5 py-3.5">{footer}</div>
   </section>;
+}
+
+type OnboardingApp = "Consumer" | "Merchant";
+type OnboardingSlide = { id: string; app: OnboardingApp; title: string; body: string; image: string; active: boolean };
+
+const onboardingSlideSeeds: OnboardingSlide[] = [
+  { id: "OS-1", app: "Consumer", title: "Welcome to OfferPe", body: "Earn real cashback every time you shop — online or in-store.", image: "", active: true },
+  { id: "OS-2", app: "Consumer", title: "Shop your favorite brands online", body: "Tap Shop Now on any brand inside the app and we track your order automatically.", image: "", active: true },
+  { id: "OS-3", app: "Consumer", title: "Scan & Pay in-store", body: "At a partner store, just show your Scan & Pay code at the counter.", image: "", active: true },
+  { id: "OS-4", app: "Consumer", title: "Track every rupee", body: "Once your cashback is approved, withdraw it straight to your bank account.", image: "", active: true },
+  { id: "OS-5", app: "Consumer", title: "Invite friends, earn more", body: "Invite friends and earn a bonus every time they complete their first order.", image: "", active: false },
+  { id: "OS-6", app: "Merchant", title: "Welcome to OfferPe Merchant", body: "Accept OfferPe cashback payments in seconds at your counter.", image: "", active: true },
+  { id: "OS-7", app: "Merchant", title: "Scan a customer's code", body: "Scan your customer's QR code, or ask for their registered mobile number.", image: "", active: true },
+  { id: "OS-8", app: "Merchant", title: "Enter the bill and confirm", body: "Enter the bill amount — cashback is calculated and applied instantly.", image: "", active: true },
+  { id: "OS-9", app: "Merchant", title: "Check your redemption history anytime", body: "Every redemption is logged. See your full history and settlements in one place.", image: "", active: true },
+];
+
+function OnboardingSlidePreview({ slide, index, total }: { slide: OnboardingSlide; index: number; total: number }) {
+  return <div className="mx-auto w-[260px] rounded-[2rem] border-8 border-foreground/85 bg-card shadow-card">
+    <div className="relative flex h-[520px] flex-col overflow-hidden rounded-[1.4rem] bg-primary">
+      <div className="absolute inset-0">{slide.image ? <img src={slide.image} alt="" className="h-full w-full object-cover" /> : <div className="h-full w-full bg-gradient-to-b from-primary to-primary/70" />}</div>
+      <div className="absolute inset-0 bg-overlay" />
+      <div className="relative flex h-full flex-col justify-between p-5 text-primary-foreground">
+        <div className="flex justify-end"><span className="rounded-full bg-card/90 px-2.5 py-1 text-[11px] font-semibold text-foreground">Skip</span></div>
+        <div>
+          <h3 className="font-heading text-xl font-bold leading-tight">{slide.title || "Slide title"}</h3>
+          <p className="mt-2 text-sm leading-6 opacity-90">{slide.body || "Slide body text appears here."}</p>
+          <div className="mt-5 flex items-center gap-1.5">{Array.from({ length: Math.max(total, 1) }).map((_, dot) => <span key={dot} className={cn("h-1.5 rounded-full transition-all", dot === index ? "w-5 bg-primary-foreground" : "w-1.5 bg-primary-foreground/40")} />)}</div>
+        </div>
+      </div>
+    </div>
+  </div>;
+}
+
+function OnboardingSlideEditPage({ slide, app, total, index, onCancel, onSave, onDelete }: { slide: OnboardingSlide | null; app: OnboardingApp; total: number; index: number; onCancel: () => void; onSave: (slide: OnboardingSlide) => void; onDelete: (slide: OnboardingSlide) => void }) {
+  const isNew = !slide;
+  const [form, setForm] = useState<OnboardingSlide>(() => slide ?? { id: `OS-${Date.now()}`, app, title: "", body: "", image: "", active: true });
+  const inputRef = useRef<HTMLInputElement>(null);
+  const set = <K extends keyof OnboardingSlide>(key: K, value: OnboardingSlide[K]) => setForm((current) => ({ ...current, [key]: value }));
+  const readFile = (file?: File) => { if (!file) return; const reader = new FileReader(); reader.onload = () => set("image", typeof reader.result === "string" ? reader.result : ""); reader.readAsDataURL(file); };
+  const save = () => { if (!form.title.trim() || !form.body.trim()) { toast.error("Title and body text are required"); return; } onSave(form); toast.success(isNew ? "Onboarding slide added" : "Onboarding slide updated", { description: `${form.title} was saved for the ${form.app} app.` }); };
+  return <div className="pb-20">
+    <nav aria-label="Breadcrumb" className="mb-4 flex items-center gap-2 text-sm text-muted-foreground"><Button variant="link" className="h-auto p-0 text-muted-foreground" onClick={onCancel}>Dashboard</Button><ChevronRight className="h-3.5 w-3.5" /><Button variant="link" className="h-auto p-0 text-muted-foreground" onClick={onCancel}>Onboarding Screens</Button><ChevronRight className="h-3.5 w-3.5" /><span className="font-medium text-foreground">{isNew ? "New" : "Edit"}</span></nav>
+    <header className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+      <div><h1 className="font-heading text-3xl font-bold">{isNew ? "New onboarding slide" : "Edit onboarding slide"}</h1><p className="mt-1 text-sm text-muted-foreground">{form.app} app · shown once before signup on a fresh install.</p></div>
+      {!isNew && <ConfirmDeleteDialog itemType="Onboarding Slide" name={form.title} onConfirm={() => onDelete(form)}><Button variant="destructive"><Trash2 />Delete</Button></ConfirmDeleteDialog>}
+    </header>
+    <div className="grid items-start gap-5 xl:grid-cols-[minmax(0,1.3fr)_minmax(320px,0.7fr)]">
+      <SectionCard title="Slide Content" description="Fields marked with an asterisk are required.">
+        <div className="grid gap-4">
+          <label className="space-y-1.5 text-sm font-medium">App <span className="text-destructive">*</span>
+            <Select value={form.app} onValueChange={(value) => set("app", value as OnboardingApp)}><SelectTrigger><SelectValue /></SelectTrigger><SelectContent><SelectItem value="Consumer">Consumer</SelectItem><SelectItem value="Merchant">Merchant</SelectItem></SelectContent></Select>
+          </label>
+          <label className="space-y-1.5 text-sm font-medium">Title <span className="text-destructive">*</span>
+            <Input value={form.title} onChange={(event) => set("title", event.target.value)} placeholder="Welcome to OfferPe" />
+          </label>
+          <label className="space-y-1.5 text-sm font-medium">Body text <span className="text-destructive">*</span>
+            <Textarea rows={3} value={form.body} onChange={(event) => set("body", event.target.value)} placeholder="Earn real cashback every time you shop." />
+          </label>
+          <div>
+            <span className="text-sm font-medium">{form.image ? "Replace image (optional)" : "Image (optional)"}</span>
+            {form.image && <div className="mt-2 h-28 w-28 overflow-hidden rounded-md border border-border"><img src={form.image} alt="Current slide" className="h-full w-full object-cover" /></div>}
+            <button type="button" onClick={() => inputRef.current?.click()} onDragOver={(event) => event.preventDefault()} onDrop={(event) => { event.preventDefault(); readFile(event.dataTransfer.files[0]); }} className="mt-2 flex min-h-24 w-full flex-col items-center justify-center rounded-lg border border-dashed border-border bg-muted/30 p-4 text-center hover:border-primary hover:bg-accent">
+              <UploadCloud className="mb-2 h-6 w-6 text-primary" /><span className="text-sm font-semibold">Choose a file</span><span className="mt-1 text-xs text-muted-foreground">Full-bleed, shown behind the title and body text.</span>
+              <input ref={inputRef} type="file" accept="image/png,image/jpeg,image/webp" className="hidden" onChange={(event) => readFile(event.target.files?.[0])} />
+            </button>
+            {form.image && <Button variant="ghost" size="sm" className="mt-2 text-destructive" onClick={() => set("image", "")}><X />Remove image</Button>}
+          </div>
+          <div className="flex items-center justify-between rounded-md border border-border bg-muted/30 px-3 py-2.5">
+            <div><p className="text-sm font-semibold">Active</p><p className="text-xs text-muted-foreground">Inactive slides stay in the list but are skipped in the app.</p></div>
+            <Switch checked={form.active} onCheckedChange={(value) => set("active", value)} aria-label="Active slide" />
+          </div>
+        </div>
+      </SectionCard>
+      <aside className="xl:sticky xl:top-6"><SectionCard title="Live Preview" description="How this slide appears in the onboarding carousel."><OnboardingSlidePreview slide={form} index={isNew ? total : index} total={isNew ? total + 1 : total} /></SectionCard></aside>
+    </div>
+    <div className="fixed inset-x-0 bottom-0 z-20 border-t border-border bg-card/95 px-4 py-3 backdrop-blur md:left-64"><div className="mx-auto flex max-w-400 justify-end gap-2"><Button variant="destructiveSoft" onClick={onCancel}>Cancel</Button><Button onClick={save}><Check />Save</Button></div></div>
+  </div>;
+}
+
+function OnboardingSlidesPage({ slides, app, onAppChange, onCreate, onEdit, onToggle, onMove, onDelete }: { slides: OnboardingSlide[]; app: OnboardingApp; onAppChange: (app: OnboardingApp) => void; onCreate: () => void; onEdit: (slide: OnboardingSlide) => void; onToggle: (slide: OnboardingSlide) => void; onMove: (slide: OnboardingSlide, direction: -1 | 1) => void; onDelete: (slide: OnboardingSlide) => void }) {
+  const rows = slides.filter((slide) => slide.app === app);
+  return <>
+    <PageHeader title="Onboarding Screens" description="The full-screen carousel shown once, before signup or login, on a fresh install of each app. Reorder with the arrows below — the same mechanism as Merchant Page Sections." actions={<Button onClick={onCreate}><Plus />Add slide</Button>} />
+    <Tabs value={app} onValueChange={(value) => onAppChange(value as OnboardingApp)}>
+      <TabsList className="mb-5 h-auto w-full justify-start gap-6 rounded-none border-b border-border bg-transparent p-0"><TabsTrigger value="Consumer" className={tabTriggerClass}>Consumer</TabsTrigger><TabsTrigger value="Merchant" className={tabTriggerClass}>Merchant</TabsTrigger></TabsList>
+      <TabsContent value={app} className="mt-0">
+        <div className="space-y-2">
+          {rows.map((slide, index) => <div key={slide.id} className="flex flex-col gap-3 rounded-lg border border-border bg-card p-3 shadow-card sm:flex-row sm:items-center">
+            <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-md bg-accent font-heading text-xs font-bold text-primary">{index + 1}</span>
+            <div className="h-11 w-11 shrink-0 overflow-hidden rounded-md border border-border bg-muted">{slide.image ? <img src={slide.image} alt="" className="h-full w-full object-cover" /> : <span className="flex h-full w-full items-center justify-center"><ImageIcon className="h-4 w-4 text-muted-foreground" /></span>}</div>
+            <div className="min-w-0 flex-1"><div className="truncate font-heading text-sm font-bold">{slide.title}</div><div className="truncate text-xs text-muted-foreground">{slide.body}</div></div>
+            <StatusBadge status={slide.active ? "Active" : "Inactive"} />
+            <div className="flex shrink-0 items-center gap-1">
+              <Button variant="ghost" size="icon" className="h-8 w-8" aria-label={`Move ${slide.title} up`} disabled={index === 0} onClick={() => onMove(slide, -1)}><ArrowUp className="h-4 w-4" /></Button>
+              <Button variant="ghost" size="icon" className="h-8 w-8" aria-label={`Move ${slide.title} down`} disabled={index === rows.length - 1} onClick={() => onMove(slide, 1)}><ArrowDown className="h-4 w-4" /></Button>
+              <Button variant="ghost" size="sm" className="h-8" onClick={() => onToggle(slide)}>{slide.active ? "Deactivate" : "Activate"}</Button>
+              <Button variant="ghost" size="sm" className="h-8" onClick={() => onEdit(slide)}><Pencil className="h-3.5 w-3.5" />Edit</Button>
+              <ConfirmDeleteDialog itemType="Onboarding Slide" name={slide.title} onConfirm={() => onDelete(slide)}><Button variant="ghost" size="sm" className="h-8 text-destructive"><Trash2 className="h-3.5 w-3.5" />Delete</Button></ConfirmDeleteDialog>
+            </div>
+          </div>)}
+          {rows.length === 0 && <div className="rounded-lg border border-dashed border-border bg-card p-10 text-center text-sm text-muted-foreground">No onboarding slides for the {app} app yet.</div>}
+        </div>
+      </TabsContent>
+    </Tabs>
+  </>;
 }
 
 function OnboardingAppCard({ app }: { app: string }) {
@@ -2085,6 +2191,9 @@ export function AdminPlayground() {
   const deleteAdminUser = (admin: AdminUser) => { setAdminUserRows((current) => current.filter((item) => item.id !== admin.id)); toast.success("Admin removed", { description: `${admin.name} no longer has portal access.` }); };
   const [editingAffiliateNetwork, setEditingAffiliateNetwork] = useState<AffiliateNetwork | null>(null);
   const [editingRole, setEditingRole] = useState<AdminRole | null>(null);
+  const [onboardingSlideRows, setOnboardingSlideRows] = useState<OnboardingSlide[]>(onboardingSlideSeeds);
+  const [onboardingApp, setOnboardingApp] = useState<OnboardingApp>("Consumer");
+  const [editingSlide, setEditingSlide] = useState<OnboardingSlide | null>(null);
   const [editingMerchant, setEditingMerchant] = useState<typeof merchants[number] | null>(null);
   const [categoryRows, setCategoryRows] = useState<Category[]>(initialCategories);
   const [mappingRows, setMappingRows] = useState<RawMapping[]>(initialMappings);
@@ -2153,6 +2262,20 @@ export function AdminPlayground() {
   const createRole = (role: AdminRole) => { setRoleRows((current) => [role, ...current]); setEditingRole(role); setView("role-edit"); toast.success("Role created", { description: `${role.name} is ready for permission assignment.` }); };
   const saveRole = (updated: AdminRole) => { setRoleRows((current) => current.map((item) => item.id === updated.id ? updated : item)); backToRoles(); };
   const deleteRole = (role: AdminRole) => { setRoleRows((current) => current.filter((item) => item.id !== role.id)); toast.success("Role deleted", { description: `${role.name} was removed.` }); if (view === "role-edit") backToRoles(); };
+  const backToOnboardingSlides = () => { setEditingSlide(null); setView("onboarding-screens"); };
+  const saveOnboardingSlide = (updated: OnboardingSlide) => { setOnboardingSlideRows((current) => current.some((item) => item.id === updated.id) ? current.map((item) => item.id === updated.id ? updated : item) : [...current, updated]); setOnboardingApp(updated.app); backToOnboardingSlides(); };
+  const deleteOnboardingSlide = (slide: OnboardingSlide) => { setOnboardingSlideRows((current) => current.filter((item) => item.id !== slide.id)); toast.success("Onboarding slide deleted", { description: `${slide.title} was removed.` }); if (view !== "onboarding-screens") backToOnboardingSlides(); };
+  const toggleOnboardingSlide = (slide: OnboardingSlide) => { setOnboardingSlideRows((current) => current.map((item) => item.id === slide.id ? { ...item, active: !item.active } : item)); toast.success(slide.active ? "Slide deactivated" : "Slide activated", { description: `${slide.title} is now ${slide.active ? "hidden from" : "shown in"} the carousel.` }); };
+  const moveOnboardingSlide = (slide: OnboardingSlide, direction: -1 | 1) => setOnboardingSlideRows((current) => {
+    const next = [...current];
+    const from = next.findIndex((item) => item.id === slide.id);
+    let to = from + direction;
+    while (to >= 0 && to < next.length && next[to]!.app !== slide.app) to += direction;
+    if (from < 0 || to < 0 || to >= next.length) return current;
+    const [moved] = next.splice(from, 1);
+    next.splice(to, 0, moved!);
+    return next;
+  });
   const content = view === "dashboard" ? <Dashboard />
     : view === "merchants" ? <Merchants rows={merchantRows} onEdit={editMerchant} />
     : view === "reviews" ? <ReviewsPage reviews={reviewRows} merchantNames={merchantRows.map((row) => row[0])} onApprove={approveReview} onReject={rejectReview} onRevert={revertReview} onDelete={deleteReview} />
@@ -2170,6 +2293,8 @@ export function AdminPlayground() {
     : view === "communication-dispatches" ? <CommunicationLogs />
     : view === "users" ? <UsersPage />
     : view === "cities" ? <CitiesPage />
+    : view === "onboarding-screens" ? <OnboardingSlidesPage slides={onboardingSlideRows} app={onboardingApp} onAppChange={setOnboardingApp} onCreate={() => { setEditingSlide(null); setView("onboarding-slide-new"); }} onEdit={(slide) => { setEditingSlide(slide); setView("onboarding-slide-edit"); }} onToggle={toggleOnboardingSlide} onMove={moveOnboardingSlide} onDelete={deleteOnboardingSlide} />
+    : view === "onboarding-slide-edit" || view === "onboarding-slide-new" ? <OnboardingSlideEditPage key={editingSlide?.id ?? "new-onboarding-slide"} slide={editingSlide} app={onboardingApp} index={Math.max(onboardingSlideRows.filter((item) => item.app === (editingSlide?.app ?? onboardingApp)).findIndex((item) => item.id === editingSlide?.id), 0)} total={onboardingSlideRows.filter((item) => item.app === (editingSlide?.app ?? onboardingApp)).length} onCancel={backToOnboardingSlides} onSave={saveOnboardingSlide} onDelete={deleteOnboardingSlide} />
     : view === "settings" ? <SettingsPage />
     : view === "app-versions" ? <AppVersionsPage builds={appBuildRows} onSave={saveAppBuild} />
     : view === "admin-users" ? <AdminUsersPage admins={adminUserRows} roles={roleRows} onSave={saveAdminUser} onDelete={deleteAdminUser} />
@@ -2185,5 +2310,5 @@ export function AdminPlayground() {
     : view === "category-edit" ? <CategoryFormPage key={editingCategory?.id} category={editingCategory} onCancel={backToCategories} onSave={saveCategory} onDelete={deleteCategory} />
     : view === "category-new" ? <CategoryFormPage key="new-category" category={null} onCancel={backToCategories} onSave={saveCategory} onDelete={deleteCategory} />
     : <Conversions />;
-  return <div className="flex h-screen overflow-hidden bg-background text-foreground"><Sidebar view={view} setView={(next) => { setView(next); if (next !== "merchant-edit" && next !== "offer-edit") setEditingMerchant(null); if (next !== "category-edit" && next !== "category-new") setEditingCategory(null); if (next !== "promo-banner-edit" && next !== "promo-banner-new") setEditingPromoBanner(null); if (next !== "affiliate-network-edit" && next !== "affiliate-network-new") setEditingAffiliateNetwork(null); if (next !== "role-edit") setEditingRole(null); }} open={sidebarOpen} setOpen={setSidebarOpen} /><div className="min-w-0 flex-1 overflow-y-auto"><div className="sticky top-0 z-20 flex h-14 items-center border-b border-border bg-card/95 px-4 backdrop-blur md:hidden"><IconButton label="Open navigation" onClick={() => setSidebarOpen(true)}><Menu /></IconButton><span className="ml-2 font-heading font-bold">OfferPe Admin</span></div><main className="mx-auto w-full max-w-400 p-4 sm:p-6 lg:p-8">{content}</main></div></div>;
+  return <div className="flex h-screen overflow-hidden bg-background text-foreground"><Sidebar view={view} setView={(next) => { setView(next); if (next !== "merchant-edit" && next !== "offer-edit") setEditingMerchant(null); if (next !== "category-edit" && next !== "category-new") setEditingCategory(null); if (next !== "promo-banner-edit" && next !== "promo-banner-new") setEditingPromoBanner(null); if (next !== "affiliate-network-edit" && next !== "affiliate-network-new") setEditingAffiliateNetwork(null); if (next !== "role-edit") setEditingRole(null); if (next !== "onboarding-slide-edit" && next !== "onboarding-slide-new") setEditingSlide(null); }} open={sidebarOpen} setOpen={setSidebarOpen} /><div className="min-w-0 flex-1 overflow-y-auto"><div className="sticky top-0 z-20 flex h-14 items-center border-b border-border bg-card/95 px-4 backdrop-blur md:hidden"><IconButton label="Open navigation" onClick={() => setSidebarOpen(true)}><Menu /></IconButton><span className="ml-2 font-heading font-bold">OfferPe Admin</span></div><main className="mx-auto w-full max-w-400 p-4 sm:p-6 lg:p-8">{content}</main></div></div>;
 }

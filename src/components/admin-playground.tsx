@@ -1433,8 +1433,8 @@ function ReviewStatusBadge({ review }: { review: Review }) {
 }
 
 function PendingReviewCard({ review, showMerchant, onApprove, onReject }: { review: Review; showMerchant: boolean; onApprove: (review: Review) => void; onReject: (review: Review, reason: string, note: string) => void }) {
-  return <article className="flex min-h-80 flex-col overflow-hidden rounded-lg border border-border bg-card shadow-card">
-    <div className="flex h-32 items-center justify-center border-b border-border bg-muted/40"><MerchantLogo name={review.merchant} /></div>
+  return <article className="flex min-h-88 flex-col overflow-hidden rounded-lg border border-border bg-card shadow-card">
+    <div className="flex h-40 items-center justify-center border-b border-border bg-muted/40"><MerchantLogo name={review.merchant} /></div>
     <div className="flex flex-1 flex-col p-4"><div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
       <div className="min-w-0">
         <div className="flex flex-wrap items-center gap-2">
@@ -1513,8 +1513,8 @@ function ReviewsPanel({ reviews, merchantNames, scopedMerchant, onApprove, onRej
     <TabsContent value="reviewed" className="mt-4">
       {reviewed.length === 0 ? <p className="text-sm text-muted-foreground">Nothing reviewed yet.</p>
         : layout === "list" ? reviewTable(reviewed, "reviewed")
-        : <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">{reviewed.map((review) => <article key={review.id} className="flex min-h-80 flex-col overflow-hidden rounded-lg border border-border bg-card shadow-card">
-          <div className="flex h-32 items-center justify-center border-b border-border bg-muted/40"><MerchantLogo name={review.merchant} /></div>
+        : <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">{reviewed.map((review) => <article key={review.id} className="flex min-h-88 flex-col overflow-hidden rounded-lg border border-border bg-card shadow-card">
+          <div className="flex h-40 items-center justify-center border-b border-border bg-muted/40"><MerchantLogo name={review.merchant} /></div>
           <div className="flex flex-1 flex-col p-4">
           <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
             <div className="min-w-0">
@@ -1633,8 +1633,8 @@ function OnboardingQueue({ applications, onApprove, onReject, onRevert, onDelete
       <TabsContent value="pending" className="mt-4">
         {pending.length === 0 ? <p className="text-sm text-muted-foreground">No submissions waiting for review.</p>
           : layout === "list" ? queueTable(pending, "pending")
-          : <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">{pending.map((application) => <article key={application.id} className="flex min-h-80 flex-col overflow-hidden rounded-lg border border-border bg-card shadow-card">
-            <div className="flex h-32 items-center justify-center border-b border-border bg-muted/40"><MerchantLogo name={application.store} /></div>
+          : <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">{pending.map((application) => <article key={application.id} className="flex min-h-88 flex-col overflow-hidden rounded-lg border border-border bg-card shadow-card">
+            <div className="flex h-40 items-center justify-center border-b border-border bg-muted/40"><MerchantLogo name={application.store} /></div>
             <div className="flex flex-1 flex-col p-4"><div className="flex flex-col gap-3">
               <ApplicationHeadline application={application} />
               <div className="mt-auto flex shrink-0 gap-2 pt-3">
@@ -1642,15 +1642,20 @@ function OnboardingQueue({ applications, onApprove, onReject, onRevert, onDelete
                 <RejectApplicationDialog application={application} onReject={onReject}><Button size="sm" variant="destructive"><X />Reject</Button></RejectApplicationDialog>
               </div>
             </div>
-            <ApplicationDetails application={application} />
+            <div className="mt-4 grid gap-3 border-t border-border pt-3 text-xs sm:grid-cols-2">
+              <div><div className="font-semibold uppercase text-muted-foreground">Applicant</div><div className="mt-1 font-medium text-foreground">{application.owner}</div><div className="text-muted-foreground">{application.phone}</div></div>
+              <div><div className="font-semibold uppercase text-muted-foreground">Location</div><div className="mt-1 font-medium text-foreground">{application.city}</div><div className="line-clamp-2 text-muted-foreground">{application.address}</div></div>
+              <div><div className="font-semibold uppercase text-muted-foreground">Commission</div><div className="mt-1 font-heading text-base font-bold text-foreground">{application.commission}</div></div>
+              <div><div className="font-semibold uppercase text-muted-foreground">Documents</div><div className="mt-1 font-medium text-foreground">{application.documents.length} attached</div></div>
+            </div>
             </div>
           </article>)}</div>}
       </TabsContent>
       <TabsContent value="reviewed" className="mt-4">
         {reviewed.length === 0 ? <p className="text-sm text-muted-foreground">Nothing reviewed yet.</p>
           : layout === "list" ? queueTable(reviewed, "reviewed")
-          : <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">{reviewed.map((application) => <article key={application.id} className="flex min-h-80 flex-col overflow-hidden rounded-lg border border-border bg-card shadow-card">
-            <div className="flex h-32 items-center justify-center border-b border-border bg-muted/40"><MerchantLogo name={application.store} /></div>
+          : <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">{reviewed.map((application) => <article key={application.id} className="flex min-h-88 flex-col overflow-hidden rounded-lg border border-border bg-card shadow-card">
+            <div className="flex h-40 items-center justify-center border-b border-border bg-muted/40"><MerchantLogo name={application.store} /></div>
             <div className="flex flex-1 flex-col p-4"><div className="flex flex-col gap-3">
               <div className="min-w-0">
                 <ApplicationHeadline application={application} />

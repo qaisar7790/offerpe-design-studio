@@ -2262,6 +2262,20 @@ export function AdminPlayground() {
   const createRole = (role: AdminRole) => { setRoleRows((current) => [role, ...current]); setEditingRole(role); setView("role-edit"); toast.success("Role created", { description: `${role.name} is ready for permission assignment.` }); };
   const saveRole = (updated: AdminRole) => { setRoleRows((current) => current.map((item) => item.id === updated.id ? updated : item)); backToRoles(); };
   const deleteRole = (role: AdminRole) => { setRoleRows((current) => current.filter((item) => item.id !== role.id)); toast.success("Role deleted", { description: `${role.name} was removed.` }); if (view === "role-edit") backToRoles(); };
+  const backToOnboardingSlides = () => { setEditingSlide(null); setView("onboarding-screens"); };
+  const saveOnboardingSlide = (updated: OnboardingSlide) => { setOnboardingSlideRows((current) => current.some((item) => item.id === updated.id) ? current.map((item) => item.id === updated.id ? updated : item) : [...current, updated]); setOnboardingApp(updated.app); backToOnboardingSlides(); };
+  const deleteOnboardingSlide = (slide: OnboardingSlide) => { setOnboardingSlideRows((current) => current.filter((item) => item.id !== slide.id)); toast.success("Onboarding slide deleted", { description: `${slide.title} was removed.` }); if (view !== "onboarding-screens") backToOnboardingSlides(); };
+  const toggleOnboardingSlide = (slide: OnboardingSlide) => { setOnboardingSlideRows((current) => current.map((item) => item.id === slide.id ? { ...item, active: !item.active } : item)); toast.success(slide.active ? "Slide deactivated" : "Slide activated", { description: `${slide.title} is now ${slide.active ? "hidden from" : "shown in"} the carousel.` }); };
+  const moveOnboardingSlide = (slide: OnboardingSlide, direction: -1 | 1) => setOnboardingSlideRows((current) => {
+    const next = [...current];
+    const from = next.findIndex((item) => item.id === slide.id);
+    let to = from + direction;
+    while (to >= 0 && to < next.length && next[to]!.app !== slide.app) to += direction;
+    if (from < 0 || to < 0 || to >= next.length) return current;
+    const [moved] = next.splice(from, 1);
+    next.splice(to, 0, moved!);
+    return next;
+  });
   const content = view === "dashboard" ? <Dashboard />
     : view === "merchants" ? <Merchants rows={merchantRows} onEdit={editMerchant} />
     : view === "reviews" ? <ReviewsPage reviews={reviewRows} merchantNames={merchantRows.map((row) => row[0])} onApprove={approveReview} onReject={rejectReview} onRevert={revertReview} onDelete={deleteReview} />

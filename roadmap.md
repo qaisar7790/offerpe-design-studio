@@ -36,3 +36,4 @@
 - [x] Build Financial Clicks with user and merchant filters, readable pricing, and CSV export
 - [x] Build Financial Withdrawals with payout processing, bulk CSV, filters, and export
 - [x] Rejection Reasons (Financial): listing w/ sortable Reason/Order, status filter, add/edit dialog (reason, display order, active), deactivation note, toasts
+- [x] Build Communication Templates with template selector, channel tabs, variables, previews, and save flow

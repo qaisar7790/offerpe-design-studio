@@ -31,3 +31,4 @@
 - [x] Trackier Import Queue module: Pending Review cards + Recent Sync Runs tab, Sync Now, approve/reject
 - [x] Refine Trackier queue filters and add Affiliate Networks listing plus add/edit flows
 - [x] Cashback Claims module under Financial: high-density pending claims list table with approve/reject reasons, summary chips, filtered reviewed table
+- [x] Cashback Claims: Pending Review and Reviewed split into two separate tabs (Pending Review default)

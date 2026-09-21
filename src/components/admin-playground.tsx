@@ -725,6 +725,7 @@ function CashbackClaims({ claims, onApprove, onReject, onRevert, onDelete }: { c
               <RejectClaimDialog claim={claim} onReject={onReject}><Button size="sm" variant="destructive" className="h-7 px-2.5 text-xs"><X />Reject</Button></RejectClaimDialog>
             </div></td>
           </tr>)}</tbody></table></div></div>}
+        </section>
       </TabsContent>
       <TabsContent value="reviewed" className="mt-0">
         <section>

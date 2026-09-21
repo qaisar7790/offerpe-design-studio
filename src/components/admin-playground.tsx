@@ -720,6 +720,161 @@ function SettingsCard({ title, description, children, footer }: { title: string;
   </section>;
 }
 
+type LegalPage = { id: string; name: string; slug: string; title: string; version: string; content: string; published: boolean; updatedAt: string };
+
+const legalPageSeeds: LegalPage[] = [
+  {
+    id: "LP-1",
+    name: "Privacy Policy",
+    slug: "privacy-policy",
+    title: "Privacy Policy",
+    version: "draft-v1",
+    published: true,
+    updatedAt: "09 Jul 2026, 12:19 pm",
+    content: `1. Information we collect
+We collect the following categories of information when you use the OfferPe app:
+- Phone number — used as your sole account identifier, verified via a one-time password (OTP). We do not require or collect an email address, password, or government ID.
+- Profile information — your name and city, and, only if you choose to grant location permission, your device's coordinates.
+- Transaction data — records of the cashback and in-store discounts you earn or redeem.
+- Device push notification token — used to deliver order and cashback status updates to your device.
+- Usage and analytics data — which screens you view and general app usage patterns.
+
+2. How we use your information
+- Create and maintain your account, and verify your identity via OTP.
+- Calculate, credit, and display the cashback and discounts you earn.
+- Suggest a nearby city and show you relevant local in-store offers.
+- Send you notifications about your transactions and account.
+
+3. Who we share information with
+We do not sell your personal information. We share data only with the service providers that help us operate the app.
+
+4. Cashback is non-withdrawable
+Cashback earned through OfferPe is credited as in-app store credit and is not withdrawable as cash.
+
+5. Contact us
+Questions about this policy or your data can be sent to [support email to be added].`,
+  },
+  {
+    id: "LP-2",
+    name: "Terms of Service",
+    slug: "terms-of-service",
+    title: "Terms of Service",
+    version: "draft-v1",
+    published: true,
+    updatedAt: "09 Jul 2026, 12:19 pm",
+    content: `1. Acceptance of these terms
+By creating an OfferPe account or using the OfferPe app, you agree to these Terms of Service.
+
+2. The service
+OfferPe is a cashback platform covering two channels: cashback on qualifying purchases at partner online brands, and instant in-store discounts at partner physical stores.
+
+3. Your account
+You sign up with your phone number, verified by a one-time password. One account per person.
+
+4. Cashback and discounts
+- Cashback is credited to your in-app wallet as non-withdrawable store credit.
+- Online cashback is provisional until confirmed by the partner brand.
+- In-store discounts, once confirmed at checkout, are final.
+
+5. Governing law
+These terms are governed by the laws of India.`,
+  },
+  {
+    id: "LP-3",
+    name: "Merchant Agreement",
+    slug: "merchant-agreement",
+    title: "Merchant Agreement",
+    version: "draft-v1",
+    published: false,
+    updatedAt: "09 Jul 2026, 12:40 pm",
+    content: `1. Acceptance of this agreement
+By submitting a store registration to OfferPe and, once approved, operating as a merchant on the platform, you agree to this Merchant Agreement.
+
+2. Onboarding and approval
+Submitting a registration does not itself create a live store — OfferPe reviews every submission and may approve or reject it.
+
+3. Redemptions and discounts
+Your staff confirm in-store discount redemptions via a QR code or Unique Code shown in a customer's app. A confirmed redemption is final.
+
+4. Governing law
+This agreement is governed by the laws of India.`,
+  },
+];
+
+function LegalPagesPage({ pages, onSave, onDelete }: { pages: LegalPage[]; onSave: (page: LegalPage) => void; onDelete: (page: LegalPage) => void }) {
+  const [selectedId, setSelectedId] = useState(pages[0]?.id ?? "");
+  const selected = pages.find((page) => page.id === selectedId) ?? pages[0];
+  const [draft, setDraft] = useState<LegalPage | null>(selected ?? null);
+  const activeDraft = draft && selected && draft.id === selected.id ? draft : selected;
+
+  if (!selected || !activeDraft) return <PageHeader title="Legal Pages" description="No legal pages have been created yet." />;
+
+  const dirty = JSON.stringify(activeDraft) !== JSON.stringify(selected);
+  const update = (patch: Partial<LegalPage>) => setDraft({ ...activeDraft, ...patch });
+  const valid = activeDraft.title.trim().length > 0 && activeDraft.slug.trim().length > 0 && activeDraft.content.trim().length > 0;
+
+  return <div className="space-y-5">
+    <PageHeader title="Legal Pages" description="One editable document per page type — Privacy Policy and Terms of Service are fetched live on the public marketing site (apps/web); Merchant Agreement is linked from both Merchant Onboarding forms' terms checkbox. Unpublished changes are invisible to the public site until Published is checked." />
+
+    <div className="flex flex-col gap-3 rounded-lg border border-border bg-card p-3 shadow-card sm:flex-row sm:items-center">
+      <div className="flex items-center gap-2">
+        <FileText className="h-4 w-4 text-muted-foreground" />
+        <span className="text-sm font-medium">Page</span>
+      </div>
+      <Select value={activeDraft.id} onValueChange={(value) => { setSelectedId(value); setDraft(pages.find((page) => page.id === value) ?? null); }}>
+        <SelectTrigger className="h-9 w-full sm:w-[280px]"><SelectValue /></SelectTrigger>
+        <SelectContent>{pages.map((page) => <SelectItem key={page.id} value={page.id}>{page.name}</SelectItem>)}</SelectContent>
+      </Select>
+      <div className="flex flex-1 items-center justify-end gap-2 text-xs text-muted-foreground">
+        <StatusBadge status={selected.published ? "Published" : "Unpublished"} />
+        <span>Last updated {selected.updatedAt}</span>
+      </div>
+    </div>
+
+    <section className="rounded-lg border border-border bg-card shadow-card">
+      <div className="flex flex-wrap items-center justify-between gap-2 border-b border-border px-5 py-4">
+        <h2 className="font-heading text-base font-bold">{selected.name}</h2>
+        <code className="rounded bg-muted px-2 py-1 text-xs text-muted-foreground">/{activeDraft.slug}</code>
+      </div>
+      <div className="space-y-4 p-5">
+        <div className="grid gap-4 sm:grid-cols-3">
+          <label className="space-y-1.5 text-sm font-medium">Title <span className="text-destructive">*</span>
+            <Input value={activeDraft.title} onChange={(event) => update({ title: event.target.value })} />
+          </label>
+          <label className="space-y-1.5 text-sm font-medium">Slug <span className="text-destructive">*</span>
+            <Input value={activeDraft.slug} onChange={(event) => update({ slug: event.target.value.toLowerCase().replace(/[^a-z0-9-]/g, "-") })} />
+          </label>
+          <label className="space-y-1.5 text-sm font-medium">Version <span className="text-destructive">*</span>
+            <Input value={activeDraft.version} onChange={(event) => update({ version: event.target.value })} />
+          </label>
+        </div>
+        <label className="block space-y-1.5 text-sm font-medium">Content <span className="text-destructive">*</span>
+          <Textarea rows={22} className="font-mono text-[13px] leading-6" value={activeDraft.content} onChange={(event) => update({ content: event.target.value })} />
+        </label>
+        <p className="text-xs text-muted-foreground">Numbered lines become section headings on the public page; lines starting with &quot;-&quot; render as bullets.</p>
+        <label className="flex items-center gap-2 text-sm font-medium">
+          <Checkbox checked={activeDraft.published} onCheckedChange={(value) => update({ published: value === true })} />
+          Published — visible on the public site
+        </label>
+      </div>
+      <div className="flex flex-wrap items-center justify-end gap-2 border-t border-border px-5 py-3.5">
+        <ConfirmDeleteDialog itemType="legal page" name={selected.name} onConfirm={() => { onDelete(selected); const next = pages.find((page) => page.id !== selected.id); setSelectedId(next?.id ?? ""); setDraft(next ?? null); }}>
+          <Button variant="ghost" className="text-destructive hover:bg-destructive/10 hover:text-destructive"><Trash2 className="h-4 w-4" />Delete page</Button>
+        </ConfirmDeleteDialog>
+        <Button variant="outline" disabled={!dirty} onClick={() => setDraft(selected)}>Cancel</Button>
+        <ConfirmSaveDialog
+          title={`Save ${selected.name}?`}
+          disabled={!dirty || !valid}
+          summary={[{ label: "Title", value: activeDraft.title }, { label: "Slug", value: `/${activeDraft.slug}` }, { label: "Version", value: activeDraft.version }, { label: "Visibility", value: activeDraft.published ? "Published — public" : "Unpublished — hidden" }]}
+          onConfirm={() => onSave(activeDraft)}
+        >
+          <Button disabled={!dirty || !valid}><Check className="h-4 w-4" />Save</Button>
+        </ConfirmSaveDialog>
+      </div>
+    </section>
+  </div>;
+}
+
 type OnboardingApp = "Consumer" | "Merchant";
 type OnboardingSlide = { id: string; app: OnboardingApp; title: string; body: string; image: string; active: boolean };
 

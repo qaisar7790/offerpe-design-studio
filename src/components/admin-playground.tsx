@@ -112,7 +112,7 @@ import {
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
 
-type View = "dashboard" | "merchants" | "reviews" | "merchant-onboarding-queue" | "trackier-queue" | "affiliate-networks" | "affiliate-network-new" | "affiliate-network-edit" | "merchant-edit" | "offers" | "offer-edit" | "promo-banners" | "promo-banner-edit" | "promo-banner-new" | "categories" | "category-mapping" | "category-edit" | "category-new" | "cashback-claims" | "transactions" | "clicks" | "withdrawals" | "rejection-reasons" | "communication-templates" | "conversions";
+type View = "dashboard" | "merchants" | "reviews" | "merchant-onboarding-queue" | "trackier-queue" | "affiliate-networks" | "affiliate-network-new" | "affiliate-network-edit" | "merchant-edit" | "offers" | "offer-edit" | "promo-banners" | "promo-banner-edit" | "promo-banner-new" | "categories" | "category-mapping" | "category-edit" | "category-new" | "cashback-claims" | "transactions" | "clicks" | "withdrawals" | "rejection-reasons" | "communication-templates" | "communication-dispatches" | "conversions";
 type RawMapping = { raw: string; mappedTo: string };
 type ReviewStatus = "Pending" | "Approved" | "Rejected";
 type Review = { id: string; user: string; merchant: string; rating: number; comment: string; photos: string[]; submitted: string; status: ReviewStatus; reason: string; note: string };
@@ -132,7 +132,7 @@ const groups = [
   { label: "Catalog", icon: ShoppingBag, items: [{ label: "Merchants", icon: Store, view: "merchants" as View }, { label: "Cashback Offers", icon: Tag, view: "offers" as View }, { label: "Promo Banners", icon: Megaphone, view: "promo-banners" as View }, { label: "Merchant Reviews", icon: Star, view: "reviews" as View }, { label: "Categories", icon: Tag, view: "categories" as View }, { label: "Cities", icon: Building2 }] },
   { label: "Operations", icon: Settings2, items: [{ label: "Merchant Onboarding Queue", icon: ClipboardCheck, view: "merchant-onboarding-queue" as View }, { label: "Trackier Import Queue", icon: DownloadCloud, view: "trackier-queue" as View }, { label: "Affiliate Networks", icon: Share2, view: "affiliate-networks" as View }, { label: "Online Conversions", icon: CircleDollarSign, view: "conversions" as View }, { label: "Category Mapping", icon: Tag, view: "category-mapping" as View }, { label: "Users", icon: Users }] },
   { label: "Financial", icon: WalletCards, items: [{ label: "Cashback Claims", icon: CircleDollarSign, view: "cashback-claims" as View }, { label: "Transactions", icon: ArrowDown, view: "transactions" as View }, { label: "Clicks", icon: MousePointerClick, view: "clicks" as View }, { label: "Withdrawals", icon: BadgeIndianRupee, view: "withdrawals" as View }, { label: "Rejection Reasons", icon: Flag, view: "rejection-reasons" as View }, { label: "Missing Claims", icon: FileSpreadsheet }] },
-  { label: "Communication", icon: Megaphone, items: [{ label: "Templates", icon: MessageSquare, view: "communication-templates" as View }, { label: "Dispatches & Notifications", icon: Bell }] },
+  { label: "Communication", icon: Megaphone, items: [{ label: "Templates", icon: MessageSquare, view: "communication-templates" as View }, { label: "Dispatches & Notifications", icon: Bell, view: "communication-dispatches" as View }] },
   { label: "System", icon: SlidersHorizontal, items: [{ label: "Admin Roles", icon: ShieldCheck }, { label: "Settings", icon: Settings2 }] },
 ];
 
@@ -443,6 +443,11 @@ type LedgerEntry = { id: string; type: "OFFLINE_REDEMPTION" | "ONLINE_PENDING"; 
 type ClickRecord = { token: string; occurred: string; date: string; userId: string; merchant: string; offer: string; discountType: "Percentage" | "Flat amount"; discountValue: number; commissionType: "Percentage" | "Flat amount" | null; commissionValue: number | null; minBill: number | null; discountCap: number | null; commissionCap: number | null };
 type WithdrawalStatus = "Requested" | "Paid" | "Failed";
 type Withdrawal = { id: string; userId: string; amount: number; mode: "Bank Account" | "UPI" | "Gift Card"; payoutDetails: string; status: WithdrawalStatus; requested: string; date: string; resolved: string; utr: string; notes: string };
+type CommunicationTab = "analytics" | "dispatches" | "notifications";
+type AnalyticsEvent = { id: string; event: string; group: "Session" | "Screen" | "Action" | "Engagement"; screen: string; userId: string; properties: Record<string, string | number> | null; session: string; occurred: string; date: string };
+type DispatchDelivery = "SENT" | "FAILED" | "QUEUED" | "DELIVERED";
+type CommunicationDispatch = { id: string; type: string; template: string; channel: TemplateChannel; title: string; body: string; read: "Yes" | "No"; delivery: DispatchDelivery; userId: string; occurred: string; date: string };
+type NotificationLog = { id: string; type: string; title: string; body: string; read: "Yes" | "No"; delivery: DispatchDelivery; userId: string; session: string; occurred: string; date: string };
 
 const onlineTransactions: OnlineTransaction[] = [
   { id: "TXN-94128", status: "Pending", userId: "USR-10294", orderValue: 4299, reported: 344, calculated: 322, rejection: "—", click: "clk_9f42ab7c", created: "21 Sep 2026, 09:18", updated: "21 Sep 2026, 09:22" },
@@ -486,6 +491,41 @@ const initialWithdrawals: Withdrawal[] = [
   { id: "WD-009836", userId: "USR-11806", amount: 500, mode: "Gift Card", payoutDetails: "Amazon Pay • priya.nair@example.com", status: "Failed", requested: "20 Sep 2026, 12:17 pm", date: "2026-09-20", resolved: "20 Sep 2026, 5:04 pm", utr: "—", notes: "Invalid gift card contact" },
   { id: "WD-009831", userId: "USR-04519", amount: 3150, mode: "UPI", payoutDetails: "vikram.singh@paytm", status: "Paid", requested: "19 Sep 2026, 6:52 pm", date: "2026-09-19", resolved: "20 Sep 2026, 10:02 am", utr: "PAYTM260920018972", notes: "—" },
   { id: "WD-009827", userId: "USR-09734", amount: 925, mode: "Bank Account", payoutDetails: "Axis Bank • A/C 918010047526331 • IFSC UTIB0000918 • Meera Iyer", status: "Requested", requested: "19 Sep 2026, 2:06 pm", date: "2026-09-19", resolved: "—", utr: "—", notes: "First withdrawal" },
+];
+
+const analyticsEvents: AnalyticsEvent[] = [
+  { id: "EVT-9001", event: "session_landing", group: "Session", screen: "—", userId: "Pre-login", properties: { source: "organic", build: "2.8.14" }, session: "ec28707a-2f68-497f-821c-4edf9b2aa6dd", occurred: "19 Sept 2026, 6:07 am", date: "2026-09-19" },
+  { id: "EVT-9002", event: "screen_view", group: "Screen", screen: "PhoneEntry", userId: "Pre-login", properties: null, session: "ec28707a-2f68-497f-821c-4edf9b2aa6dd", occurred: "19 Sept 2026, 6:07 am", date: "2026-09-19" },
+  { id: "EVT-9003", event: "send_otp_tapped", group: "Action", screen: "—", userId: "Pre-login", properties: null, session: "ec28707a-2f68-497f-821c-4edf9b2aa6dd", occurred: "19 Sept 2026, 6:07 am", date: "2026-09-19" },
+  { id: "EVT-9004", event: "screen_view", group: "Screen", screen: "OtpVerify", userId: "Pre-login", properties: null, session: "ec28707a-2f68-497f-821c-4edf9b2aa6dd", occurred: "19 Sept 2026, 6:07 am", date: "2026-09-19" },
+  { id: "EVT-9005", event: "verify_otp_tapped", group: "Action", screen: "—", userId: "USR-10294", properties: null, session: "ec28707a-2f68-497f-821c-4edf9b2aa6dd", occurred: "19 Sept 2026, 6:07 am", date: "2026-09-19" },
+  { id: "EVT-9006", event: "screen_exit", group: "Screen", screen: "—", userId: "USR-10294", properties: { duration_ms: 24120, reason: "otp_verified" }, session: "ec28707a-2f68-497f-821c-4edf9b2aa6dd", occurred: "19 Sept 2026, 6:07 am", date: "2026-09-19" },
+  { id: "EVT-9007", event: "screen_view", group: "Screen", screen: "ProfileSetup", userId: "USR-10294", properties: null, session: "ec28707a-2f68-497f-821c-4edf9b2aa6dd", occurred: "19 Sept 2026, 6:07 am", date: "2026-09-19" },
+  { id: "EVT-9008", event: "profile_submit_tapped", group: "Action", screen: "—", userId: "USR-10294", properties: null, session: "ec28707a-2f68-497f-821c-4edf9b2aa6dd", occurred: "19 Sept 2026, 6:08 am", date: "2026-09-19" },
+  { id: "EVT-9009", event: "screen_view", group: "Screen", screen: "Home", userId: "USR-10294", properties: null, session: "ec28707a-2f68-497f-821c-4edf9b2aa6dd", occurred: "19 Sept 2026, 6:08 am", date: "2026-09-19" },
+  { id: "EVT-9010", event: "scroll_depth", group: "Engagement", screen: "Home", userId: "USR-10294", properties: { percent: 50, section: "featured_merchants" }, session: "ec28707a-2f68-497f-821c-4edf9b2aa6dd", occurred: "19 Sept 2026, 6:08 am", date: "2026-09-19" },
+  { id: "EVT-9011", event: "merchant_opened", group: "Action", screen: "MerchantDetail", userId: "USR-08471", properties: { merchant: "Croma", source: "home_carousel" }, session: "a7fb07ab-a347-4453-bdea-1029dc091f90", occurred: "21 Sept 2026, 10:19 am", date: "2026-09-21" },
+  { id: "EVT-9012", event: "offer_cta_tapped", group: "Action", screen: "MerchantDetail", userId: "USR-08471", properties: { offer_id: "OFF-1039", merchant: "Croma" }, session: "a7fb07ab-a347-4453-bdea-1029dc091f90", occurred: "21 Sept 2026, 10:20 am", date: "2026-09-21" },
+];
+
+const communicationDispatches: CommunicationDispatch[] = [
+  { id: "DSP-7108", type: "ONLINE_CASHBACK_PENDING", template: "Purchase Tracked", channel: "SMS", title: "Cashback tracked", body: "Your Rs. 60.00 cashback from Croma is now tracked and pending approval.", read: "No", delivery: "FAILED", userId: "USR-10294", occurred: "19 Sept 2026, 6:08 am", date: "2026-09-19" },
+  { id: "DSP-7107", type: "ONLINE_CASHBACK_PENDING", template: "Purchase Tracked", channel: "WhatsApp", title: "Cashback tracked", body: "Your Rs. 60.00 cashback from Croma is now tracked and pending approval.", read: "No", delivery: "FAILED", userId: "USR-10294", occurred: "19 Sept 2026, 6:08 am", date: "2026-09-19" },
+  { id: "DSP-7106", type: "ONLINE_CASHBACK_PENDING", template: "Purchase Tracked", channel: "Notification", title: "Cashback tracked", body: "Your Rs. 20.00 cashback from Croma is now tracked and pending approval.", read: "No", delivery: "QUEUED", userId: "USR-10294", occurred: "19 Sept 2026, 6:09 am", date: "2026-09-19" },
+  { id: "DSP-7105", type: "CASHBACK_APPROVED", template: "Cashback Approved", channel: "SMS", title: "Cashback approved", body: "Congrats! You earned 151 reward points on OfferPe for shopping at Theobroma.", read: "Yes", delivery: "SENT", userId: "USR-08471", occurred: "20 Sept 2026, 8:10 am", date: "2026-09-20" },
+  { id: "DSP-7104", type: "MERCHANT_REVIEW_APPROVED", template: "Review Approved", channel: "Email", title: "Your review of Nykaa is live", body: "Hi Ananya, your review of Nykaa has been approved and is now visible to other shoppers.", read: "Yes", delivery: "DELIVERED", userId: "USR-06322", occurred: "20 Sept 2026, 3:24 pm", date: "2026-09-20" },
+  { id: "DSP-7103", type: "MERCHANT_ONBOARDING_SUBMITTED", template: "Merchant Onboarding Submitted", channel: "Email", title: "Application received for Blue Tokai Coffee Roasters", body: "Hi Nikhil Desai, we received your application for Blue Tokai Coffee Roasters.", read: "No", delivery: "DELIVERED", userId: "MER-APP-3012", occurred: "21 Sept 2026, 8:40 am", date: "2026-09-21" },
+  { id: "DSP-7102", type: "MERCHANT_ONBOARDING_REJECTED", template: "Merchant Onboarding Rejected", channel: "WhatsApp", title: "Application update", body: "Hi Rekha Patil, unfortunately your OfferPe application for Sunrise Kirana Mart was not approved.", read: "No", delivery: "SENT", userId: "MER-APP-3009", occurred: "18 Sept 2026, 1:32 pm", date: "2026-09-18" },
+  { id: "DSP-7101", type: "CASHBACK_REJECTED", template: "Cashback Rejected", channel: "Notification", title: "Cashback not approved", body: "Your Rs. 375 cashback claim from Croma was not approved.", read: "No", delivery: "SENT", userId: "USR-83172", occurred: "18 Sept 2026, 10:16 am", date: "2026-09-18" },
+];
+
+const notificationLogs: NotificationLog[] = [
+  { id: "NTF-8042", type: "ONLINE_CASHBACK_PENDING", title: "Cashback tracked", body: "Your Rs. 60.00 cashback from Croma is now tracked and pending approval.", read: "No", delivery: "FAILED", userId: "USR-10294", session: "ec28707a-2f68-497f-821c-4edf9b2aa6dd", occurred: "19 Sept 2026, 6:08 am", date: "2026-09-19" },
+  { id: "NTF-8041", type: "ONLINE_CASHBACK_PENDING", title: "Cashback tracked", body: "Your Rs. 20.00 cashback from Croma is now tracked and pending approval.", read: "No", delivery: "FAILED", userId: "USR-10294", session: "ec28707a-2f68-497f-821c-4edf9b2aa6dd", occurred: "19 Sept 2026, 6:09 am", date: "2026-09-19" },
+  { id: "NTF-8040", type: "CASHBACK_APPROVED", title: "Cashback approved", body: "You earned Rs. 151 cashback from Theobroma!", read: "Yes", delivery: "DELIVERED", userId: "USR-08471", session: "f840db2c-1d37-4f7e-a165-c720998d1121", occurred: "20 Sept 2026, 8:10 am", date: "2026-09-20" },
+  { id: "NTF-8039", type: "REVIEW_APPROVED", title: "Review approved", body: "Your review of Nykaa is live!", read: "Yes", delivery: "SENT", userId: "USR-06322", session: "d791617b-4073-4b38-a32f-a1a336c4dc77", occurred: "20 Sept 2026, 3:24 pm", date: "2026-09-20" },
+  { id: "NTF-8038", type: "REVIEW_REJECTED", title: "Review not approved", body: "Your review of Croma was not approved.", read: "No", delivery: "SENT", userId: "USR-11806", session: "ba7b1fd9-2861-41f5-bfc5-b7710506bd57", occurred: "20 Sept 2026, 5:45 pm", date: "2026-09-20" },
+  { id: "NTF-8037", type: "MERCHANT_ONBOARDING_APPROVED", title: "Merchant approved", body: "Urban Threads Studio is approved and live!", read: "No", delivery: "QUEUED", userId: "MER-APP-3010", session: "merchant-app", occurred: "19 Sept 2026, 12:09 pm", date: "2026-09-19" },
 ];
 
 const chartData = {
@@ -1345,6 +1385,68 @@ function RejectionReasons({ reasons, onSave }: { reasons: RejectionReason[]; onS
   </>;
 }
 
+function DeliveryBadge({ delivery }: { delivery: DispatchDelivery }) {
+  return <span className={cn("inline-flex rounded-full px-2 py-0.5 text-[11px] font-bold", delivery === "DELIVERED" || delivery === "SENT" ? "status-approved" : delivery === "FAILED" ? "status-rejected" : "status-pending")}>{delivery}</span>;
+}
+
+function JsonPropertiesDialog({ title, properties }: { title: string; properties: Record<string, string | number> }) {
+  return <Dialog><DialogTrigger asChild><Button variant="link" size="sm" className="h-auto p-0 font-semibold text-info">View JSON</Button></DialogTrigger><DialogContent className="max-w-lg bg-card"><DialogHeader><DialogTitle className="font-heading text-lg">{title}</DialogTitle><DialogDescription>Recorded event properties for this row.</DialogDescription></DialogHeader><pre className="max-h-80 overflow-auto rounded-lg border border-border bg-muted p-4 font-mono text-xs leading-5 text-foreground">{JSON.stringify(properties, null, 2)}</pre></DialogContent></Dialog>;
+}
+
+function CommunicationLogs() {
+  const [tab, setTab] = useState<CommunicationTab>("analytics");
+  const [query, setQuery] = useState("");
+  const [eventGroup, setEventGroup] = useState("all");
+  const [channel, setChannel] = useState<TemplateChannel | "all">("all");
+  const [delivery, setDelivery] = useState<DispatchDelivery | "all">("all");
+  const [read, setRead] = useState<"all" | "Yes" | "No">("all");
+  const [from, setFrom] = useState("");
+  const [to, setTo] = useState("");
+  const [sortDesc, setSortDesc] = useState(true);
+  const search = query.toLowerCase();
+  const inDateRange = (date: string) => (!from || date >= from) && (!to || date <= to);
+  const analyticsRows = analyticsEvents.filter((row) => (!search || `${row.event} ${row.screen} ${row.userId} ${row.session}`.toLowerCase().includes(search)) && (eventGroup === "all" || row.group === eventGroup) && inDateRange(row.date)).sort((a, b) => sortDesc ? b.id.localeCompare(a.id) : a.id.localeCompare(b.id));
+  const dispatchRows = communicationDispatches.filter((row) => (!search || `${row.type} ${row.template} ${row.title} ${row.body} ${row.userId}`.toLowerCase().includes(search)) && (channel === "all" || row.channel === channel) && (delivery === "all" || row.delivery === delivery) && (read === "all" || row.read === read) && inDateRange(row.date)).sort((a, b) => sortDesc ? b.id.localeCompare(a.id) : a.id.localeCompare(b.id));
+  const notificationRows = notificationLogs.filter((row) => (!search || `${row.type} ${row.title} ${row.body} ${row.userId} ${row.session}`.toLowerCase().includes(search)) && (delivery === "all" || row.delivery === delivery) && (read === "all" || row.read === read) && inDateRange(row.date)).sort((a, b) => sortDesc ? b.id.localeCompare(a.id) : a.id.localeCompare(b.id));
+  const count = tab === "analytics" ? analyticsRows.length : tab === "dispatches" ? dispatchRows.length : notificationRows.length;
+  const reset = () => { setQuery(""); setEventGroup("all"); setChannel("all"); setDelivery("all"); setRead("all"); setFrom(""); setTo(""); };
+  const hasFilters = Boolean(query || eventGroup !== "all" || channel !== "all" || delivery !== "all" || read !== "all" || from || to);
+  const csvCell = (cell: string | number | null) => `"${String(cell ?? "").replaceAll('"', '""')}"`;
+  const exportRows = () => {
+    const rows = tab === "analytics"
+      ? [["Event", "Screen", "User ID", "Properties", "Session", "Occurred"], ...analyticsRows.map((row) => [row.event, row.screen, row.userId, row.properties ? JSON.stringify(row.properties) : "", row.session, row.occurred])]
+      : tab === "dispatches"
+        ? [["Type", "Template", "Channel", "Title", "Body", "Read", "Delivery", "User ID", "Occurred"], ...dispatchRows.map((row) => [row.type, row.template, row.channel, row.title, row.body, row.read, row.delivery, row.userId, row.occurred])]
+        : [["Type", "Title", "Body", "Read", "Delivery", "User ID", "Session", "Occurred"], ...notificationRows.map((row) => [row.type, row.title, row.body, row.read, row.delivery, row.userId, row.session, row.occurred])];
+    const csv = rows.map((line) => line.map(csvCell).join(",")).join("\n");
+    const url = URL.createObjectURL(new Blob([csv], { type: "text/csv;charset=utf-8" }));
+    const anchor = document.createElement("a"); anchor.href = url; anchor.download = `offerpe-${tab}.csv`; anchor.click(); URL.revokeObjectURL(url);
+    toast.success("Export ready", { description: `${count} ${tab === "analytics" ? "events" : tab === "dispatches" ? "dispatches" : "notifications"} downloaded as CSV.` });
+  };
+  return <><PageHeader title="Dispatches & Notifications" description="High-density audit tables for app analytics events, outbound communication dispatches, and delivered notification records." actions={<Button variant="outline" onClick={exportRows}><Download />Export CSV</Button>} />
+    <Tabs value={tab} onValueChange={(value) => { setTab(value as CommunicationTab); reset(); }}>
+      <TabsList className="mb-5 h-auto w-full justify-start gap-6 overflow-x-auto rounded-none border-b border-border bg-transparent p-0"><TabsTrigger value="analytics" className={tabTriggerClass}>Analytics Events</TabsTrigger><TabsTrigger value="dispatches" className={tabTriggerClass}>Communication Dispatches</TabsTrigger><TabsTrigger value="notifications" className={tabTriggerClass}>Notifications</TabsTrigger></TabsList>
+      <div className="mb-5 flex flex-col gap-3 rounded-lg border border-border bg-card p-3 shadow-card lg:flex-row lg:flex-wrap lg:items-center">
+        <div className="relative min-w-[280px] flex-1"><Search className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground" /><Input className="w-full pl-9" value={query} onChange={(event) => setQuery(event.target.value)} placeholder={tab === "analytics" ? "Search event, screen, User ID, or session…" : "Search type, title, body, template, or User ID…"} /></div>
+        {tab === "analytics" && <DropdownMenu><DropdownMenuTrigger asChild><Button variant="outline" className="shrink-0"><Filter className="mr-2 h-4 w-4 text-muted-foreground" />Group: {eventGroup === "all" ? "All" : eventGroup}<ChevronDown className="ml-2 h-3.5 w-3.5 opacity-60" /></Button></DropdownMenuTrigger><DropdownMenuContent align="end" className="w-48 border-border bg-card"><DropdownMenuItem onSelect={() => setEventGroup("all")}>Group: All</DropdownMenuItem>{["Session", "Screen", "Action", "Engagement"].map((item) => <DropdownMenuItem key={item} onSelect={() => setEventGroup(item)}>Group: {item}</DropdownMenuItem>)}</DropdownMenuContent></DropdownMenu>}
+        {tab === "dispatches" && <DropdownMenu><DropdownMenuTrigger asChild><Button variant="outline" className="shrink-0"><MessageSquare className="mr-2 h-4 w-4 text-muted-foreground" />Channel: {channel === "all" ? "All" : channel}<ChevronDown className="ml-2 h-3.5 w-3.5 opacity-60" /></Button></DropdownMenuTrigger><DropdownMenuContent align="end" className="w-52 border-border bg-card"><DropdownMenuItem onSelect={() => setChannel("all")}>Channel: All</DropdownMenuItem>{templateChannels.map((item) => <DropdownMenuItem key={item} onSelect={() => setChannel(item)}>Channel: {item}</DropdownMenuItem>)}</DropdownMenuContent></DropdownMenu>}
+        {tab !== "analytics" && <DropdownMenu><DropdownMenuTrigger asChild><Button variant="outline" className="shrink-0"><Filter className="mr-2 h-4 w-4 text-muted-foreground" />Delivery: {delivery === "all" ? "All" : delivery}<ChevronDown className="ml-2 h-3.5 w-3.5 opacity-60" /></Button></DropdownMenuTrigger><DropdownMenuContent align="end" className="w-48 border-border bg-card"><DropdownMenuItem onSelect={() => setDelivery("all")}>Delivery: All</DropdownMenuItem>{["SENT", "DELIVERED", "FAILED", "QUEUED"].map((item) => <DropdownMenuItem key={item} onSelect={() => setDelivery(item as DispatchDelivery)}>Delivery: {item}</DropdownMenuItem>)}</DropdownMenuContent></DropdownMenu>}
+        {tab !== "analytics" && <DropdownMenu><DropdownMenuTrigger asChild><Button variant="outline" className="shrink-0">Read: {read}<ChevronDown className="ml-2 h-3.5 w-3.5 opacity-60" /></Button></DropdownMenuTrigger><DropdownMenuContent align="end" className="w-36 border-border bg-card"><DropdownMenuItem onSelect={() => setRead("all")}>Read: all</DropdownMenuItem><DropdownMenuItem onSelect={() => setRead("Yes")}>Read: Yes</DropdownMenuItem><DropdownMenuItem onSelect={() => setRead("No")}>Read: No</DropdownMenuItem></DropdownMenuContent></DropdownMenu>}
+        <Input aria-label="From date" title="From date" type="date" value={from} onChange={(event) => setFrom(event.target.value)} className="w-full shrink-0 lg:w-38" />
+        <Input aria-label="To date" title="To date" type="date" value={to} onChange={(event) => setTo(event.target.value)} className="w-full shrink-0 lg:w-38" />
+        {hasFilters && <Button variant="ghost" size="sm" onClick={reset} className="shrink-0 text-muted-foreground hover:text-foreground"><RotateCcw className="mr-1 h-3.5 w-3.5" />Reset</Button>}
+      </div>
+      <TabsContent value="analytics" className="mt-0"><div className="min-w-0 overflow-hidden rounded-lg border border-border bg-card shadow-card"><div className="table-scrollbar overflow-x-auto"><table className="w-full min-w-320 text-left text-sm"><thead className="text-[11px] uppercase text-muted-foreground"><tr>{["Event", "Screen", "User ID", "Properties", "Session", "Occurred"].map((label) => <th key={label} className="sticky top-0 border-b border-border bg-muted/95 py-2 backdrop-blur">{label === "Occurred" ? <Button variant="ghost" size="sm" className="-ml-3 h-7 text-[11px] uppercase" onClick={() => setSortDesc(!sortDesc)}>Occurred {sortDesc ? <ArrowDown className="h-3.5 w-3.5" /> : <ArrowUp className="h-3.5 w-3.5" />}</Button> : label}</th>)}</tr></thead><tbody>{analyticsRows.map((row) => <tr key={row.id} className="border-t border-border hover:bg-muted/50"><td className="font-mono text-xs font-semibold">{row.event}</td><td className="font-semibold">{row.screen}</td><td className="font-mono text-xs text-muted-foreground">{row.userId}</td><td>{row.properties ? <JsonPropertiesDialog title={row.event} properties={row.properties} /> : <span className="text-muted-foreground">—</span>}</td><td className="font-mono text-xs text-muted-foreground">{row.session}</td><td className="whitespace-nowrap text-xs font-semibold">{row.occurred}</td></tr>)}</tbody></table>{!analyticsRows.length && <EmptyCommunicationState />}</div></div><TransactionPagination count={analyticsRows.length} /></TabsContent>
+      <TabsContent value="dispatches" className="mt-0"><div className="min-w-0 overflow-hidden rounded-lg border border-border bg-card shadow-card"><div className="table-scrollbar overflow-x-auto"><table className="w-full min-w-390 text-left text-sm"><thead className="text-[11px] uppercase text-muted-foreground"><tr>{["Type", "Template", "Channel", "Title", "Body", "Read", "Delivery", "User ID", "Occurred"].map((label) => <th key={label} className="sticky top-0 border-b border-border bg-muted/95 py-2 backdrop-blur">{label === "Occurred" ? <Button variant="ghost" size="sm" className="-ml-3 h-7 text-[11px] uppercase" onClick={() => setSortDesc(!sortDesc)}>Occurred {sortDesc ? <ArrowDown className="h-3.5 w-3.5" /> : <ArrowUp className="h-3.5 w-3.5" />}</Button> : label}</th>)}</tr></thead><tbody>{dispatchRows.map((row) => <tr key={row.id} className="border-t border-border hover:bg-muted/50"><td className="font-mono text-xs font-semibold">{row.type}</td><td>{row.template}</td><td><span className="inline-flex rounded-full bg-muted px-2 py-0.5 text-[11px] font-semibold text-muted-foreground">{row.channel}</span></td><td className="font-semibold">{row.title}</td><td className="max-w-150 truncate text-muted-foreground" title={row.body}>{row.body}</td><td>{row.read}</td><td><DeliveryBadge delivery={row.delivery} /></td><td className="font-mono text-xs text-muted-foreground">{row.userId}</td><td className="whitespace-nowrap text-xs font-semibold">{row.occurred}</td></tr>)}</tbody></table>{!dispatchRows.length && <EmptyCommunicationState />}</div></div><TransactionPagination count={dispatchRows.length} /></TabsContent>
+      <TabsContent value="notifications" className="mt-0"><div className="min-w-0 overflow-hidden rounded-lg border border-border bg-card shadow-card"><div className="table-scrollbar overflow-x-auto"><table className="w-full min-w-360 text-left text-sm"><thead className="text-[11px] uppercase text-muted-foreground"><tr>{["Type", "Title", "Body", "Read", "Delivery", "User ID", "Session", "Occurred"].map((label) => <th key={label} className="sticky top-0 border-b border-border bg-muted/95 py-2 backdrop-blur">{label === "Occurred" ? <Button variant="ghost" size="sm" className="-ml-3 h-7 text-[11px] uppercase" onClick={() => setSortDesc(!sortDesc)}>Occurred {sortDesc ? <ArrowDown className="h-3.5 w-3.5" /> : <ArrowUp className="h-3.5 w-3.5" />}</Button> : label}</th>)}</tr></thead><tbody>{notificationRows.map((row) => <tr key={row.id} className="border-t border-border hover:bg-muted/50"><td className="font-mono text-xs font-semibold">{row.type}</td><td className="font-semibold">{row.title}</td><td className="max-w-150 truncate text-muted-foreground" title={row.body}>{row.body}</td><td>{row.read}</td><td><DeliveryBadge delivery={row.delivery} /></td><td className="font-mono text-xs text-muted-foreground">{row.userId}</td><td className="font-mono text-xs text-muted-foreground">{row.session}</td><td className="whitespace-nowrap text-xs font-semibold">{row.occurred}</td></tr>)}</tbody></table>{!notificationRows.length && <EmptyCommunicationState />}</div></div><TransactionPagination count={notificationRows.length} /></TabsContent>
+    </Tabs>
+  </>;
+}
+
+function EmptyCommunicationState() {
+  return <div className="px-6 py-14 text-center"><Bell className="mx-auto h-8 w-8 text-muted-foreground" /><h3 className="mt-3 font-heading font-semibold">No records found</h3><p className="mt-1 text-sm text-muted-foreground">Try changing or resetting the current filters.</p></div>;
+}
+
 function CommunicationTemplates({ templates, onChange }: { templates: CommunicationTemplate[]; onChange: (template: CommunicationTemplate) => void }) {
   const [selectedId, setSelectedId] = useState(templates[0]?.id ?? "");
   const [channel, setChannel] = useState<TemplateChannel>("Email");
@@ -1356,8 +1458,6 @@ function CommunicationTemplates({ templates, onChange }: { templates: Communicat
     Notification: { icon: Bell, description: "In-app and push notification title and body." },
   };
   if (!selected) return null;
-  const activeCopy = selected.channels[channel];
-  const updateCopy = <K extends keyof TemplateCopy>(key: K, value: TemplateCopy[K]) => onChange({ ...selected, channels: { ...selected.channels, [channel]: { ...activeCopy, [key]: value } } });
   const save = () => toast.success("Template saved", { description: `${selected.name} · ${channel} copy was updated.` });
   return <><PageHeader title="Communication Templates" description="Manage event-based customer copy by template and channel without scanning four separate cards at once." actions={<Button variant="outline"><Download />Export templates</Button>} />
     <section className="mb-5 rounded-lg border border-border bg-card p-4 shadow-card">
@@ -1466,6 +1566,7 @@ export function AdminPlayground() {
     : view === "withdrawals" ? <Withdrawals />
     : view === "rejection-reasons" ? <RejectionReasons reasons={rejectionReasonRows} onSave={(reason, isNew) => { setRejectionReasonRows((current) => current.some((item) => item.id === reason.id) ? current.map((item) => item.id === reason.id ? reason : item) : [reason, ...current]); toast.success(isNew ? "Rejection reason added" : "Rejection reason updated", { description: `${reason.reason} is now ${reason.active ? "active" : "inactive"} at display order ${reason.order}.` }); }} />
     : view === "communication-templates" ? <CommunicationTemplates templates={communicationTemplateRows} onChange={(template) => setCommunicationTemplateRows((current) => current.map((item) => item.id === template.id ? template : item))} />
+    : view === "communication-dispatches" ? <CommunicationLogs />
     : view === "merchant-edit" && editingMerchant ? <MerchantEditPage merchant={editingMerchant} offers={offerRows} reviews={reviewRows} onApproveReview={approveReview} onRejectReview={rejectReview} onRevertReview={revertReview} onDeleteReview={deleteReview} initialTab={merchantTab} onBack={backToMerchants} onDeleteMerchant={deleteMerchant} onEditOffer={(offer) => openOffer(offer, { type: "merchant", merchant: editingMerchant })} onCreateOffer={() => openOffer(null, { type: "merchant", merchant: editingMerchant })} onDeleteOffer={deleteOffer} />
     : view === "offers" ? <OffersPage offers={offerRows} onEdit={(offer) => openOffer(offer, { type: "listing" })} onCreate={() => openOffer(null, { type: "listing" })} onDelete={deleteOffer} />
     : view === "offer-edit" ? <OfferEditPage key={editingOffer?.id ?? "new"} offer={editingOffer} origin={offerOrigin} onCancel={returnFromOffer} onSave={saveOffer} onDelete={deleteOffer} />

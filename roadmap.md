@@ -24,3 +24,5 @@
 
 - [x] Build Categories listing and full-page add/edit forms
 - [x] Add reusable confirmation dialogs to destructive actions
+- [x] Build Promo Banners listing and full-page add/edit experiences
+- [x] Add banner image validation, live preview, state updates, and Catalog navigation

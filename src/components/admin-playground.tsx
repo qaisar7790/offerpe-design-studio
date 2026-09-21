@@ -655,6 +655,105 @@ function OnboardingQueue({ applications, onApprove, onReject, onRevert, onDelete
   </>;
 }
 
+const inr = (value: number) => `₹${value.toLocaleString("en-IN")}`;
+
+function ClaimDetails({ claim }: { claim: Claim }) {
+  return <div className="mt-3 grid gap-3 text-sm sm:grid-cols-2 lg:grid-cols-4">
+    <div><div className="text-xs font-semibold uppercase text-muted-foreground">Claimant</div><div className="mt-0.5 font-medium">{claim.user}</div><div className="text-muted-foreground">{claim.email}</div></div>
+    <div><div className="text-xs font-semibold uppercase text-muted-foreground">Order</div><div className="mt-0.5 font-mono text-xs">{claim.orderId}</div><div className="text-muted-foreground">{claim.orderDate}</div></div>
+    <div><div className="text-xs font-semibold uppercase text-muted-foreground">Click ID</div><div className="mt-0.5 font-mono text-xs">{claim.clickId || "—"}</div><div className="text-muted-foreground">{claim.clickId ? "Matched in click log" : "No click matched"}</div></div>
+    <div><div className="text-xs font-semibold uppercase text-muted-foreground">Order value / expected cashback</div><div className="mt-0.5 font-heading text-lg font-bold">{inr(claim.orderValue)}</div><div className="font-semibold text-primary">{inr(claim.expectedCashback)} expected</div></div>
+    <div className="sm:col-span-2 lg:col-span-4"><div className="text-xs font-semibold uppercase text-muted-foreground">Customer comment</div><p className="mt-0.5 leading-6">{claim.comment}</p><span className="mt-2 inline-flex items-center gap-1 rounded-full border border-border bg-muted px-2 py-0.5 text-xs font-medium"><ImageIcon className="h-3 w-3" />{claim.proof}</span></div>
+  </div>;
+}
+
+function ClaimHeadline({ claim }: { claim: Claim }) {
+  return <div className="flex flex-wrap items-center gap-2">
+    <span className="font-heading text-base font-bold">{claim.merchant}</span>
+    <span className="inline-flex rounded-full bg-info-soft px-2 py-0.5 text-xs font-semibold text-info">ONLINE</span>
+    <span className="font-mono text-xs text-muted-foreground">{claim.id}</span>
+    <span className="text-xs text-muted-foreground">Submitted {claim.submitted}</span>
+  </div>;
+}
+
+function RejectClaimDialog({ claim, onReject, children }: { claim: Claim; onReject: (claim: Claim, reason: string, note: string) => void; children: React.ReactNode }) {
+  const [open, setOpen] = useState(false);
+  const [reason, setReason] = useState(claimRejectionReasons[0] as string);
+  const [note, setNote] = useState("");
+  return <Dialog open={open} onOpenChange={setOpen}><DialogTrigger asChild>{children}</DialogTrigger><DialogContent className="max-w-lg bg-card"><DialogHeader><DialogTitle className="font-heading text-lg">Reject claim</DialogTitle><DialogDescription>{claim.user}&apos;s claim on order {claim.orderId} will be declined. A reason from the Rejection Reasons list is required and is shown to the customer.</DialogDescription></DialogHeader><div className="space-y-4"><label className="block space-y-1.5 text-sm font-medium">Rejection reason <span className="text-destructive">*</span><Select value={reason} onValueChange={setReason}><SelectTrigger><SelectValue /></SelectTrigger><SelectContent>{claimRejectionReasons.map((item) => <SelectItem key={item} value={item}>{item}</SelectItem>)}</SelectContent></Select></label><label className="block space-y-1.5 text-sm font-medium">Admin remarks <span className="font-normal text-muted-foreground">(optional)</span><Textarea rows={3} value={note} onChange={(event) => setNote(event.target.value)} placeholder="Add internal context for this decision…" /></label></div><DialogFooter><Button variant="outline" onClick={() => setOpen(false)}>Cancel</Button><Button variant="destructive" onClick={() => { onReject(claim, reason, note); setOpen(false); }}>Reject claim</Button></DialogFooter></DialogContent></Dialog>;
+}
+
+function CashbackClaims({ claims, onApprove, onReject, onRevert, onDelete }: { claims: Claim[]; onApprove: (claim: Claim) => void; onReject: (claim: Claim, reason: string, note: string) => void; onRevert: (claim: Claim) => void; onDelete: (claim: Claim) => void }) {
+  const [query, setQuery] = useState("");
+  const [status, setStatus] = useState("all");
+  const [merchant, setMerchant] = useState("all");
+  const [from, setFrom] = useState("");
+  const [to, setTo] = useState("");
+  const [sort, setSort] = useState("newest");
+  const merchantNames = Array.from(new Set(claims.map((claim) => claim.merchant)));
+  const pending = claims.filter((claim) => claim.status === "Pending");
+  const reviewed = useMemo(() => {
+    const parse = (value: string) => new Date(value.replace(",", "")).getTime();
+    return claims.filter((claim) => claim.status !== "Pending")
+      .filter((claim) => !query || `${claim.orderId} ${claim.id} ${claim.user}`.toLowerCase().includes(query.toLowerCase()))
+      .filter((claim) => status === "all" || claim.status === status)
+      .filter((claim) => merchant === "all" || claim.merchant === merchant)
+      .filter((claim) => !from || parse(claim.submitted) >= new Date(from).getTime())
+      .filter((claim) => !to || parse(claim.submitted) <= new Date(to).getTime() + 86_400_000)
+      .sort((a, b) => sort === "oldest" ? parse(a.submitted) - parse(b.submitted) : sort === "value-high" ? b.orderValue - a.orderValue : sort === "value-low" ? a.orderValue - b.orderValue : parse(b.submitted) - parse(a.submitted));
+  }, [claims, query, status, merchant, from, to, sort]);
+  const pendingValue = pending.reduce((total, claim) => total + claim.expectedCashback, 0);
+  return <><PageHeader title="Cashback Claims" description="Online missing-cashback claims raised by customers. Approving accepts a claim into the same online-conversion pipeline a real network webhook uses (source = CLAIM) — it does not itself credit the wallet. Resolve the resulting conversion from Online Conversions to actually credit it." actions={<DropdownMenu><DropdownMenuTrigger asChild><Button variant="outline"><UploadCloud />Import &amp; Export<ChevronDown /></Button></DropdownMenuTrigger><DropdownMenuContent align="end"><DropdownMenuItem><Download />Export claims CSV</DropdownMenuItem><DropdownMenuItem><UploadCloud />Import claim decisions</DropdownMenuItem></DropdownMenuContent></DropdownMenu>} />
+    <div className="mb-6 grid gap-3 sm:grid-cols-3">
+      <div className="rounded-lg border border-border bg-card p-4 shadow-card"><p className="text-xs font-semibold uppercase text-muted-foreground">Pending claims</p><p className="mt-1 font-heading text-2xl font-bold">{pending.length}</p></div>
+      <div className="rounded-lg border border-border bg-card p-4 shadow-card"><p className="text-xs font-semibold uppercase text-muted-foreground">Cashback at stake</p><p className="mt-1 font-heading text-2xl font-bold">{inr(pendingValue)}</p></div>
+      <div className="rounded-lg border border-border bg-card p-4 shadow-card"><p className="text-xs font-semibold uppercase text-muted-foreground">Reviewed claims</p><p className="mt-1 font-heading text-2xl font-bold">{claims.length - pending.length}</p></div>
+    </div>
+    <div className="space-y-8">
+      <section>
+        <h2 className="font-heading text-lg font-bold">Pending review ({pending.length})</h2>
+        {pending.length === 0 ? <p className="mt-2 text-sm text-muted-foreground">No claims waiting for review.</p>
+          : <div className="mt-3 space-y-3">{pending.map((claim) => <article key={claim.id} className="rounded-lg border border-border bg-card p-4 shadow-card">
+            <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+              <ClaimHeadline claim={claim} />
+              <div className="flex shrink-0 gap-2">
+                <Button size="sm" onClick={() => onApprove(claim)}><Check />Approve</Button>
+                <RejectClaimDialog claim={claim} onReject={onReject}><Button size="sm" variant="destructive"><X />Reject</Button></RejectClaimDialog>
+              </div>
+            </div>
+            <ClaimDetails claim={claim} />
+          </article>)}</div>}
+      </section>
+      <section>
+        <h2 className="font-heading text-lg font-bold">Reviewed</h2>
+        <div className="mt-3 grid gap-3 rounded-lg border border-border bg-card p-3 shadow-card sm:grid-cols-2 xl:grid-cols-6">
+          <label className="space-y-1.5 text-xs font-semibold uppercase text-muted-foreground xl:col-span-2">Order ID<div className="relative"><Search className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground" /><Input className="w-full pl-9" value={query} onChange={(event) => setQuery(event.target.value)} placeholder="Search order ID, claim ID, or customer…" /></div></label>
+          <label className="space-y-1.5 text-xs font-semibold uppercase text-muted-foreground">Status<Select value={status} onValueChange={setStatus}><SelectTrigger><SelectValue /></SelectTrigger><SelectContent><SelectItem value="all">All</SelectItem><SelectItem value="Approved">Approved</SelectItem><SelectItem value="Rejected">Rejected</SelectItem></SelectContent></Select></label>
+          <label className="space-y-1.5 text-xs font-semibold uppercase text-muted-foreground">Merchant<Select value={merchant} onValueChange={setMerchant}><SelectTrigger><SelectValue /></SelectTrigger><SelectContent><SelectItem value="all">All</SelectItem>{merchantNames.map((item) => <SelectItem key={item} value={item}>{item}</SelectItem>)}</SelectContent></Select></label>
+          <label className="space-y-1.5 text-xs font-semibold uppercase text-muted-foreground">From<Input type="date" value={from} onChange={(event) => setFrom(event.target.value)} /></label>
+          <label className="space-y-1.5 text-xs font-semibold uppercase text-muted-foreground">To<Input type="date" value={to} onChange={(event) => setTo(event.target.value)} /></label>
+          <label className="space-y-1.5 text-xs font-semibold uppercase text-muted-foreground xl:col-span-2">Sort by<Select value={sort} onValueChange={setSort}><SelectTrigger><SelectValue /></SelectTrigger><SelectContent><SelectItem value="newest">Newest submitted</SelectItem><SelectItem value="oldest">Oldest submitted</SelectItem><SelectItem value="value-high">Order value: High to Low</SelectItem><SelectItem value="value-low">Order value: Low to High</SelectItem></SelectContent></Select></label>
+        </div>
+        {reviewed.length === 0 ? <p className="mt-4 text-sm text-muted-foreground">Nothing reviewed yet.</p>
+          : <div className="mt-3 overflow-hidden rounded-lg border border-border bg-card shadow-card"><div className="overflow-x-auto"><table className="w-full min-w-250 text-left text-sm"><thead className="bg-muted/70 text-[11px] uppercase text-muted-foreground"><tr><th>Claim</th><th>Customer</th><th>Merchant</th><th>Order ID</th><th>Order value</th><th>Cashback</th><th>Status</th><th className="pr-4 text-right">Actions</th></tr></thead><tbody>{reviewed.map((claim) => <tr key={claim.id} className="border-t border-border align-top hover:bg-muted/50">
+            <td className="px-4 py-2 font-mono text-xs">{claim.id}<div className="font-sans text-xs text-muted-foreground">{claim.submitted}</div></td>
+            <td className="font-medium">{claim.user}</td>
+            <td>{claim.merchant}</td>
+            <td className="font-mono text-xs">{claim.orderId}</td>
+            <td className="font-semibold">{inr(claim.orderValue)}</td>
+            <td className="font-semibold text-primary">{inr(claim.expectedCashback)}</td>
+            <td><span className={cn("inline-flex rounded-full px-2 py-0.5 text-xs font-semibold", claim.status === "Approved" ? "status-approved" : "status-rejected")}>{claim.status}</span>{claim.status === "Rejected" && <div className="mt-1 max-w-56 whitespace-normal text-xs text-destructive">{claim.reason}</div>}</td>
+            <td className="pr-3 text-right"><div className="flex justify-end gap-1">
+              <Dialog><DialogTrigger asChild><IconButton className="h-7 w-7" label={`View claim ${claim.id}`}><ExternalLink className="h-3.5 w-3.5" /></IconButton></DialogTrigger><DialogContent className="max-w-2xl bg-card"><DialogHeader><DialogTitle className="font-heading text-lg">{claim.merchant} · {claim.orderId}</DialogTitle><DialogDescription>Claim {claim.id} · submitted {claim.submitted}</DialogDescription></DialogHeader><ClaimDetails claim={claim} />{claim.status === "Rejected" && <p className="mt-3 text-sm font-semibold text-destructive">Reason: {claim.reason}{claim.note && <span className="font-normal text-muted-foreground"> — {claim.note}</span>}</p>}{claim.status === "Approved" && claim.note && <p className="mt-3 text-sm text-muted-foreground">{claim.note}</p>}</DialogContent></Dialog>
+              <IconButton className="h-7 w-7" label={`Re-evaluate claim ${claim.id}`} onClick={() => onRevert(claim)}><RotateCcw className="h-3.5 w-3.5" /></IconButton>
+              <ConfirmDeleteDialog itemType="Claim" name={claim.id} onConfirm={() => onDelete(claim)}><Button variant="ghost" size="icon" className="h-7 w-7 text-destructive" aria-label={`Delete claim ${claim.id}`}><Trash2 className="h-3.5 w-3.5" /></Button></ConfirmDeleteDialog>
+            </div></td>
+          </tr>)}</tbody></table></div></div>}
+      </section>
+    </div>
+  </>;
+}
+
 function ReviewsPage(props: { reviews: Review[]; merchantNames: string[]; onApprove: (review: Review) => void; onReject: (review: Review, reason: string, note: string) => void; onRevert: (review: Review) => void; onDelete: (review: Review) => void }) {
   return <><PageHeader title="Merchant Reviews" description="Vendor/store reviews submitted by verified purchasers. Approving makes the review (and any photos) publicly visible on the store's Store Detail page; rejecting requires a reason from the Rejection Reasons list." actions={<DropdownMenu><DropdownMenuTrigger asChild><Button variant="outline"><UploadCloud />Import &amp; Export<ChevronDown /></Button></DropdownMenuTrigger><DropdownMenuContent align="end"><DropdownMenuItem><Download />Export reviews CSV</DropdownMenuItem><DropdownMenuItem><UploadCloud />Import moderation decisions</DropdownMenuItem></DropdownMenuContent></DropdownMenu>} /><ReviewsPanel {...props} /></>;
 }

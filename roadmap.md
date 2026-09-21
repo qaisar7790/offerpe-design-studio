@@ -21,3 +21,6 @@
 - [x] Add offers, commission, and city columns to the Merchants listing
 - [x] Add banner drag ordering and position controls
 - [x] Build the Add Banner dialog with scheduling, upload, and active state
+
+- [x] Build Categories listing and full-page add/edit forms
+- [x] Add reusable confirmation dialogs to destructive actions

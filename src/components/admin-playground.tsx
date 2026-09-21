@@ -1479,8 +1479,8 @@ function ReviewsPanel({ reviews, merchantNames, scopedMerchant, onApprove, onRej
           {review.status === "Rejected" && <p className="mt-2 text-xs font-semibold text-destructive">Reason: {review.reason}{review.note && <span className="font-normal text-muted-foreground"> — {review.note}</span>}</p>}
           {review.photos.length > 0 && <div className="mt-3 flex flex-wrap gap-2">{review.photos.map((photo) => <ReviewPhoto key={photo} src={photo} user={review.user} />)}</div>}
         </article>)}</div>}
-    </section>
-  </div>;
+    </TabsContent>
+  </Tabs>;
 }
 
 function ApplicationDetails({ application }: { application: Application }) {

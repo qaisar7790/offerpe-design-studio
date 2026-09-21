@@ -1707,7 +1707,7 @@ function AppVersionCard({ build, onSave }: { build: AppBuild; onSave: (build: Ap
           <p className="mt-0.5 text-xs text-muted-foreground">Live: v{build.latestVersion} · minimum v{build.minVersion}</p>
         </div>
       </div>
-      <StatusBadge status={blocking ? "Force update" : "Soft prompt"} className={blocking ? "status-rejected" : "status-active"} />
+      <span className={`rounded-full px-2.5 py-1 text-xs font-semibold ${blocking ? "status-rejected" : "status-active"}`}>{blocking ? "Force update" : "Soft prompt"}</span>
     </div>
     <div className="grid gap-4 p-5 sm:grid-cols-2">
       <label className="space-y-1.5 text-sm font-medium">Minimum supported version <span className="text-destructive">*</span>

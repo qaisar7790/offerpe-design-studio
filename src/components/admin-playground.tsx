@@ -2791,6 +2791,7 @@ export function AdminPlayground() {
     : view === "affiliate-network-edit" && editingAffiliateNetwork ? <AffiliateNetworkFormPage key={editingAffiliateNetwork.id} network={editingAffiliateNetwork} onCancel={backToAffiliateNetworks} onSave={saveAffiliateNetwork} onDelete={deleteAffiliateNetwork} />
     : view === "merchant-onboarding-queue" ? <OnboardingQueue applications={applicationRows} onApprove={approveApplication} onReject={rejectApplication} onRevert={revertApplication} onDelete={deleteApplication} />
     : view === "cashback-claims" ? <CashbackClaims claims={claimRows} onApprove={approveClaim} onReject={rejectClaim} onRevert={revertClaim} onDelete={deleteClaim} />
+    : view === "conversion-resolutions" ? <ConversionResolutions reasons={rejectionReasonRows} />
     : view === "transactions" ? <Transactions />
     : view === "clicks" ? <Clicks />
     : view === "withdrawals" ? <Withdrawals />

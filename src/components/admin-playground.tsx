@@ -202,6 +202,21 @@ const initialApplications: Application[] = [
   { id: "APP-3007", store: "Cafe Mocha Lane", category: "Cafes & Dining", owner: "Vikram Joshi", phone: "+91 98330 90210", email: "vikram@mochalane.example", address: "Salt Lake Sector V", city: "Kolkata", commission: "11%", documents: ["Storefront photo"], submitted: "16 Sep 2026, 09:31", status: "Rejected", reason: "Invalid GST/FSSAI documents", note: "GST certificate was illegible and FSSAI licence missing." },
 ];
 
+type Claim = { id: string; user: string; email: string; merchant: string; orderId: string; clickId: string; orderDate: string; orderValue: number; expectedCashback: number; proof: string; comment: string; submitted: string; status: ReviewStatus; reason: string; note: string };
+
+const claimRejectionReasons = ["No matching click found", "Order placed outside OfferPe click window", "Order cancelled or returned", "Proof of purchase unreadable", "Duplicate claim for the same order", "Merchant category excluded from cashback"];
+
+const initialClaims: Claim[] = [
+  { id: "CLM-5042", user: "Ananya Rao", email: "ananya.rao@example.com", merchant: "Myntra", orderId: "MYN-77120934", clickId: "clk_9f42ab7c", orderDate: "14 Sep 2026", orderValue: 4299, expectedCashback: 344, proof: "order-confirmation.png", comment: "Cashback did not track even though I came through the OfferPe app.", submitted: "21 Sep 2026, 09:12", status: "Pending", reason: "", note: "" },
+  { id: "CLM-5041", user: "Rahul Menon", email: "rahul.menon@example.com", merchant: "Croma", orderId: "CRM-4408217", clickId: "clk_2b71de09", orderDate: "12 Sep 2026", orderValue: 28990, expectedCashback: 1449, proof: "invoice-croma.pdf", comment: "Bought a washing machine, cashback still missing after 7 days.", submitted: "20 Sep 2026, 18:44", status: "Pending", reason: "", note: "" },
+  { id: "CLM-5040", user: "Sneha Iyer", email: "sneha.iyer@example.com", merchant: "Nykaa", orderId: "NYK-33019876", clickId: "clk_77c1a4e2", orderDate: "11 Sep 2026", orderValue: 2150, expectedCashback: 215, proof: "nykaa-order.png", comment: "Order delivered, no cashback in wallet.", submitted: "20 Sep 2026, 11:05", status: "Pending", reason: "", note: "" },
+  { id: "CLM-5039", user: "Imran Shaikh", email: "imran.shaikh@example.com", merchant: "Myntra", orderId: "MYN-77118420", clickId: "clk_51ba0d33", orderDate: "08 Sep 2026", orderValue: 1899, expectedCashback: 152, proof: "myntra-order.png", comment: "Missing cashback on a fashion order.", submitted: "19 Sep 2026, 16:20", status: "Approved", reason: "", note: "Click found in logs, conversion created with source = CLAIM." },
+  { id: "CLM-5038", user: "Priya Nair", email: "priya.nair@example.com", merchant: "Croma", orderId: "CRM-4407004", clickId: "", orderDate: "05 Sep 2026", orderValue: 7499, expectedCashback: 375, proof: "screenshot.jpg", comment: "Cashback not credited.", submitted: "18 Sep 2026, 10:02", status: "Rejected", reason: "No matching click found", note: "No OfferPe click recorded within 30 days of the order date." },
+  { id: "CLM-5037", user: "Devansh Gupta", email: "devansh.gupta@example.com", merchant: "Nykaa", orderId: "NYK-33015512", clickId: "clk_1de9f004", orderDate: "02 Sep 2026", orderValue: 999, expectedCashback: 100, proof: "nykaa-invoice.pdf", comment: "Placed via app, no cashback.", submitted: "17 Sep 2026, 14:37", status: "Approved", reason: "", note: "" },
+  { id: "CLM-5036", user: "Meera Krishnan", email: "meera.k@example.com", merchant: "Myntra", orderId: "MYN-77101288", clickId: "clk_84aa22b1", orderDate: "29 Aug 2026", orderValue: 3499, expectedCashback: 280, proof: "order.png", comment: "Returned one item but kept the rest.", submitted: "16 Sep 2026, 09:55", status: "Rejected", reason: "Order cancelled or returned", note: "Merchant reported the full order as returned." },
+];
+
+
 
 type StagedOffer = { headline: string; terms: string; discountType: string; discountValue: string; commissionType: string; commissionValue: string };
 type StagedCampaign = { id: string; trackierId: string; name: string; categoryId: string; rawCategory: string; about: string; logo: string; website: string; trackingTime: string; approvalTime: string; displayOrder: string; attribution: string; trackingUrl: string; offers: StagedOffer[] };

@@ -45,3 +45,4 @@
 - [x] Build Admins module (System) with listing, filters, invite dialog, edit dialog, resend invite, and delete confirmation
 - [x] System > App Versions (per-app version gates, update copy, store URLs)
 - [x] System > Settings (withdrawal, referral, Trackier sync with save reconfirmation)
+- [x] Renamed Cashback Offers to Offers, moved Online Conversions into Financial, built Conversion Resolutions (pending/reviewed tabs, filters, exports, bulk CSV)

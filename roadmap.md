@@ -30,3 +30,4 @@
 - [x] Merchants listing tabs reverted; Merchant Reviews is its own view; Merchant Onboarding Queue module under Operations
 - [x] Trackier Import Queue module: Pending Review cards + Recent Sync Runs tab, Sync Now, approve/reject
 - [x] Refine Trackier queue filters and add Affiliate Networks listing plus add/edit flows
+- [x] Cashback Claims module under Financial: pending claim cards with approve/reject reasons, stats, filtered reviewed table

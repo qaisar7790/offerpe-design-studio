@@ -123,7 +123,7 @@ type OfferOrigin = { type: "merchant"; merchant: typeof merchants[number] } | { 
 const groups = [
   { label: "Catalog", icon: ShoppingBag, items: [{ label: "Merchants", icon: Store, view: "merchants" as View }, { label: "Cashback Offers", icon: Tag, view: "offers" as View }, { label: "Promo Banners", icon: Megaphone, view: "promo-banners" as View }, { label: "Merchant Reviews", icon: Star, view: "reviews" as View }, { label: "Categories", icon: Tag, view: "categories" as View }, { label: "Cities", icon: Building2 }] },
   { label: "Operations", icon: Settings2, items: [{ label: "Merchant Onboarding Queue", icon: ClipboardCheck, view: "merchant-onboarding-queue" as View }, { label: "Trackier Import Queue", icon: DownloadCloud, view: "trackier-queue" as View }, { label: "Affiliate Networks", icon: Share2, view: "affiliate-networks" as View }, { label: "Online Conversions", icon: CircleDollarSign, view: "conversions" as View }, { label: "Category Mapping", icon: Tag, view: "category-mapping" as View }, { label: "Users", icon: Users }] },
-  { label: "Financial", icon: WalletCards, items: [{ label: "Withdrawals", icon: BadgeIndianRupee }, { label: "Missing Claims", icon: FileSpreadsheet }] },
+  { label: "Financial", icon: WalletCards, items: [{ label: "Cashback Claims", icon: CircleDollarSign, view: "cashback-claims" as View }, { label: "Withdrawals", icon: BadgeIndianRupee }, { label: "Missing Claims", icon: FileSpreadsheet }] },
   { label: "Communication", icon: Megaphone, items: [{ label: "Notifications", icon: Megaphone }] },
   { label: "System", icon: SlidersHorizontal, items: [{ label: "Admin Roles", icon: ShieldCheck }, { label: "Settings", icon: Settings2 }] },
 ];

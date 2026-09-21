@@ -59,6 +59,7 @@ import {
   Bold,
   Italic,
   Heading2,
+  LayoutGrid,
   List,
   ListOrdered,
   Undo2,
@@ -1162,6 +1163,15 @@ function OnboardingSlideEditPage({ slide, app, total, index, onCancel, onSave, o
       <aside className="xl:sticky xl:top-6"><SectionCard title="Live Preview" description="How this slide appears in the onboarding carousel."><OnboardingSlidePreview slide={form} index={isNew ? total : index} total={isNew ? total + 1 : total} /></SectionCard></aside>
     </div>
     <div className="fixed inset-x-0 bottom-0 z-20 border-t border-border bg-card/95 px-4 py-3 backdrop-blur md:left-64"><div className="mx-auto flex max-w-400 justify-end gap-2"><Button variant="destructiveSoft" onClick={onCancel}>Cancel</Button><Button onClick={save}><Check />Save</Button></div></div>
+  </div>;
+}
+
+type LayoutMode = "list" | "grid";
+
+function LayoutToggle({ value, onChange }: { value: LayoutMode; onChange: (mode: LayoutMode) => void }) {
+  return <div className="inline-flex shrink-0 items-center gap-0.5 rounded-md border border-border bg-card p-0.5 shadow-card">
+    <Button type="button" variant={value === "list" ? "default" : "ghost"} size="sm" className="h-7 px-2" aria-pressed={value === "list"} aria-label="List layout" onClick={() => onChange("list")}><List className="h-3.5 w-3.5" />List</Button>
+    <Button type="button" variant={value === "grid" ? "default" : "ghost"} size="sm" className="h-7 px-2" aria-pressed={value === "grid"} aria-label="Grid layout" onClick={() => onChange("grid")}><LayoutGrid className="h-3.5 w-3.5" />Grid</Button>
   </div>;
 }
 

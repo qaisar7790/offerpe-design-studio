@@ -113,7 +113,7 @@ import {
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
 
-type View = "dashboard" | "merchants" | "reviews" | "merchant-onboarding-queue" | "trackier-queue" | "affiliate-networks" | "affiliate-network-new" | "affiliate-network-edit" | "merchant-edit" | "offers" | "offer-edit" | "promo-banners" | "promo-banner-edit" | "promo-banner-new" | "categories" | "category-mapping" | "category-edit" | "category-new" | "cashback-claims" | "transactions" | "clicks" | "withdrawals" | "rejection-reasons" | "communication-templates" | "communication-dispatches" | "users" | "app-versions" | "settings" | "cities" | "onboarding-screens" | "onboarding-slide-edit" | "onboarding-slide-new" | "admin-users" | "roles" | "role-edit" | "conversions";
+type View = "dashboard" | "merchants" | "reviews" | "merchant-onboarding-queue" | "trackier-queue" | "affiliate-networks" | "affiliate-network-new" | "affiliate-network-edit" | "merchant-edit" | "offers" | "offer-edit" | "promo-banners" | "promo-banner-edit" | "promo-banner-new" | "categories" | "category-mapping" | "category-edit" | "category-new" | "cashback-claims" | "transactions" | "clicks" | "withdrawals" | "rejection-reasons" | "communication-templates" | "communication-dispatches" | "users" | "app-versions" | "settings" | "cities" | "onboarding-screens" | "onboarding-slide-edit" | "onboarding-slide-new" | "legal-pages" | "admin-users" | "roles" | "role-edit" | "conversions";
 type RawMapping = { raw: string; mappedTo: string };
 type ReviewStatus = "Pending" | "Approved" | "Rejected";
 type Review = { id: string; user: string; merchant: string; rating: number; comment: string; photos: string[]; submitted: string; status: ReviewStatus; reason: string; note: string };
@@ -134,7 +134,7 @@ const groups = [
   { label: "Operations", icon: Settings2, items: [{ label: "Merchant Onboarding Queue", icon: ClipboardCheck, view: "merchant-onboarding-queue" as View }, { label: "Trackier Import Queue", icon: DownloadCloud, view: "trackier-queue" as View }, { label: "Affiliate Networks", icon: Share2, view: "affiliate-networks" as View }, { label: "Online Conversions", icon: CircleDollarSign, view: "conversions" as View }, { label: "Category Mapping", icon: Tag, view: "category-mapping" as View }] },
   { label: "Financial", icon: WalletCards, items: [{ label: "Cashback Claims", icon: CircleDollarSign, view: "cashback-claims" as View }, { label: "Transactions", icon: ArrowDown, view: "transactions" as View }, { label: "Clicks", icon: MousePointerClick, view: "clicks" as View }, { label: "Withdrawals", icon: BadgeIndianRupee, view: "withdrawals" as View }, { label: "Rejection Reasons", icon: Flag, view: "rejection-reasons" as View }, { label: "Missing Claims", icon: FileSpreadsheet }] },
   { label: "Communication", icon: Megaphone, items: [{ label: "Templates", icon: MessageSquare, view: "communication-templates" as View }, { label: "Dispatches & Notifications", icon: Bell, view: "communication-dispatches" as View }] },
-  { label: "System", icon: SlidersHorizontal, items: [{ label: "Users", icon: Users, view: "users" as View }, { label: "Cities", icon: Building2, view: "cities" as View }, { label: "App Versions", icon: Smartphone, view: "app-versions" as View }, { label: "Onboarding Screens", icon: ImageIcon, view: "onboarding-screens" as View }, { label: "Admins", icon: Mail, view: "admin-users" as View }, { label: "Roles", icon: ShieldCheck, view: "roles" as View }, { label: "Settings", icon: Settings2, view: "settings" as View }] },
+  { label: "System", icon: SlidersHorizontal, items: [{ label: "Users", icon: Users, view: "users" as View }, { label: "Cities", icon: Building2, view: "cities" as View }, { label: "App Versions", icon: Smartphone, view: "app-versions" as View }, { label: "Onboarding Screens", icon: ImageIcon, view: "onboarding-screens" as View }, { label: "Legal Pages", icon: FileText, view: "legal-pages" as View }, { label: "Admins", icon: Mail, view: "admin-users" as View }, { label: "Roles", icon: ShieldCheck, view: "roles" as View }, { label: "Settings", icon: Settings2, view: "settings" as View }] },
 ];
 
 const merchants = [
@@ -718,6 +718,162 @@ function SettingsCard({ title, description, children, footer }: { title: string;
     <div className="grid gap-4 p-5 sm:grid-cols-2">{children}</div>
     <div className="flex items-center justify-end gap-2 border-t border-border px-5 py-3.5">{footer}</div>
   </section>;
+}
+
+type LegalPage = { id: string; name: string; slug: string; title: string; version: string; content: string; published: boolean; updatedAt: string };
+
+const legalPageSeeds: LegalPage[] = [
+  {
+    id: "LP-1",
+    name: "Privacy Policy",
+    slug: "privacy-policy",
+    title: "Privacy Policy",
+    version: "draft-v1",
+    published: true,
+    updatedAt: "09 Jul 2026, 12:19 pm",
+    content: `1. Information we collect
+We collect the following categories of information when you use the OfferPe app:
+- Phone number — used as your sole account identifier, verified via a one-time password (OTP). We do not require or collect an email address, password, or government ID.
+- Profile information — your name and city, and, only if you choose to grant location permission, your device's coordinates.
+- Transaction data — records of the cashback and in-store discounts you earn or redeem.
+- Device push notification token — used to deliver order and cashback status updates to your device.
+- Usage and analytics data — which screens you view and general app usage patterns.
+
+2. How we use your information
+- Create and maintain your account, and verify your identity via OTP.
+- Calculate, credit, and display the cashback and discounts you earn.
+- Suggest a nearby city and show you relevant local in-store offers.
+- Send you notifications about your transactions and account.
+
+3. Who we share information with
+We do not sell your personal information. We share data only with the service providers that help us operate the app.
+
+4. Cashback is non-withdrawable
+Cashback earned through OfferPe is credited as in-app store credit and is not withdrawable as cash.
+
+5. Contact us
+Questions about this policy or your data can be sent to [support email to be added].`,
+  },
+  {
+    id: "LP-2",
+    name: "Terms of Service",
+    slug: "terms-of-service",
+    title: "Terms of Service",
+    version: "draft-v1",
+    published: true,
+    updatedAt: "09 Jul 2026, 12:19 pm",
+    content: `1. Acceptance of these terms
+By creating an OfferPe account or using the OfferPe app, you agree to these Terms of Service.
+
+2. The service
+OfferPe is a cashback platform covering two channels: cashback on qualifying purchases at partner online brands, and instant in-store discounts at partner physical stores.
+
+3. Your account
+You sign up with your phone number, verified by a one-time password. One account per person.
+
+4. Cashback and discounts
+- Cashback is credited to your in-app wallet as non-withdrawable store credit.
+- Online cashback is provisional until confirmed by the partner brand.
+- In-store discounts, once confirmed at checkout, are final.
+
+5. Governing law
+These terms are governed by the laws of India.`,
+  },
+  {
+    id: "LP-3",
+    name: "Merchant Agreement",
+    slug: "merchant-agreement",
+    title: "Merchant Agreement",
+    version: "draft-v1",
+    published: false,
+    updatedAt: "09 Jul 2026, 12:40 pm",
+    content: `1. Acceptance of this agreement
+By submitting a store registration to OfferPe and, once approved, operating as a merchant on the platform, you agree to this Merchant Agreement.
+
+2. Onboarding and approval
+Submitting a registration does not itself create a live store — OfferPe reviews every submission and may approve or reject it.
+
+3. Redemptions and discounts
+Your staff confirm in-store discount redemptions via a QR code or Unique Code shown in a customer's app. A confirmed redemption is final.
+
+4. Governing law
+This agreement is governed by the laws of India.`,
+  },
+];
+
+function LegalPagesPage({ pages, onSave, onDelete }: { pages: LegalPage[]; onSave: (page: LegalPage) => void; onDelete: (page: LegalPage) => void }) {
+  const [selectedId, setSelectedId] = useState(pages[0]?.id ?? "");
+  const selected = pages.find((page) => page.id === selectedId) ?? pages[0];
+  const [draft, setDraft] = useState<LegalPage | null>(selected ?? null);
+  const activeDraft = draft && selected && draft.id === selected.id ? draft : selected;
+
+  if (!selected || !activeDraft) return <PageHeader title="Legal Pages" description="No legal pages have been created yet." />;
+
+  const dirty = JSON.stringify(activeDraft) !== JSON.stringify(selected);
+  const update = (patch: Partial<LegalPage>) => setDraft({ ...activeDraft, ...patch });
+  const valid = activeDraft.title.trim().length > 0 && activeDraft.slug.trim().length > 0 && activeDraft.content.trim().length > 0;
+
+  return <div className="space-y-5">
+    <PageHeader title="Legal Pages" description="One editable document per page type — Privacy Policy and Terms of Service are fetched live on the public marketing site (apps/web); Merchant Agreement is linked from both Merchant Onboarding forms' terms checkbox. Unpublished changes are invisible to the public site until Published is checked." />
+
+    <div className="flex flex-col gap-3 rounded-lg border border-border bg-card p-3 shadow-card sm:flex-row sm:items-center">
+      <div className="flex items-center gap-2">
+        <FileText className="h-4 w-4 text-muted-foreground" />
+        <span className="text-sm font-medium">Page</span>
+      </div>
+      <Select value={activeDraft.id} onValueChange={(value) => { setSelectedId(value); setDraft(pages.find((page) => page.id === value) ?? null); }}>
+        <SelectTrigger className="h-9 w-full sm:w-[280px]"><SelectValue /></SelectTrigger>
+        <SelectContent>{pages.map((page) => <SelectItem key={page.id} value={page.id}>{page.name}</SelectItem>)}</SelectContent>
+      </Select>
+      <div className="flex flex-1 items-center justify-end gap-2 text-xs text-muted-foreground">
+        <StatusBadge status={selected.published ? "Active" : "Inactive"} />
+        <span>{selected.published ? "Published" : "Unpublished"}</span>
+        <span>Last updated {selected.updatedAt}</span>
+      </div>
+    </div>
+
+    <section className="rounded-lg border border-border bg-card shadow-card">
+      <div className="flex flex-wrap items-center justify-between gap-2 border-b border-border px-5 py-4">
+        <h2 className="font-heading text-base font-bold">{selected.name}</h2>
+        <code className="rounded bg-muted px-2 py-1 text-xs text-muted-foreground">/{activeDraft.slug}</code>
+      </div>
+      <div className="space-y-4 p-5">
+        <div className="grid gap-4 sm:grid-cols-3">
+          <label className="space-y-1.5 text-sm font-medium">Title <span className="text-destructive">*</span>
+            <Input value={activeDraft.title} onChange={(event) => update({ title: event.target.value })} />
+          </label>
+          <label className="space-y-1.5 text-sm font-medium">Slug <span className="text-destructive">*</span>
+            <Input value={activeDraft.slug} onChange={(event) => update({ slug: event.target.value.toLowerCase().replace(/[^a-z0-9-]/g, "-") })} />
+          </label>
+          <label className="space-y-1.5 text-sm font-medium">Version <span className="text-destructive">*</span>
+            <Input value={activeDraft.version} onChange={(event) => update({ version: event.target.value })} />
+          </label>
+        </div>
+        <label className="block space-y-1.5 text-sm font-medium">Content <span className="text-destructive">*</span>
+          <Textarea rows={22} className="font-mono text-[13px] leading-6" value={activeDraft.content} onChange={(event) => update({ content: event.target.value })} />
+        </label>
+        <p className="text-xs text-muted-foreground">Numbered lines become section headings on the public page; lines starting with &quot;-&quot; render as bullets.</p>
+        <label className="flex items-center gap-2 text-sm font-medium">
+          <Checkbox checked={activeDraft.published} onCheckedChange={(value) => update({ published: value === true })} />
+          Published — visible on the public site
+        </label>
+      </div>
+      <div className="flex flex-wrap items-center justify-end gap-2 border-t border-border px-5 py-3.5">
+        <ConfirmDeleteDialog itemType="legal page" name={selected.name} onConfirm={() => { onDelete(selected); const next = pages.find((page) => page.id !== selected.id); setSelectedId(next?.id ?? ""); setDraft(next ?? null); }}>
+          <Button variant="ghost" className="text-destructive hover:bg-destructive/10 hover:text-destructive"><Trash2 className="h-4 w-4" />Delete page</Button>
+        </ConfirmDeleteDialog>
+        <Button variant="outline" disabled={!dirty} onClick={() => setDraft(selected)}>Cancel</Button>
+        <ConfirmSaveDialog
+          title={`Save ${selected.name}?`}
+          disabled={!dirty || !valid}
+          summary={[{ label: "Title", value: activeDraft.title }, { label: "Slug", value: `/${activeDraft.slug}` }, { label: "Version", value: activeDraft.version }, { label: "Visibility", value: activeDraft.published ? "Published — public" : "Unpublished — hidden" }]}
+          onConfirm={() => onSave(activeDraft)}
+        >
+          <Button disabled={!dirty || !valid}><Check className="h-4 w-4" />Save</Button>
+        </ConfirmSaveDialog>
+      </div>
+    </section>
+  </div>;
 }
 
 type OnboardingApp = "Consumer" | "Merchant";
@@ -2262,6 +2418,9 @@ export function AdminPlayground() {
   const createRole = (role: AdminRole) => { setRoleRows((current) => [role, ...current]); setEditingRole(role); setView("role-edit"); toast.success("Role created", { description: `${role.name} is ready for permission assignment.` }); };
   const saveRole = (updated: AdminRole) => { setRoleRows((current) => current.map((item) => item.id === updated.id ? updated : item)); backToRoles(); };
   const deleteRole = (role: AdminRole) => { setRoleRows((current) => current.filter((item) => item.id !== role.id)); toast.success("Role deleted", { description: `${role.name} was removed.` }); if (view === "role-edit") backToRoles(); };
+  const [legalPageRows, setLegalPageRows] = useState<LegalPage[]>(legalPageSeeds);
+  const saveLegalPage = (page: LegalPage) => { const stamped = { ...page, updatedAt: format(new Date(), "dd MMM yyyy, h:mm a") }; setLegalPageRows((current) => current.map((item) => item.id === page.id ? stamped : item)); toast.success("Legal page saved", { description: `${page.name} is now ${page.published ? "published" : "unpublished"}.` }); };
+  const deleteLegalPage = (page: LegalPage) => { setLegalPageRows((current) => current.filter((item) => item.id !== page.id)); toast.success("Legal page deleted", { description: `${page.name} was removed.` }); };
   const backToOnboardingSlides = () => { setEditingSlide(null); setView("onboarding-screens"); };
   const saveOnboardingSlide = (updated: OnboardingSlide) => { setOnboardingSlideRows((current) => current.some((item) => item.id === updated.id) ? current.map((item) => item.id === updated.id ? updated : item) : [...current, updated]); setOnboardingApp(updated.app); backToOnboardingSlides(); };
   const deleteOnboardingSlide = (slide: OnboardingSlide) => { setOnboardingSlideRows((current) => current.filter((item) => item.id !== slide.id)); toast.success("Onboarding slide deleted", { description: `${slide.title} was removed.` }); if (view !== "onboarding-screens") backToOnboardingSlides(); };
@@ -2295,6 +2454,7 @@ export function AdminPlayground() {
     : view === "cities" ? <CitiesPage />
     : view === "onboarding-screens" ? <OnboardingSlidesPage slides={onboardingSlideRows} app={onboardingApp} onAppChange={setOnboardingApp} onCreate={() => { setEditingSlide(null); setView("onboarding-slide-new"); }} onEdit={(slide) => { setEditingSlide(slide); setView("onboarding-slide-edit"); }} onToggle={toggleOnboardingSlide} onMove={moveOnboardingSlide} onDelete={deleteOnboardingSlide} />
     : view === "onboarding-slide-edit" || view === "onboarding-slide-new" ? <OnboardingSlideEditPage key={editingSlide?.id ?? "new-onboarding-slide"} slide={editingSlide} app={onboardingApp} index={Math.max(onboardingSlideRows.filter((item) => item.app === (editingSlide?.app ?? onboardingApp)).findIndex((item) => item.id === editingSlide?.id), 0)} total={onboardingSlideRows.filter((item) => item.app === (editingSlide?.app ?? onboardingApp)).length} onCancel={backToOnboardingSlides} onSave={saveOnboardingSlide} onDelete={deleteOnboardingSlide} />
+    : view === "legal-pages" ? <LegalPagesPage pages={legalPageRows} onSave={saveLegalPage} onDelete={deleteLegalPage} />
     : view === "settings" ? <SettingsPage />
     : view === "app-versions" ? <AppVersionsPage builds={appBuildRows} onSave={saveAppBuild} />
     : view === "admin-users" ? <AdminUsersPage admins={adminUserRows} roles={roleRows} onSave={saveAdminUser} onDelete={deleteAdminUser} />

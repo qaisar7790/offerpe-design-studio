@@ -28,3 +28,4 @@
 - [x] Add banner image validation, live preview, state updates, and Catalog navigation
 - [x] Merchant Reviews: Merchants/Reviews tabs, pending approve & reject-with-reason, reviewed filters, merchant edit Reviews tab
 - [x] Merchants listing tabs reverted; Merchant Reviews is its own view; Merchant Onboarding Queue module under Operations
+- [x] Trackier Import Queue module: Pending Review cards + Recent Sync Runs tab, Sync Now, approve/reject

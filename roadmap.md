@@ -46,3 +46,4 @@
 - [x] System > App Versions (per-app version gates, update copy, store URLs)
 - [x] System > Settings (withdrawal, referral, Trackier sync with save reconfirmation)
 - [x] Renamed Cashback Offers to Offers, moved Online Conversions into Financial, built Conversion Resolutions (pending/reviewed tabs, filters, exports, bulk CSV)
+- [x] Merchant Reviews: split into Pending Review (default) / Reviewed tabs with shared filters

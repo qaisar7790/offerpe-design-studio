@@ -113,7 +113,7 @@ import {
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
 
-type View = "dashboard" | "merchants" | "reviews" | "merchant-onboarding-queue" | "trackier-queue" | "affiliate-networks" | "affiliate-network-new" | "affiliate-network-edit" | "merchant-edit" | "offers" | "offer-edit" | "promo-banners" | "promo-banner-edit" | "promo-banner-new" | "categories" | "category-mapping" | "category-edit" | "category-new" | "cashback-claims" | "transactions" | "clicks" | "withdrawals" | "rejection-reasons" | "communication-templates" | "communication-dispatches" | "users" | "admin-users" | "roles" | "role-edit" | "conversions";
+type View = "dashboard" | "merchants" | "reviews" | "merchant-onboarding-queue" | "trackier-queue" | "affiliate-networks" | "affiliate-network-new" | "affiliate-network-edit" | "merchant-edit" | "offers" | "offer-edit" | "promo-banners" | "promo-banner-edit" | "promo-banner-new" | "categories" | "category-mapping" | "category-edit" | "category-new" | "cashback-claims" | "transactions" | "clicks" | "withdrawals" | "rejection-reasons" | "communication-templates" | "communication-dispatches" | "users" | "app-versions" | "admin-users" | "roles" | "role-edit" | "conversions";
 type RawMapping = { raw: string; mappedTo: string };
 type ReviewStatus = "Pending" | "Approved" | "Rejected";
 type Review = { id: string; user: string; merchant: string; rating: number; comment: string; photos: string[]; submitted: string; status: ReviewStatus; reason: string; note: string };
@@ -134,7 +134,7 @@ const groups = [
   { label: "Operations", icon: Settings2, items: [{ label: "Merchant Onboarding Queue", icon: ClipboardCheck, view: "merchant-onboarding-queue" as View }, { label: "Trackier Import Queue", icon: DownloadCloud, view: "trackier-queue" as View }, { label: "Affiliate Networks", icon: Share2, view: "affiliate-networks" as View }, { label: "Online Conversions", icon: CircleDollarSign, view: "conversions" as View }, { label: "Category Mapping", icon: Tag, view: "category-mapping" as View }] },
   { label: "Financial", icon: WalletCards, items: [{ label: "Cashback Claims", icon: CircleDollarSign, view: "cashback-claims" as View }, { label: "Transactions", icon: ArrowDown, view: "transactions" as View }, { label: "Clicks", icon: MousePointerClick, view: "clicks" as View }, { label: "Withdrawals", icon: BadgeIndianRupee, view: "withdrawals" as View }, { label: "Rejection Reasons", icon: Flag, view: "rejection-reasons" as View }, { label: "Missing Claims", icon: FileSpreadsheet }] },
   { label: "Communication", icon: Megaphone, items: [{ label: "Templates", icon: MessageSquare, view: "communication-templates" as View }, { label: "Dispatches & Notifications", icon: Bell, view: "communication-dispatches" as View }] },
-  { label: "System", icon: SlidersHorizontal, items: [{ label: "Users", icon: Users, view: "users" as View }, { label: "Admins", icon: Mail, view: "admin-users" as View }, { label: "Roles", icon: ShieldCheck, view: "roles" as View }, { label: "Settings", icon: Settings2 }] },
+  { label: "System", icon: SlidersHorizontal, items: [{ label: "Users", icon: Users, view: "users" as View }, { label: "App Versions", icon: Smartphone, view: "app-versions" as View }, { label: "Admins", icon: Mail, view: "admin-users" as View }, { label: "Roles", icon: ShieldCheck, view: "roles" as View }, { label: "Settings", icon: Settings2 }] },
 ];
 
 const merchants = [
@@ -1858,6 +1858,8 @@ export function AdminPlayground() {
   const [rejectionReasonRows, setRejectionReasonRows] = useState<RejectionReason[]>(initialRejectionReasons);
   const [communicationTemplateRows, setCommunicationTemplateRows] = useState<CommunicationTemplate[]>(initialCommunicationTemplates);
   const [roleRows, setRoleRows] = useState<AdminRole[]>(initialRoles);
+  const [appBuildRows, setAppBuildRows] = useState(initialAppBuilds);
+  const saveAppBuild = (build: AppBuild) => setAppBuildRows((current) => current.map((item) => item.id === build.id ? build : item));
   const [adminUserRows, setAdminUserRows] = useState<AdminUser[]>(initialAdminUsers);
   const saveAdminUser = (admin: AdminUser, isNew: boolean) => {
     setAdminUserRows((current) => isNew ? [admin, ...current] : current.map((item) => item.id === admin.id ? admin : item));
@@ -1950,6 +1952,7 @@ export function AdminPlayground() {
     : view === "communication-templates" ? <CommunicationTemplates templates={communicationTemplateRows} onChange={(template) => setCommunicationTemplateRows((current) => current.map((item) => item.id === template.id ? template : item))} />
     : view === "communication-dispatches" ? <CommunicationLogs />
     : view === "users" ? <UsersPage />
+    : view === "app-versions" ? <AppVersionsPage builds={appBuildRows} onSave={saveAppBuild} />
     : view === "admin-users" ? <AdminUsersPage admins={adminUserRows} roles={roleRows} onSave={saveAdminUser} onDelete={deleteAdminUser} />
     : view === "roles" ? <RolesPage roles={roleRows} onCreate={createRole} onEdit={(role) => { setEditingRole(role); setView("role-edit"); }} onDelete={deleteRole} />
     : view === "role-edit" && editingRole ? <RoleEditPage key={editingRole.id} role={editingRole} onCancel={backToRoles} onSave={saveRole} onDelete={deleteRole} />

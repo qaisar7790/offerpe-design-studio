@@ -39,3 +39,4 @@
 - [x] Build Communication Templates with template selector, channel tabs, variables, previews, and save flow
 - [x] Add uploaded Communication template events, variables, and channel copy as dropdown options
 - [x] Build Dispatches & Notifications with Analytics Events, Communication Dispatches, Notifications tabs, filters, User ID columns, and CSV export
+- [x] Build System Users with dense table, filtering, import dialog, PI/non-PI export, horizontal scroll, and pagination

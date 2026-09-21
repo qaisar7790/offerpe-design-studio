@@ -51,3 +51,4 @@
 - [x] List/Grid toggle added to Merchants, Offers, Merchant Reviews, Merchant Onboarding Queue and Onboarding Screens
 - [x] Standardize Grid cards with tall media/logo areas across all five layouts
 - [x] Standardize Import and Export CSV placement inside screen and tab filter bars
+- [x] Replace Withdrawals inline CSV controls with the shared Import Report dialog

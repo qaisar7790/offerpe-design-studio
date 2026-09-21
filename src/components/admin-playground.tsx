@@ -107,7 +107,7 @@ import {
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
 
-type View = "dashboard" | "merchants" | "reviews" | "merchant-onboarding-queue" | "trackier-queue" | "affiliate-networks" | "affiliate-network-new" | "affiliate-network-edit" | "merchant-edit" | "offers" | "offer-edit" | "promo-banners" | "promo-banner-edit" | "promo-banner-new" | "categories" | "category-mapping" | "category-edit" | "category-new" | "cashback-claims" | "conversions";
+type View = "dashboard" | "merchants" | "reviews" | "merchant-onboarding-queue" | "trackier-queue" | "affiliate-networks" | "affiliate-network-new" | "affiliate-network-edit" | "merchant-edit" | "offers" | "offer-edit" | "promo-banners" | "promo-banner-edit" | "promo-banner-new" | "categories" | "category-mapping" | "category-edit" | "category-new" | "cashback-claims" | "transactions" | "conversions";
 type RawMapping = { raw: string; mappedTo: string };
 type ReviewStatus = "Pending" | "Approved" | "Rejected";
 type Review = { id: string; user: string; merchant: string; rating: number; comment: string; photos: string[]; submitted: string; status: ReviewStatus; reason: string; note: string };
@@ -123,7 +123,7 @@ type OfferOrigin = { type: "merchant"; merchant: typeof merchants[number] } | { 
 const groups = [
   { label: "Catalog", icon: ShoppingBag, items: [{ label: "Merchants", icon: Store, view: "merchants" as View }, { label: "Cashback Offers", icon: Tag, view: "offers" as View }, { label: "Promo Banners", icon: Megaphone, view: "promo-banners" as View }, { label: "Merchant Reviews", icon: Star, view: "reviews" as View }, { label: "Categories", icon: Tag, view: "categories" as View }, { label: "Cities", icon: Building2 }] },
   { label: "Operations", icon: Settings2, items: [{ label: "Merchant Onboarding Queue", icon: ClipboardCheck, view: "merchant-onboarding-queue" as View }, { label: "Trackier Import Queue", icon: DownloadCloud, view: "trackier-queue" as View }, { label: "Affiliate Networks", icon: Share2, view: "affiliate-networks" as View }, { label: "Online Conversions", icon: CircleDollarSign, view: "conversions" as View }, { label: "Category Mapping", icon: Tag, view: "category-mapping" as View }, { label: "Users", icon: Users }] },
-  { label: "Financial", icon: WalletCards, items: [{ label: "Cashback Claims", icon: CircleDollarSign, view: "cashback-claims" as View }, { label: "Withdrawals", icon: BadgeIndianRupee }, { label: "Missing Claims", icon: FileSpreadsheet }] },
+  { label: "Financial", icon: WalletCards, items: [{ label: "Cashback Claims", icon: CircleDollarSign, view: "cashback-claims" as View }, { label: "Transactions", icon: ArrowDown, view: "transactions" as View }, { label: "Withdrawals", icon: BadgeIndianRupee }, { label: "Missing Claims", icon: FileSpreadsheet }] },
   { label: "Communication", icon: Megaphone, items: [{ label: "Notifications", icon: Megaphone }] },
   { label: "System", icon: SlidersHorizontal, items: [{ label: "Admin Roles", icon: ShieldCheck }, { label: "Settings", icon: Settings2 }] },
 ];
@@ -286,6 +286,37 @@ const conversions: Conversion[] = Array.from({ length: 148 }, (_, index) => {
     invoice: seed.invoice ? `INV-2026/09-${String(91 - index).padStart(4, "0")}` : null,
   };
 });
+
+type TransactionStatus = "Pending" | "Approved" | "Rejected" | "Pending Bill";
+type OnlineTransaction = { id: string; status: TransactionStatus; orderValue: number; reported: number; calculated: number; rejection: string; click: string; created: string; updated: string };
+type OfflineTransaction = { id: string; status: TransactionStatus; billAmount: number | null; discount: number | null; payable: number | null; commission: number | null; confirmedBy: string; merchant: string; user: string; occurred: string };
+type LedgerEntry = { id: string; type: "OFFLINE_REDEMPTION" | "ONLINE_PENDING"; amount: number; user: string; merchant: string; offer: string; resolution: string; occurred: string };
+
+const onlineTransactions: OnlineTransaction[] = [
+  { id: "TXN-94128", status: "Pending", orderValue: 4299, reported: 344, calculated: 322, rejection: "—", click: "clk_9f42ab7c", created: "21 Sep 2026, 09:18", updated: "21 Sep 2026, 09:22" },
+  { id: "TXN-94127", status: "Approved", orderValue: 1890, reported: 151, calculated: 151, rejection: "—", click: "clk_2b71de09", created: "20 Sep 2026, 18:44", updated: "21 Sep 2026, 08:10" },
+  { id: "TXN-94125", status: "Rejected", orderValue: 7499, reported: 375, calculated: 0, rejection: "No matching click found", click: "—", created: "20 Sep 2026, 11:05", updated: "20 Sep 2026, 16:34" },
+  { id: "TXN-94122", status: "Pending", orderValue: 2150, reported: 215, calculated: 204, rejection: "—", click: "clk_77c1a4e2", created: "19 Sep 2026, 17:26", updated: "19 Sep 2026, 17:26" },
+  { id: "TXN-94119", status: "Approved", orderValue: 28990, reported: 1449, calculated: 1377, rejection: "—", click: "clk_51ba0d33", created: "19 Sep 2026, 10:02", updated: "20 Sep 2026, 09:41" },
+];
+
+const offlineTransactions: OfflineTransaction[] = [
+  { id: "OFF-78321", status: "Pending Bill", billAmount: null, discount: null, payable: null, commission: null, confirmedBy: "—", merchant: "Absolute Barbecues", user: "+91 ••••••••74", occurred: "19 Sep 2026, 06:08" },
+  { id: "OFF-78318", status: "Approved", billAmount: 2380, discount: 238, payable: 2142, commission: 286, confirmedBy: "Rahul S.", merchant: "Theobroma", user: "+91 ••••••••53", occurred: "18 Sep 2026, 20:14" },
+  { id: "OFF-78312", status: "Approved", billAmount: 1650, discount: 165, payable: 1485, commission: 198, confirmedBy: "Neha P.", merchant: "Blue Tokai Coffee", user: "+91 ••••••••29", occurred: "18 Sep 2026, 17:42" },
+  { id: "OFF-78304", status: "Rejected", billAmount: 899, discount: null, payable: null, commission: null, confirmedBy: "—", merchant: "Croma", user: "+91 ••••••••91", occurred: "17 Sep 2026, 13:09" },
+];
+
+const ledgerEntries: LedgerEntry[] = [
+  { id: "LED-6201", type: "OFFLINE_REDEMPTION", amount: 250, user: "+97 778 ••••••••53", merchant: "—", offer: "—", resolution: "—", occurred: "19 Sep 2026, 11:50" },
+  { id: "LED-6202", type: "OFFLINE_REDEMPTION", amount: 250, user: "+91 2721 ••••••••65", merchant: "—", offer: "—", resolution: "—", occurred: "19 Sep 2026, 14:36" },
+  { id: "LED-6203", type: "OFFLINE_REDEMPTION", amount: 250, user: "+94 325 ••••••••98", merchant: "—", offer: "—", resolution: "—", occurred: "19 Sep 2026, 16:06" },
+  { id: "LED-6204", type: "ONLINE_PENDING", amount: 60, user: "+91 ••••••••45", merchant: "Croma", offer: "Up to 4% cashback", resolution: "Still pending", occurred: "19 Sep 2026, 19:17" },
+  { id: "LED-6205", type: "ONLINE_PENDING", amount: 60, user: "+91 ••••••••45", merchant: "Croma", offer: "Up to 4% cashback", resolution: "Still pending", occurred: "19 Sep 2026, 19:18" },
+  { id: "LED-6206", type: "ONLINE_PENDING", amount: 20, user: "+91 ••••••••45", merchant: "Croma", offer: "Up to 4% cashback", resolution: "Still pending", occurred: "19 Sep 2026, 19:20" },
+  { id: "LED-6207", type: "OFFLINE_REDEMPTION", amount: 250, user: "+97 611 ••••••••78", merchant: "—", offer: "—", resolution: "—", occurred: "19 Sep 2026, 19:21" },
+  { id: "LED-6208", type: "ONLINE_PENDING", amount: 60, user: "+91 ••••••••45", merchant: "Croma", offer: "Up to 4% cashback", resolution: "Still pending", occurred: "20 Sep 2026, 04:07" },
+];
 
 const chartData = {
   users: [{ name: "Today", value: 7 }, { name: "Yesterday", value: 12 }, { name: "7d", value: 49 }, { name: "30d", value: 184 }],

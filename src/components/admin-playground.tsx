@@ -443,6 +443,11 @@ type LedgerEntry = { id: string; type: "OFFLINE_REDEMPTION" | "ONLINE_PENDING"; 
 type ClickRecord = { token: string; occurred: string; date: string; userId: string; merchant: string; offer: string; discountType: "Percentage" | "Flat amount"; discountValue: number; commissionType: "Percentage" | "Flat amount" | null; commissionValue: number | null; minBill: number | null; discountCap: number | null; commissionCap: number | null };
 type WithdrawalStatus = "Requested" | "Paid" | "Failed";
 type Withdrawal = { id: string; userId: string; amount: number; mode: "Bank Account" | "UPI" | "Gift Card"; payoutDetails: string; status: WithdrawalStatus; requested: string; date: string; resolved: string; utr: string; notes: string };
+type CommunicationTab = "analytics" | "dispatches" | "notifications";
+type AnalyticsEvent = { id: string; event: string; group: "Session" | "Screen" | "Action" | "Engagement"; screen: string; userId: string; properties: Record<string, string | number> | null; session: string; occurred: string; date: string };
+type DispatchDelivery = "SENT" | "FAILED" | "QUEUED" | "DELIVERED";
+type CommunicationDispatch = { id: string; type: string; template: string; channel: TemplateChannel; title: string; body: string; read: "Yes" | "No"; delivery: DispatchDelivery; userId: string; occurred: string; date: string };
+type NotificationLog = { id: string; type: string; title: string; body: string; read: "Yes" | "No"; delivery: DispatchDelivery; userId: string; session: string; occurred: string; date: string };
 
 const onlineTransactions: OnlineTransaction[] = [
   { id: "TXN-94128", status: "Pending", userId: "USR-10294", orderValue: 4299, reported: 344, calculated: 322, rejection: "—", click: "clk_9f42ab7c", created: "21 Sep 2026, 09:18", updated: "21 Sep 2026, 09:22" },
@@ -486,6 +491,41 @@ const initialWithdrawals: Withdrawal[] = [
   { id: "WD-009836", userId: "USR-11806", amount: 500, mode: "Gift Card", payoutDetails: "Amazon Pay • priya.nair@example.com", status: "Failed", requested: "20 Sep 2026, 12:17 pm", date: "2026-09-20", resolved: "20 Sep 2026, 5:04 pm", utr: "—", notes: "Invalid gift card contact" },
   { id: "WD-009831", userId: "USR-04519", amount: 3150, mode: "UPI", payoutDetails: "vikram.singh@paytm", status: "Paid", requested: "19 Sep 2026, 6:52 pm", date: "2026-09-19", resolved: "20 Sep 2026, 10:02 am", utr: "PAYTM260920018972", notes: "—" },
   { id: "WD-009827", userId: "USR-09734", amount: 925, mode: "Bank Account", payoutDetails: "Axis Bank • A/C 918010047526331 • IFSC UTIB0000918 • Meera Iyer", status: "Requested", requested: "19 Sep 2026, 2:06 pm", date: "2026-09-19", resolved: "—", utr: "—", notes: "First withdrawal" },
+];
+
+const analyticsEvents: AnalyticsEvent[] = [
+  { id: "EVT-9001", event: "session_landing", group: "Session", screen: "—", userId: "Pre-login", properties: { source: "organic", build: "2.8.14" }, session: "ec28707a-2f68-497f-821c-4edf9b2aa6dd", occurred: "19 Sept 2026, 6:07 am", date: "2026-09-19" },
+  { id: "EVT-9002", event: "screen_view", group: "Screen", screen: "PhoneEntry", userId: "Pre-login", properties: null, session: "ec28707a-2f68-497f-821c-4edf9b2aa6dd", occurred: "19 Sept 2026, 6:07 am", date: "2026-09-19" },
+  { id: "EVT-9003", event: "send_otp_tapped", group: "Action", screen: "—", userId: "Pre-login", properties: null, session: "ec28707a-2f68-497f-821c-4edf9b2aa6dd", occurred: "19 Sept 2026, 6:07 am", date: "2026-09-19" },
+  { id: "EVT-9004", event: "screen_view", group: "Screen", screen: "OtpVerify", userId: "Pre-login", properties: null, session: "ec28707a-2f68-497f-821c-4edf9b2aa6dd", occurred: "19 Sept 2026, 6:07 am", date: "2026-09-19" },
+  { id: "EVT-9005", event: "verify_otp_tapped", group: "Action", screen: "—", userId: "USR-10294", properties: null, session: "ec28707a-2f68-497f-821c-4edf9b2aa6dd", occurred: "19 Sept 2026, 6:07 am", date: "2026-09-19" },
+  { id: "EVT-9006", event: "screen_exit", group: "Screen", screen: "—", userId: "USR-10294", properties: { duration_ms: 24120, reason: "otp_verified" }, session: "ec28707a-2f68-497f-821c-4edf9b2aa6dd", occurred: "19 Sept 2026, 6:07 am", date: "2026-09-19" },
+  { id: "EVT-9007", event: "screen_view", group: "Screen", screen: "ProfileSetup", userId: "USR-10294", properties: null, session: "ec28707a-2f68-497f-821c-4edf9b2aa6dd", occurred: "19 Sept 2026, 6:07 am", date: "2026-09-19" },
+  { id: "EVT-9008", event: "profile_submit_tapped", group: "Action", screen: "—", userId: "USR-10294", properties: null, session: "ec28707a-2f68-497f-821c-4edf9b2aa6dd", occurred: "19 Sept 2026, 6:08 am", date: "2026-09-19" },
+  { id: "EVT-9009", event: "screen_view", group: "Screen", screen: "Home", userId: "USR-10294", properties: null, session: "ec28707a-2f68-497f-821c-4edf9b2aa6dd", occurred: "19 Sept 2026, 6:08 am", date: "2026-09-19" },
+  { id: "EVT-9010", event: "scroll_depth", group: "Engagement", screen: "Home", userId: "USR-10294", properties: { percent: 50, section: "featured_merchants" }, session: "ec28707a-2f68-497f-821c-4edf9b2aa6dd", occurred: "19 Sept 2026, 6:08 am", date: "2026-09-19" },
+  { id: "EVT-9011", event: "merchant_opened", group: "Action", screen: "MerchantDetail", userId: "USR-08471", properties: { merchant: "Croma", source: "home_carousel" }, session: "a7fb07ab-a347-4453-bdea-1029dc091f90", occurred: "21 Sept 2026, 10:19 am", date: "2026-09-21" },
+  { id: "EVT-9012", event: "offer_cta_tapped", group: "Action", screen: "MerchantDetail", userId: "USR-08471", properties: { offer_id: "OFF-1039", merchant: "Croma" }, session: "a7fb07ab-a347-4453-bdea-1029dc091f90", occurred: "21 Sept 2026, 10:20 am", date: "2026-09-21" },
+];
+
+const communicationDispatches: CommunicationDispatch[] = [
+  { id: "DSP-7108", type: "ONLINE_CASHBACK_PENDING", template: "Purchase Tracked", channel: "SMS", title: "Cashback tracked", body: "Your Rs. 60.00 cashback from Croma is now tracked and pending approval.", read: "No", delivery: "FAILED", userId: "USR-10294", occurred: "19 Sept 2026, 6:08 am", date: "2026-09-19" },
+  { id: "DSP-7107", type: "ONLINE_CASHBACK_PENDING", template: "Purchase Tracked", channel: "WhatsApp", title: "Cashback tracked", body: "Your Rs. 60.00 cashback from Croma is now tracked and pending approval.", read: "No", delivery: "FAILED", userId: "USR-10294", occurred: "19 Sept 2026, 6:08 am", date: "2026-09-19" },
+  { id: "DSP-7106", type: "ONLINE_CASHBACK_PENDING", template: "Purchase Tracked", channel: "Notification", title: "Cashback tracked", body: "Your Rs. 20.00 cashback from Croma is now tracked and pending approval.", read: "No", delivery: "QUEUED", userId: "USR-10294", occurred: "19 Sept 2026, 6:09 am", date: "2026-09-19" },
+  { id: "DSP-7105", type: "CASHBACK_APPROVED", template: "Cashback Approved", channel: "SMS", title: "Cashback approved", body: "Congrats! You earned 151 reward points on OfferPe for shopping at Theobroma.", read: "Yes", delivery: "SENT", userId: "USR-08471", occurred: "20 Sept 2026, 8:10 am", date: "2026-09-20" },
+  { id: "DSP-7104", type: "MERCHANT_REVIEW_APPROVED", template: "Review Approved", channel: "Email", title: "Your review of Nykaa is live", body: "Hi Ananya, your review of Nykaa has been approved and is now visible to other shoppers.", read: "Yes", delivery: "DELIVERED", userId: "USR-06322", occurred: "20 Sept 2026, 3:24 pm", date: "2026-09-20" },
+  { id: "DSP-7103", type: "MERCHANT_ONBOARDING_SUBMITTED", template: "Merchant Onboarding Submitted", channel: "Email", title: "Application received for Blue Tokai Coffee Roasters", body: "Hi Nikhil Desai, we received your application for Blue Tokai Coffee Roasters.", read: "No", delivery: "DELIVERED", userId: "MER-APP-3012", occurred: "21 Sept 2026, 8:40 am", date: "2026-09-21" },
+  { id: "DSP-7102", type: "MERCHANT_ONBOARDING_REJECTED", template: "Merchant Onboarding Rejected", channel: "WhatsApp", title: "Application update", body: "Hi Rekha Patil, unfortunately your OfferPe application for Sunrise Kirana Mart was not approved.", read: "No", delivery: "SENT", userId: "MER-APP-3009", occurred: "18 Sept 2026, 1:32 pm", date: "2026-09-18" },
+  { id: "DSP-7101", type: "CASHBACK_REJECTED", template: "Cashback Rejected", channel: "Notification", title: "Cashback not approved", body: "Your Rs. 375 cashback claim from Croma was not approved.", read: "No", delivery: "SENT", userId: "USR-83172", occurred: "18 Sept 2026, 10:16 am", date: "2026-09-18" },
+];
+
+const notificationLogs: NotificationLog[] = [
+  { id: "NTF-8042", type: "ONLINE_CASHBACK_PENDING", title: "Cashback tracked", body: "Your Rs. 60.00 cashback from Croma is now tracked and pending approval.", read: "No", delivery: "FAILED", userId: "USR-10294", session: "ec28707a-2f68-497f-821c-4edf9b2aa6dd", occurred: "19 Sept 2026, 6:08 am", date: "2026-09-19" },
+  { id: "NTF-8041", type: "ONLINE_CASHBACK_PENDING", title: "Cashback tracked", body: "Your Rs. 20.00 cashback from Croma is now tracked and pending approval.", read: "No", delivery: "FAILED", userId: "USR-10294", session: "ec28707a-2f68-497f-821c-4edf9b2aa6dd", occurred: "19 Sept 2026, 6:09 am", date: "2026-09-19" },
+  { id: "NTF-8040", type: "CASHBACK_APPROVED", title: "Cashback approved", body: "You earned Rs. 151 cashback from Theobroma!", read: "Yes", delivery: "DELIVERED", userId: "USR-08471", session: "f840db2c-1d37-4f7e-a165-c720998d1121", occurred: "20 Sept 2026, 8:10 am", date: "2026-09-20" },
+  { id: "NTF-8039", type: "REVIEW_APPROVED", title: "Review approved", body: "Your review of Nykaa is live!", read: "Yes", delivery: "SENT", userId: "USR-06322", session: "d791617b-4073-4b38-a32f-a1a336c4dc77", occurred: "20 Sept 2026, 3:24 pm", date: "2026-09-20" },
+  { id: "NTF-8038", type: "REVIEW_REJECTED", title: "Review not approved", body: "Your review of Croma was not approved.", read: "No", delivery: "SENT", userId: "USR-11806", session: "ba7b1fd9-2861-41f5-bfc5-b7710506bd57", occurred: "20 Sept 2026, 5:45 pm", date: "2026-09-20" },
+  { id: "NTF-8037", type: "MERCHANT_ONBOARDING_APPROVED", title: "Merchant approved", body: "Urban Threads Studio is approved and live!", read: "No", delivery: "QUEUED", userId: "MER-APP-3010", session: "merchant-app", occurred: "19 Sept 2026, 12:09 pm", date: "2026-09-19" },
 ];
 
 const chartData = {

@@ -1018,6 +1018,11 @@ export function AdminPlayground() {
   const rejectApplication = (application: Application, reason: string, note: string) => { setApplicationStatus(application, "Rejected", reason, note); toast.success("Application rejected", { description: `${application.store} was rejected: ${reason}.` }); };
   const revertApplication = (application: Application) => { setApplicationStatus(application, "Pending"); toast.success("Application moved back to pending", { description: `${application.store} awaits review again.` }); };
   const deleteApplication = (application: Application) => { setApplicationRows((current) => current.filter((item) => item.id !== application.id)); toast.success("Application deleted", { description: `${application.store} was removed from the queue.` }); };
+  const setClaimStatus = (claim: Claim, status: ReviewStatus, reason = "", note = "") => setClaimRows((current) => current.map((item) => item.id === claim.id ? { ...item, status, reason, note } : item));
+  const approveClaim = (claim: Claim) => { setClaimStatus(claim, "Approved", "", "Accepted into the online-conversion pipeline (source = CLAIM)."); toast.success("Claim approved", { description: `${claim.orderId} was staged as an online conversion — resolve it from Online Conversions to credit ₹${claim.expectedCashback.toLocaleString("en-IN")}.` }); };
+  const rejectClaim = (claim: Claim, reason: string, note: string) => { setClaimStatus(claim, "Rejected", reason, note); toast.success("Claim rejected", { description: `${claim.user}'s claim on ${claim.orderId} was rejected: ${reason}.` }); };
+  const revertClaim = (claim: Claim) => { setClaimStatus(claim, "Pending"); toast.success("Claim moved back to pending", { description: `${claim.id} awaits review again.` }); };
+  const deleteClaim = (claim: Claim) => { setClaimRows((current) => current.filter((item) => item.id !== claim.id)); toast.success("Claim deleted", { description: `${claim.id} was removed.` }); };
   const runSync = () => {
     setSyncing(true);
     window.setTimeout(() => {

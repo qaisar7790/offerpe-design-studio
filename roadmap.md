@@ -5,4 +5,4 @@
 - [x] Add Merchants listing with filters, badges, sorting, and edit actions
 - [x] Add Online Conversions listing with filters, status treatments, and row actions
 - [x] Add the Import Offline Report upload modal
-- [ ] Add page metadata and verify desktop/mobile interaction flows
+- [x] Add page metadata and verify desktop/mobile interaction flows

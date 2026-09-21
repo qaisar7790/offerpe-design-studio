@@ -42,3 +42,4 @@
 - [x] Build System Users with dense table, filtering, import dialog, PI/non-PI export, horizontal scroll, and pagination
 
 - [x] Build System Roles with listing, add dialog, full-page edit, grouped searchable permissions, generated descriptions, and delete confirmations
+- [x] Build Admins module (System) with listing, filters, invite dialog, edit dialog, resend invite, and delete confirmation

@@ -10,3 +10,6 @@
 - [x] Add interactive enterprise pagination with page-size controls
 - [x] Upgrade Edit Conversion with full prefilled editing and saved row updates
 - [x] Add save confirmation and verify locked/editable invoice behavior
+- [x] Reduce listing table row heights and compact badges and row actions
+- [x] Add copy controls with visual feedback for Click ID and Order ID
+- [x] Add the Dashboard admin welcome and operational health banner

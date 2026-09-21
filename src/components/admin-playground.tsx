@@ -849,10 +849,10 @@ function LegalPagesPage({ pages, onSave, onDelete }: { pages: LegalPage[]; onSav
             <Input value={activeDraft.version} onChange={(event) => update({ version: event.target.value })} />
           </label>
         </div>
-        <label className="block space-y-1.5 text-sm font-medium">Content <span className="text-destructive">*</span>
-          <Textarea rows={22} className="font-mono text-[13px] leading-6" value={activeDraft.content} onChange={(event) => update({ content: event.target.value })} />
-        </label>
-        <p className="text-xs text-muted-foreground">Numbered lines become section headings on the public page; lines starting with &quot;-&quot; render as bullets.</p>
+        <div className="space-y-1.5 text-sm font-medium">Content <span className="text-destructive">*</span>
+          <RichTextEditor key={selected.id} value={activeDraft.content} onChange={(html) => update({ content: html })} />
+        </div>
+        <p className="text-xs text-muted-foreground">Headings, bold, italics and lists are carried through to the public page exactly as shown here.</p>
         <label className="flex items-center gap-2 text-sm font-medium">
           <Checkbox checked={activeDraft.published} onCheckedChange={(value) => update({ published: value === true })} />
           Published — visible on the public site

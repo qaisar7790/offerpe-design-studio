@@ -18,3 +18,6 @@
 - [x] Add full-page offer create/edit flows and merchant-scoped offer management
 - [x] Add the Catalog Cashback Offers listing with filters and pagination
 - [x] Split merchant Details and Page Sections tabs with interactive section controls
+- [x] Add offers, commission, and city columns to the Merchants listing
+- [x] Add banner drag ordering and position controls
+- [x] Build the Add Banner dialog with scheduling, upload, and active state

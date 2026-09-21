@@ -1509,28 +1509,52 @@ function ApplicationHeadline({ application }: { application: Application }) {
 }
 
 function OnboardingQueue({ applications, onApprove, onReject, onRevert, onDelete }: { applications: Application[]; onApprove: (application: Application) => void; onReject: (application: Application, reason: string, note: string) => void; onRevert: (application: Application) => void; onDelete: (application: Application) => void }) {
+  const [tab, setTab] = useState("pending");
+  const [query, setQuery] = useState("");
   const [status, setStatus] = useState("all");
   const [category, setCategory] = useState("all");
   const [from, setFrom] = useState("");
   const [to, setTo] = useState("");
   const [sort, setSort] = useState("newest");
   const categories = Array.from(new Set(applications.map((application) => application.category)));
-  const pending = applications.filter((application) => application.status === "Pending");
-  const reviewed = useMemo(() => {
-    const parse = (value: string) => new Date(value.replace(",", "")).getTime();
-    return applications.filter((application) => application.status !== "Pending")
-      .filter((application) => status === "all" || application.status === status)
-      .filter((application) => category === "all" || application.category === category)
-      .filter((application) => !from || parse(application.submitted) >= new Date(from).getTime())
-      .filter((application) => !to || parse(application.submitted) <= new Date(to).getTime() + 86_400_000)
-      .sort((a, b) => sort === "oldest" ? parse(a.submitted) - parse(b.submitted) : sort === "store" ? a.store.localeCompare(b.store) : parse(b.submitted) - parse(a.submitted));
-  }, [applications, status, category, from, to, sort]);
+  const parse = (value: string) => new Date(value.replace(",", "")).getTime();
+  const applyFilters = (rows: Application[]) => rows
+    .filter((application) => !query || `${application.store} ${application.owner} ${application.id} ${application.city}`.toLowerCase().includes(query.toLowerCase()))
+    .filter((application) => category === "all" || application.category === category)
+    .filter((application) => !from || parse(application.submitted) >= new Date(from).getTime())
+    .filter((application) => !to || parse(application.submitted) <= new Date(to).getTime() + 86_400_000)
+    .sort((a, b) => sort === "oldest" ? parse(a.submitted) - parse(b.submitted) : sort === "store" ? a.store.localeCompare(b.store) : parse(b.submitted) - parse(a.submitted));
+  const pending = useMemo(() => applyFilters(applications.filter((application) => application.status === "Pending")), [applications, query, category, from, to, sort]);
+  const reviewed = useMemo(() => applyFilters(applications.filter((application) => application.status !== "Pending" && (status === "all" || application.status === status))), [applications, status, query, category, from, to, sort]);
+  const hasFilters = Boolean(query) || status !== "all" || category !== "all" || from || to || sort !== "newest";
+  const resetFilters = () => { setQuery(""); setStatus("all"); setCategory("all"); setFrom(""); setTo(""); setSort("newest"); };
+  const exportRows = (rows: Application[]) => {
+    const escape = (value: string) => `"${value.replace(/"/g, '""')}"`;
+    const header = ["Application ID", "Store", "Category", "Applicant", "Phone", "Email", "City", "Proposed Commission", "Submitted", "Status", "Rejection Reason"];
+    const lines = rows.map((application) => [application.id, application.store, application.category, application.owner, application.phone, application.email, application.city, application.commission, application.submitted, application.status, application.reason].map(escape).join(","));
+    const url = URL.createObjectURL(new Blob([[header.map(escape).join(","), ...lines].join("\n")], { type: "text/csv;charset=utf-8" }));
+    const anchor = document.createElement("a"); anchor.href = url; anchor.download = `offerpe-merchant-onboarding-${tab}.csv`; anchor.click(); URL.revokeObjectURL(url);
+    toast.success(`${rows.length} application${rows.length === 1 ? "" : "s"} exported`);
+  };
+  const activeRows = tab === "pending" ? pending : reviewed;
   return <><PageHeader title="Merchant Onboarding Queue" description={'Applications submitted via the web form or the merchant app\'s "Register your store" path. Approving creates a live OFFLINE merchant and grants the applicant immediate merchant-app login — no separate invite step. Rejecting requires a reason from the Onboarding Rejection Reasons list.'} />
-    <div className="space-y-8">
-      <section>
-        <h2 className="font-heading text-lg font-bold">Pending review ({pending.length})</h2>
-        {pending.length === 0 ? <p className="mt-2 text-sm text-muted-foreground">No submissions waiting for review.</p>
-          : <div className="mt-3 space-y-3">{pending.map((application) => <article key={application.id} className="rounded-lg border border-border bg-card p-4 shadow-card">
+    <Tabs value={tab} onValueChange={setTab}>
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <TabsList><TabsTrigger value="pending" className={tabTriggerClass}>Pending Review ({pending.length})</TabsTrigger><TabsTrigger value="reviewed" className={tabTriggerClass}>Reviewed ({reviewed.length})</TabsTrigger></TabsList>
+        <Button variant="outline" className="shrink-0" onClick={() => exportRows(activeRows)}><Download />Export CSV</Button>
+      </div>
+      <div className="mt-4 flex flex-col gap-3 rounded-lg border border-border bg-card p-3 shadow-card lg:flex-row lg:flex-wrap lg:items-center">
+        <div className="relative min-w-64 flex-1"><Search className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground" /><Input className="pl-9" value={query} onChange={(event) => setQuery(event.target.value)} placeholder="Search store, applicant, or application ID…" /></div>
+        {tab === "reviewed" && <Select value={status} onValueChange={setStatus}><SelectTrigger className="lg:w-40"><SelectValue placeholder="Status" /></SelectTrigger><SelectContent><SelectItem value="all">All statuses</SelectItem><SelectItem value="Approved">Approved</SelectItem><SelectItem value="Rejected">Rejected</SelectItem></SelectContent></Select>}
+        <Select value={category} onValueChange={setCategory}><SelectTrigger className="lg:w-44"><SelectValue placeholder="Category" /></SelectTrigger><SelectContent><SelectItem value="all">All categories</SelectItem>{categories.map((item) => <SelectItem key={item} value={item}>{item}</SelectItem>)}</SelectContent></Select>
+        <Input type="date" className="lg:w-40" value={from} onChange={(event) => setFrom(event.target.value)} aria-label="Submitted from" />
+        <Input type="date" className="lg:w-40" value={to} onChange={(event) => setTo(event.target.value)} aria-label="Submitted to" />
+        <Select value={sort} onValueChange={setSort}><SelectTrigger className="lg:w-44"><SelectValue /></SelectTrigger><SelectContent><SelectItem value="newest">Newest submitted</SelectItem><SelectItem value="oldest">Oldest submitted</SelectItem><SelectItem value="store">Store name: A to Z</SelectItem></SelectContent></Select>
+        {hasFilters && <Button variant="ghost" onClick={resetFilters}>Reset</Button>}
+      </div>
+      <TabsContent value="pending" className="mt-4">
+        {pending.length === 0 ? <p className="text-sm text-muted-foreground">No submissions waiting for review.</p>
+          : <div className="space-y-3">{pending.map((application) => <article key={application.id} className="rounded-lg border border-border bg-card p-4 shadow-card">
             <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
               <ApplicationHeadline application={application} />
               <div className="flex shrink-0 gap-2">
@@ -1540,18 +1564,10 @@ function OnboardingQueue({ applications, onApprove, onReject, onRevert, onDelete
             </div>
             <ApplicationDetails application={application} />
           </article>)}</div>}
-      </section>
-      <section>
-        <h2 className="font-heading text-lg font-bold">Reviewed</h2>
-        <div className="mt-3 grid gap-3 rounded-lg border border-border bg-card p-3 shadow-card sm:grid-cols-2 xl:grid-cols-5">
-          <label className="space-y-1.5 text-xs font-semibold uppercase text-muted-foreground">Status<Select value={status} onValueChange={setStatus}><SelectTrigger><SelectValue /></SelectTrigger><SelectContent><SelectItem value="all">All</SelectItem><SelectItem value="Approved">Approved</SelectItem><SelectItem value="Rejected">Rejected</SelectItem></SelectContent></Select></label>
-          <label className="space-y-1.5 text-xs font-semibold uppercase text-muted-foreground">Category<Select value={category} onValueChange={setCategory}><SelectTrigger><SelectValue /></SelectTrigger><SelectContent><SelectItem value="all">All</SelectItem>{categories.map((item) => <SelectItem key={item} value={item}>{item}</SelectItem>)}</SelectContent></Select></label>
-          <label className="space-y-1.5 text-xs font-semibold uppercase text-muted-foreground">From<Input type="date" value={from} onChange={(event) => setFrom(event.target.value)} /></label>
-          <label className="space-y-1.5 text-xs font-semibold uppercase text-muted-foreground">To<Input type="date" value={to} onChange={(event) => setTo(event.target.value)} /></label>
-          <label className="space-y-1.5 text-xs font-semibold uppercase text-muted-foreground">Sort by<Select value={sort} onValueChange={setSort}><SelectTrigger><SelectValue /></SelectTrigger><SelectContent><SelectItem value="newest">Newest submitted</SelectItem><SelectItem value="oldest">Oldest submitted</SelectItem><SelectItem value="store">Store name: A to Z</SelectItem></SelectContent></Select></label>
-        </div>
-        {reviewed.length === 0 ? <p className="mt-4 text-sm text-muted-foreground">Nothing reviewed yet.</p>
-          : <div className="mt-3 space-y-3">{reviewed.map((application) => <article key={application.id} className="rounded-lg border border-border bg-card p-4 shadow-card">
+      </TabsContent>
+      <TabsContent value="reviewed" className="mt-4">
+        {reviewed.length === 0 ? <p className="text-sm text-muted-foreground">Nothing reviewed yet.</p>
+          : <div className="space-y-3">{reviewed.map((application) => <article key={application.id} className="rounded-lg border border-border bg-card p-4 shadow-card">
             <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
               <div className="min-w-0">
                 <ApplicationHeadline application={application} />
@@ -1568,8 +1584,8 @@ function OnboardingQueue({ applications, onApprove, onReject, onRevert, onDelete
             </div>
             {application.status === "Rejected" && <p className="mt-2 text-xs font-semibold text-destructive">Reason: {application.reason}{application.note && <span className="font-normal text-muted-foreground"> — {application.note}</span>}</p>}
           </article>)}</div>}
-      </section>
-    </div>
+      </TabsContent>
+    </Tabs>
   </>;
 }
 

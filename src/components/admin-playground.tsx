@@ -1423,39 +1423,40 @@ function PendingReviewCard({ review, showMerchant, onApprove, onReject }: { revi
 }
 
 function ReviewsPanel({ reviews, merchantNames, scopedMerchant, onApprove, onReject, onRevert, onDelete }: { reviews: Review[]; merchantNames: string[]; scopedMerchant?: string; onApprove: (review: Review) => void; onReject: (review: Review, reason: string, note: string) => void; onRevert: (review: Review) => void; onDelete: (review: Review) => void }) {
+  const [tab, setTab] = useState("pending");
   const [status, setStatus] = useState("all");
   const [merchantFilter, setMerchantFilter] = useState("all");
   const [from, setFrom] = useState("");
   const [to, setTo] = useState("");
   const [sort, setSort] = useState("newest");
   const scoped = scopedMerchant ? reviews.filter((review) => review.merchant === scopedMerchant) : reviews;
-  const pending = scoped.filter((review) => review.status === "Pending");
-  const reviewed = useMemo(() => {
-    const parse = (value: string) => new Date(value.replace(",", "")).getTime();
-    return scoped.filter((review) => review.status !== "Pending")
-      .filter((review) => status === "all" || review.status === status)
-      .filter((review) => scopedMerchant || merchantFilter === "all" || review.merchant === merchantFilter)
-      .filter((review) => !from || parse(review.submitted) >= new Date(from).getTime())
-      .filter((review) => !to || parse(review.submitted) <= new Date(to).getTime() + 86_400_000)
-      .sort((a, b) => sort === "oldest" ? parse(a.submitted) - parse(b.submitted) : sort === "rating-high" ? b.rating - a.rating : sort === "rating-low" ? a.rating - b.rating : parse(b.submitted) - parse(a.submitted));
-  }, [scoped, status, merchantFilter, from, to, sort, scopedMerchant]);
-  return <div className="space-y-8">
-    <section>
-      <h2 className="font-heading text-lg font-bold">Pending review ({pending.length})</h2>
-      {pending.length === 0 ? <p className="mt-2 text-sm text-muted-foreground">No reviews waiting for review.</p>
-        : <div className="mt-3 space-y-3">{pending.map((review) => <PendingReviewCard key={review.id} review={review} showMerchant={!scopedMerchant} onApprove={onApprove} onReject={onReject} />)}</div>}
-    </section>
-    <section>
-      <h2 className="font-heading text-lg font-bold">Reviewed</h2>
-      <div className="mt-3 grid gap-3 rounded-lg border border-border bg-card p-3 shadow-card sm:grid-cols-2 xl:grid-cols-5">
-        <label className="space-y-1.5 text-xs font-semibold uppercase text-muted-foreground">Status<Select value={status} onValueChange={setStatus}><SelectTrigger><SelectValue /></SelectTrigger><SelectContent><SelectItem value="all">All</SelectItem><SelectItem value="Approved">Approved</SelectItem><SelectItem value="Rejected">Rejected</SelectItem></SelectContent></Select></label>
-        {!scopedMerchant && <label className="space-y-1.5 text-xs font-semibold uppercase text-muted-foreground">Merchant<Select value={merchantFilter} onValueChange={setMerchantFilter}><SelectTrigger><SelectValue /></SelectTrigger><SelectContent><SelectItem value="all">All</SelectItem>{merchantNames.map((name) => <SelectItem key={name} value={name}>{name}</SelectItem>)}</SelectContent></Select></label>}
-        <label className="space-y-1.5 text-xs font-semibold uppercase text-muted-foreground">From<Input type="date" value={from} onChange={(event) => setFrom(event.target.value)} /></label>
-        <label className="space-y-1.5 text-xs font-semibold uppercase text-muted-foreground">To<Input type="date" value={to} onChange={(event) => setTo(event.target.value)} /></label>
-        <label className="space-y-1.5 text-xs font-semibold uppercase text-muted-foreground">Sort by<Select value={sort} onValueChange={setSort}><SelectTrigger><SelectValue /></SelectTrigger><SelectContent><SelectItem value="newest">Newest submitted</SelectItem><SelectItem value="oldest">Oldest submitted</SelectItem><SelectItem value="rating-high">Rating: High to Low</SelectItem><SelectItem value="rating-low">Rating: Low to High</SelectItem></SelectContent></Select></label>
-      </div>
-      {reviewed.length === 0 ? <p className="mt-4 text-sm text-muted-foreground">Nothing reviewed yet.</p>
-        : <div className="mt-3 space-y-3">{reviewed.map((review) => <article key={review.id} className="rounded-lg border border-border bg-card p-4 shadow-card">
+  const parse = (value: string) => new Date(value.replace(",", "")).getTime();
+  const applyFilters = (rows: Review[]) => rows
+    .filter((review) => scopedMerchant || merchantFilter === "all" || review.merchant === merchantFilter)
+    .filter((review) => !from || parse(review.submitted) >= new Date(from).getTime())
+    .filter((review) => !to || parse(review.submitted) <= new Date(to).getTime() + 86_400_000)
+    .sort((a, b) => sort === "oldest" ? parse(a.submitted) - parse(b.submitted) : sort === "rating-high" ? b.rating - a.rating : sort === "rating-low" ? a.rating - b.rating : parse(b.submitted) - parse(a.submitted));
+  const pending = useMemo(() => applyFilters(scoped.filter((review) => review.status === "Pending")), [scoped, merchantFilter, from, to, sort, scopedMerchant]);
+  const reviewed = useMemo(() => applyFilters(scoped.filter((review) => review.status !== "Pending" && (status === "all" || review.status === status))), [scoped, status, merchantFilter, from, to, sort, scopedMerchant]);
+  const hasFilters = status !== "all" || merchantFilter !== "all" || from || to || sort !== "newest";
+  const resetFilters = () => { setStatus("all"); setMerchantFilter("all"); setFrom(""); setTo(""); setSort("newest"); };
+  return <Tabs value={tab} onValueChange={setTab}>
+    <TabsList><TabsTrigger value="pending" className={tabTriggerClass}>Pending Review ({pending.length})</TabsTrigger><TabsTrigger value="reviewed" className={tabTriggerClass}>Reviewed ({reviewed.length})</TabsTrigger></TabsList>
+    <div className="mt-4 flex flex-col gap-3 rounded-lg border border-border bg-card p-3 shadow-card lg:flex-row lg:flex-wrap lg:items-center">
+      {tab === "reviewed" && <Select value={status} onValueChange={setStatus}><SelectTrigger className="lg:w-40"><SelectValue placeholder="Status" /></SelectTrigger><SelectContent><SelectItem value="all">All statuses</SelectItem><SelectItem value="Approved">Approved</SelectItem><SelectItem value="Rejected">Rejected</SelectItem></SelectContent></Select>}
+      {!scopedMerchant && <Select value={merchantFilter} onValueChange={setMerchantFilter}><SelectTrigger className="lg:w-52"><SelectValue placeholder="Merchant" /></SelectTrigger><SelectContent><SelectItem value="all">All merchants</SelectItem>{merchantNames.map((name) => <SelectItem key={name} value={name}>{name}</SelectItem>)}</SelectContent></Select>}
+      <Input type="date" className="lg:w-40" value={from} onChange={(event) => setFrom(event.target.value)} aria-label="Submitted from" />
+      <Input type="date" className="lg:w-40" value={to} onChange={(event) => setTo(event.target.value)} aria-label="Submitted to" />
+      <Select value={sort} onValueChange={setSort}><SelectTrigger className="lg:w-48"><SelectValue /></SelectTrigger><SelectContent><SelectItem value="newest">Newest submitted</SelectItem><SelectItem value="oldest">Oldest submitted</SelectItem><SelectItem value="rating-high">Rating: High to Low</SelectItem><SelectItem value="rating-low">Rating: Low to High</SelectItem></SelectContent></Select>
+      {hasFilters && <Button variant="ghost" onClick={resetFilters}>Reset</Button>}
+    </div>
+    <TabsContent value="pending" className="mt-4">
+      {pending.length === 0 ? <p className="text-sm text-muted-foreground">No reviews waiting for review.</p>
+        : <div className="space-y-3">{pending.map((review) => <PendingReviewCard key={review.id} review={review} showMerchant={!scopedMerchant} onApprove={onApprove} onReject={onReject} />)}</div>}
+    </TabsContent>
+    <TabsContent value="reviewed" className="mt-4">
+      {reviewed.length === 0 ? <p className="text-sm text-muted-foreground">Nothing reviewed yet.</p>
+        : <div className="space-y-3">{reviewed.map((review) => <article key={review.id} className="rounded-lg border border-border bg-card p-4 shadow-card">
           <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
             <div className="min-w-0">
               <div className="flex flex-wrap items-center gap-2">
@@ -1478,8 +1479,8 @@ function ReviewsPanel({ reviews, merchantNames, scopedMerchant, onApprove, onRej
           {review.status === "Rejected" && <p className="mt-2 text-xs font-semibold text-destructive">Reason: {review.reason}{review.note && <span className="font-normal text-muted-foreground"> — {review.note}</span>}</p>}
           {review.photos.length > 0 && <div className="mt-3 flex flex-wrap gap-2">{review.photos.map((photo) => <ReviewPhoto key={photo} src={photo} user={review.user} />)}</div>}
         </article>)}</div>}
-    </section>
-  </div>;
+    </TabsContent>
+  </Tabs>;
 }
 
 function ApplicationDetails({ application }: { application: Application }) {

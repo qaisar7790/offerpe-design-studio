@@ -21,6 +21,7 @@ import {
   EyeOff,
   FileSpreadsheet,
   Filter,
+  GripVertical,
   LayoutDashboard,
   Lock,
   Image as ImageIcon,
@@ -64,6 +65,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Switch } from "@/components/ui/switch";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Tooltip as UiTooltip, TooltipContent as UiTooltipContent, TooltipProvider, TooltipTrigger as UiTooltipTrigger } from "@/components/ui/tooltip";
 import { Checkbox } from "@/components/ui/checkbox";
 import {
   Dialog,
@@ -88,6 +90,7 @@ import { toast } from "sonner";
 type View = "dashboard" | "merchants" | "merchant-edit" | "offers" | "offer-edit" | "conversions";
 type Status = "Active" | "Inactive" | "Pending" | "Approved" | "Rejected" | "Requested" | "Paid";
 type Offer = { id: string; merchant: string; headline: string; subtext: string; details: string; terms: string; discountType: "Percentage" | "Flat amount"; discountValue: number; commissionType: "Percentage" | "Flat amount"; commissionValue: number; start: string; end: string; minBill: number; sortOrder: number; discountCap: number; commissionCap: number; redirectUrl: string; voucherLink: string; productLink: string; affiliate: string; featured: boolean; active: boolean };
+type Banner = { id: string; title: string; placement: string; target: string; image: string; start: string; end: string; active: boolean };
 type OfferOrigin = { type: "merchant"; merchant: typeof merchants[number] } | { type: "listing" };
 
 const groups = [
@@ -99,16 +102,16 @@ const groups = [
 ];
 
 const merchants = [
-  ["Theobroma", "Offline", "Premium Bakeries", 0, "Active"],
-  ["Absolute Barbecues", "Offline", "Restaurants", 0, "Active"],
-  ["Croma", "Online", "Electronics", 0, "Active"],
-  ["Withdrawal Test Merchant", "Online", "Testing", 0, "Inactive"],
-  ["Nykaa", "Online", "Beauty", 1, "Active"],
-  ["MakeMyTrip", "Online", "Travel", 1, "Active"],
-  ["Myntra", "Online", "Fashion", 1, "Active"],
-  ["Big Bazaar", "Offline", "Department Stores", 2, "Inactive"],
-  ["Hummel", "Online", "Fashion", 2, "Active"],
-  ["Nippon Paint FX10", "Online", "Home & Living", 3, "Active"],
+  ["Theobroma", "Offline", "Premium Bakeries", 0, "Active", 3, "Up to 12%", ["Mumbai", "Bengaluru", "Delhi", "Pune", "Hyderabad"]],
+  ["Absolute Barbecues", "Offline", "Restaurants", 0, "Active", 2, "8% default", ["Mumbai", "Bengaluru", "Hyderabad", "Chennai"]],
+  ["Croma", "Online", "Electronics", 0, "Active", 5, "Up to 10%", ["Pan-India"]],
+  ["Withdrawal Test Merchant", "Online", "Testing", 0, "Inactive", 0, "6% default", ["Mumbai"]],
+  ["Nykaa", "Online", "Beauty", 1, "Active", 4, "Up to 11%", ["Pan-India"]],
+  ["MakeMyTrip", "Online", "Travel", 1, "Active", 3, "8% default", ["Pan-India"]],
+  ["Myntra", "Online", "Fashion", 1, "Active", 2, "Up to 9%", ["Pan-India"]],
+  ["Big Bazaar", "Offline", "Department Stores", 2, "Inactive", 0, "6% default", ["Mumbai", "Pune", "Ahmedabad", "Surat"]],
+  ["Hummel", "Online", "Fashion", 2, "Active", 2, "8% default", ["Mumbai", "Delhi", "Bengaluru"]],
+  ["Nippon Paint FX10", "Online", "Home & Living", 3, "Active", 1, "Up to 7%", ["Mumbai", "Pune", "Nagpur", "Nashik", "Thane"]],
 ] as const;
 
 const initialOffers: Offer[] = [

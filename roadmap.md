@@ -38,3 +38,4 @@
 - [x] Rejection Reasons (Financial): listing w/ sortable Reason/Order, status filter, add/edit dialog (reason, display order, active), deactivation note, toasts
 - [x] Build Communication Templates with template selector, channel tabs, variables, previews, and save flow
 - [x] Add uploaded Communication template events, variables, and channel copy as dropdown options
+- [x] Build Dispatches & Notifications with Analytics Events, Communication Dispatches, Notifications tabs, filters, User ID columns, and CSV export

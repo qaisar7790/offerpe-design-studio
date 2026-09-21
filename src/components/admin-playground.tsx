@@ -991,6 +991,7 @@ export function AdminPlayground() {
   const [merchantRows, setMerchantRows] = useState<readonly (typeof merchants[number])[]>(merchants);
   const [reviewRows, setReviewRows] = useState<Review[]>(initialReviews);
   const [applicationRows, setApplicationRows] = useState<Application[]>(initialApplications);
+  const [claimRows, setClaimRows] = useState<Claim[]>(initialClaims);
   const [campaignRows, setCampaignRows] = useState<StagedCampaign[]>(initialCampaigns);
   const [syncRuns, setSyncRuns] = useState<SyncRun[]>(initialSyncRuns);
   const [syncing, setSyncing] = useState(false);

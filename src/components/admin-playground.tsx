@@ -107,7 +107,7 @@ import {
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
 
-type View = "dashboard" | "merchants" | "reviews" | "merchant-onboarding-queue" | "trackier-queue" | "affiliate-networks" | "affiliate-network-new" | "affiliate-network-edit" | "merchant-edit" | "offers" | "offer-edit" | "promo-banners" | "promo-banner-edit" | "promo-banner-new" | "categories" | "category-mapping" | "category-edit" | "category-new" | "conversions";
+type View = "dashboard" | "merchants" | "reviews" | "merchant-onboarding-queue" | "trackier-queue" | "affiliate-networks" | "affiliate-network-new" | "affiliate-network-edit" | "merchant-edit" | "offers" | "offer-edit" | "promo-banners" | "promo-banner-edit" | "promo-banner-new" | "categories" | "category-mapping" | "category-edit" | "category-new" | "cashback-claims" | "conversions";
 type RawMapping = { raw: string; mappedTo: string };
 type ReviewStatus = "Pending" | "Approved" | "Rejected";
 type Review = { id: string; user: string; merchant: string; rating: number; comment: string; photos: string[]; submitted: string; status: ReviewStatus; reason: string; note: string };

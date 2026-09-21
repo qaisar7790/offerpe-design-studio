@@ -1469,6 +1469,19 @@ function ReviewsPanel({ reviews, merchantNames, scopedMerchant, onApprove, onRej
   const hasFilters = status !== "all" || merchantFilter !== "all" || from || to || sort !== "newest";
   const resetFilters = () => { setStatus("all"); setMerchantFilter("all"); setFrom(""); setTo(""); setSort("newest"); };
   const [reviewImportOpen, setReviewImportOpen] = useState(false);
+  const [layout, setLayout] = useState<LayoutMode>("grid");
+  const reviewTable = (rows: Review[], mode: "pending" | "reviewed") => <div className="overflow-hidden rounded-lg border border-border bg-card shadow-card"><div className="table-scrollbar overflow-x-auto"><table className="w-full min-w-260 text-left text-sm"><thead className="bg-muted/70 text-[11px] uppercase text-muted-foreground"><tr><th className="px-4 py-2">Review ID</th><th>Customer</th>{!scopedMerchant && <th>Merchant</th>}<th>Rating</th><th>Comment</th><th>Submitted</th><th>Status</th><th className="pr-4 text-right">Actions</th></tr></thead><tbody>{rows.map((review) => <tr key={review.id} className="border-t border-border align-top hover:bg-muted/50">
+    <td className="px-4 py-2 font-mono text-xs">{review.id}</td>
+    <td className="font-medium">{review.user}</td>
+    {!scopedMerchant && <td>{review.merchant}</td>}
+    <td><Stars rating={review.rating} /></td>
+    <td className="max-w-80 text-xs text-muted-foreground"><span className="line-clamp-2">{review.comment}</span>{review.status === "Rejected" && review.reason && <span className="mt-1 block text-xs font-semibold text-destructive">Reason: {review.reason}</span>}</td>
+    <td className="whitespace-nowrap text-xs text-muted-foreground">{review.submitted}</td>
+    <td><ReviewStatusBadge review={review} /></td>
+    <td className="pr-3 text-right"><div className="flex justify-end gap-1">{mode === "pending"
+      ? <><Button size="sm" className="h-7 px-2.5 text-xs" onClick={() => onApprove(review)}><Check />Approve</Button><RejectReviewDialog review={review} onReject={onReject}><Button size="sm" variant="destructive" className="h-7 px-2.5 text-xs"><X />Reject</Button></RejectReviewDialog></>
+      : <><IconButton className="h-7 w-7" label={`Re-evaluate review ${review.id}`} onClick={() => onRevert(review)}><RotateCcw className="h-3.5 w-3.5" /></IconButton><ConfirmDeleteDialog itemType="Review" name={`${review.user} — ${review.merchant}`} onConfirm={() => onDelete(review)}><Button variant="ghost" size="icon" className="h-7 w-7 text-destructive" aria-label={`Delete review ${review.id}`}><Trash2 className="h-3.5 w-3.5" /></Button></ConfirmDeleteDialog></>}</div></td>
+  </tr>)}</tbody></table></div></div>;
   return <Tabs value={tab} onValueChange={setTab}>
     <TabsList><TabsTrigger value="pending" className={tabTriggerClass}>Pending Review ({pending.length})</TabsTrigger><TabsTrigger value="reviewed" className={tabTriggerClass}>Reviewed ({reviewed.length})</TabsTrigger></TabsList>
     <div className="mt-4 flex flex-col gap-3 rounded-lg border border-border bg-card p-3 shadow-card lg:flex-row lg:flex-wrap lg:items-center">
@@ -1478,16 +1491,19 @@ function ReviewsPanel({ reviews, merchantNames, scopedMerchant, onApprove, onRej
       <Input type="date" className="lg:w-40" value={to} onChange={(event) => setTo(event.target.value)} aria-label="Submitted to" />
       <Select value={sort} onValueChange={setSort}><SelectTrigger className="lg:w-48"><SelectValue /></SelectTrigger><SelectContent><SelectItem value="newest">Newest submitted</SelectItem><SelectItem value="oldest">Oldest submitted</SelectItem><SelectItem value="rating-high">Rating: High to Low</SelectItem><SelectItem value="rating-low">Rating: Low to High</SelectItem></SelectContent></Select>
       {hasFilters && <Button variant="ghost" onClick={resetFilters}>Reset</Button>}
+      <LayoutToggle value={layout} onChange={setLayout} />
       {tab === "pending" && <Button variant="outline" size="sm" className="shrink-0" onClick={() => setReviewImportOpen(true)}><UploadCloud className="mr-1 h-3.5 w-3.5" />Import</Button>}
       <Button variant="outline" size="sm" className="shrink-0" onClick={() => downloadCsv(tab === "pending" ? pending : reviewed, `offerpe-reviews-${tab}.csv`)}><Download className="mr-1 h-3.5 w-3.5" />Export CSV</Button>
     </div>
     <ImportModal open={reviewImportOpen} onOpenChange={setReviewImportOpen} />
     <TabsContent value="pending" className="mt-4">
       {pending.length === 0 ? <p className="text-sm text-muted-foreground">No reviews waiting for review.</p>
+        : layout === "list" ? reviewTable(pending, "pending")
         : <div className="space-y-3">{pending.map((review) => <PendingReviewCard key={review.id} review={review} showMerchant={!scopedMerchant} onApprove={onApprove} onReject={onReject} />)}</div>}
     </TabsContent>
     <TabsContent value="reviewed" className="mt-4">
       {reviewed.length === 0 ? <p className="text-sm text-muted-foreground">Nothing reviewed yet.</p>
+        : layout === "list" ? reviewTable(reviewed, "reviewed")
         : <div className="space-y-3">{reviewed.map((review) => <article key={review.id} className="rounded-lg border border-border bg-card p-4 shadow-card">
           <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
             <div className="min-w-0">

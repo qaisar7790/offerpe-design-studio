@@ -52,3 +52,4 @@
 - [x] Standardize Grid cards with tall media/logo areas across all five layouts
 - [x] Standardize Import and Export CSV placement inside screen and tab filter bars
 - [x] Replace Withdrawals inline CSV controls with the shared Import Report dialog
+- [x] Standardize Cashback Claims Reviewed filters to the Merchant Onboarding compact pattern

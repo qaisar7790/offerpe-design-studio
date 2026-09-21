@@ -27,8 +27,11 @@ import {
   LayoutDashboard,
   Lock,
   Image as ImageIcon,
+  Bell,
+  Mail,
   Megaphone,
   Menu,
+  MessageSquare,
   MoreHorizontal,
   MousePointerClick,
   Pencil,
@@ -109,11 +112,14 @@ import {
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
 
-type View = "dashboard" | "merchants" | "reviews" | "merchant-onboarding-queue" | "trackier-queue" | "affiliate-networks" | "affiliate-network-new" | "affiliate-network-edit" | "merchant-edit" | "offers" | "offer-edit" | "promo-banners" | "promo-banner-edit" | "promo-banner-new" | "categories" | "category-mapping" | "category-edit" | "category-new" | "cashback-claims" | "transactions" | "clicks" | "withdrawals" | "rejection-reasons" | "conversions";
+type View = "dashboard" | "merchants" | "reviews" | "merchant-onboarding-queue" | "trackier-queue" | "affiliate-networks" | "affiliate-network-new" | "affiliate-network-edit" | "merchant-edit" | "offers" | "offer-edit" | "promo-banners" | "promo-banner-edit" | "promo-banner-new" | "categories" | "category-mapping" | "category-edit" | "category-new" | "cashback-claims" | "transactions" | "clicks" | "withdrawals" | "rejection-reasons" | "communication-templates" | "conversions";
 type RawMapping = { raw: string; mappedTo: string };
 type ReviewStatus = "Pending" | "Approved" | "Rejected";
 type Review = { id: string; user: string; merchant: string; rating: number; comment: string; photos: string[]; submitted: string; status: ReviewStatus; reason: string; note: string };
 type Status = "Active" | "Inactive" | "Pending" | "Approved" | "Rejected" | "Requested" | "Paid";
+type TemplateChannel = "Email" | "SMS" | "WhatsApp" | "Notification";
+type TemplateCopy = { enabled: boolean; subject?: string; body: string };
+type CommunicationTemplate = { id: string; name: string; event: string; description: string; trigger: string; variables: string[]; channels: Record<TemplateChannel, TemplateCopy> };
 type Offer = { id: string; merchant: string; headline: string; subtext: string; details: string; terms: string; discountType: "Percentage" | "Flat amount"; discountValue: number; commissionType: "Percentage" | "Flat amount"; commissionValue: number; start: string; end: string; minBill: number; sortOrder: number; discountCap: number; commissionCap: number; redirectUrl: string; voucherLink: string; productLink: string; affiliate: string; featured: boolean; active: boolean };
 type Banner = { id: string; title: string; placement: string; target: string; image: string; start: string; end: string; active: boolean };
 type PromoSection = "HERO" | "PREMIUM DEALS" | "FLASH OFFERS" | "NEW ON PLATFORM";
@@ -126,7 +132,7 @@ const groups = [
   { label: "Catalog", icon: ShoppingBag, items: [{ label: "Merchants", icon: Store, view: "merchants" as View }, { label: "Cashback Offers", icon: Tag, view: "offers" as View }, { label: "Promo Banners", icon: Megaphone, view: "promo-banners" as View }, { label: "Merchant Reviews", icon: Star, view: "reviews" as View }, { label: "Categories", icon: Tag, view: "categories" as View }, { label: "Cities", icon: Building2 }] },
   { label: "Operations", icon: Settings2, items: [{ label: "Merchant Onboarding Queue", icon: ClipboardCheck, view: "merchant-onboarding-queue" as View }, { label: "Trackier Import Queue", icon: DownloadCloud, view: "trackier-queue" as View }, { label: "Affiliate Networks", icon: Share2, view: "affiliate-networks" as View }, { label: "Online Conversions", icon: CircleDollarSign, view: "conversions" as View }, { label: "Category Mapping", icon: Tag, view: "category-mapping" as View }, { label: "Users", icon: Users }] },
   { label: "Financial", icon: WalletCards, items: [{ label: "Cashback Claims", icon: CircleDollarSign, view: "cashback-claims" as View }, { label: "Transactions", icon: ArrowDown, view: "transactions" as View }, { label: "Clicks", icon: MousePointerClick, view: "clicks" as View }, { label: "Withdrawals", icon: BadgeIndianRupee, view: "withdrawals" as View }, { label: "Rejection Reasons", icon: Flag, view: "rejection-reasons" as View }, { label: "Missing Claims", icon: FileSpreadsheet }] },
-  { label: "Communication", icon: Megaphone, items: [{ label: "Notifications", icon: Megaphone }] },
+  { label: "Communication", icon: Megaphone, items: [{ label: "Templates", icon: MessageSquare, view: "communication-templates" as View }, { label: "Dispatches & Notifications", icon: Bell }] },
   { label: "System", icon: SlidersHorizontal, items: [{ label: "Admin Roles", icon: ShieldCheck }, { label: "Settings", icon: Settings2 }] },
 ];
 
@@ -216,6 +222,67 @@ const initialRejectionReasons: RejectionReason[] = [
   { id: "RR-3", reason: "Fraud Suspected", order: 3, active: true },
   { id: "RR-4", reason: "Network Rejected", order: 4, active: true },
   { id: "RR-5", reason: "Other", order: 5, active: true },
+];
+
+const templateChannels: TemplateChannel[] = ["Email", "SMS", "WhatsApp", "Notification"];
+
+const initialCommunicationTemplates: CommunicationTemplate[] = [
+  {
+    id: "TPL-101",
+    name: "Signup Welcome",
+    event: "create_profile",
+    description: "Sent after a customer profile is created successfully.",
+    trigger: "Fires once, immediately after signup completes.",
+    variables: ["{{user_name}}", "{{signup_city}}", "{{app_link}}"],
+    channels: {
+      Email: { enabled: true, subject: "Welcome to OfferPe, {{user_name}}!", body: "Hi {{user_name}},\n\nWelcome to OfferPe. Start discovering cashback from trusted online and offline stores in {{signup_city}}.\n\nOpen OfferPe: {{app_link}}" },
+      SMS: { enabled: true, body: "Welcome to OfferPe, {{user_name}}! Start earning cashback today: {{app_link}}" },
+      WhatsApp: { enabled: true, body: "Hi {{user_name}}! Welcome to OfferPe — your cashback journey starts now. Explore stores in {{signup_city}}: {{app_link}}" },
+      Notification: { enabled: true, subject: "Welcome to OfferPe", body: "Start earning cashback at online and offline stores near you." },
+    },
+  },
+  {
+    id: "TPL-102",
+    name: "Cashback Approved",
+    event: "cashback_approved",
+    description: "Sent when a pending cashback moves to approved.",
+    trigger: "Fires after admin or network approval is recorded.",
+    variables: ["{{user_name}}", "{{cashback_amount}}", "{{merchant_name}}", "{{order_id}}", "{{wallet_link}}"],
+    channels: {
+      Email: { enabled: true, subject: "Cashback approved for {{merchant_name}}", body: "Hi {{user_name}},\n\nYour cashback of {{cashback_amount}} for order {{order_id}} at {{merchant_name}} has been approved.\n\nView wallet: {{wallet_link}}" },
+      SMS: { enabled: true, body: "Good news {{user_name}}! {{cashback_amount}} cashback for {{merchant_name}} is approved. View wallet: {{wallet_link}}" },
+      WhatsApp: { enabled: true, body: "Your {{cashback_amount}} cashback from {{merchant_name}} is approved. Order: {{order_id}}. Check your wallet: {{wallet_link}}" },
+      Notification: { enabled: true, subject: "Cashback approved", body: "{{cashback_amount}} from {{merchant_name}} is now approved." },
+    },
+  },
+  {
+    id: "TPL-103",
+    name: "Withdrawal Paid",
+    event: "withdrawal_paid",
+    description: "Sent after an admin marks a withdrawal as paid.",
+    trigger: "Fires when payout status changes from Requested to Paid.",
+    variables: ["{{user_name}}", "{{withdrawal_id}}", "{{amount}}", "{{utr}}", "{{paid_at}}"],
+    channels: {
+      Email: { enabled: true, subject: "Your OfferPe withdrawal is paid", body: "Hi {{user_name}},\n\nWithdrawal {{withdrawal_id}} for {{amount}} was paid on {{paid_at}}.\n\nReference: {{utr}}" },
+      SMS: { enabled: true, body: "OfferPe withdrawal {{withdrawal_id}} for {{amount}} is paid. UTR: {{utr}}" },
+      WhatsApp: { enabled: false, body: "Hi {{user_name}}, your OfferPe withdrawal of {{amount}} is paid. Reference: {{utr}}" },
+      Notification: { enabled: true, subject: "Withdrawal paid", body: "{{amount}} has been sent to your payout method." },
+    },
+  },
+  {
+    id: "TPL-104",
+    name: "Missing Cashback Rejected",
+    event: "claim_rejected",
+    description: "Sent when an admin rejects a missing cashback claim.",
+    trigger: "Fires after a claim decision is saved.",
+    variables: ["{{user_name}}", "{{claim_id}}", "{{merchant_name}}", "{{order_id}}", "{{rejection_reason}}", "{{support_link}}"],
+    channels: {
+      Email: { enabled: true, subject: "Update on your missing cashback claim", body: "Hi {{user_name}},\n\nWe reviewed claim {{claim_id}} for {{merchant_name}} order {{order_id}}. It could not be approved because: {{rejection_reason}}.\n\nNeed help? {{support_link}}" },
+      SMS: { enabled: false, body: "OfferPe claim {{claim_id}} was not approved: {{rejection_reason}}. Help: {{support_link}}" },
+      WhatsApp: { enabled: true, body: "Hi {{user_name}}, your missing cashback claim for {{merchant_name}} could not be approved. Reason: {{rejection_reason}}. Support: {{support_link}}" },
+      Notification: { enabled: true, subject: "Claim update", body: "Your missing cashback claim for {{merchant_name}} was reviewed." },
+    },
+  },
 ];
 
 const initialClaims: Claim[] = [

@@ -26,3 +26,4 @@
 - [x] Add reusable confirmation dialogs to destructive actions
 - [x] Build Promo Banners listing and full-page add/edit experiences
 - [x] Add banner image validation, live preview, state updates, and Catalog navigation
+- [x] Merchant Reviews: Merchants/Reviews tabs, pending approve & reject-with-reason, reviewed filters, merchant edit Reviews tab

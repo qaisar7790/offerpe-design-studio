@@ -208,6 +208,16 @@ type Claim = { id: string; userId: string; user: string; merchant: string; order
 
 const claimRejectionReasons = ["No matching click found", "Order placed outside OfferPe click window", "Order cancelled or returned", "Proof of purchase unreadable", "Duplicate claim for the same order", "Merchant category excluded from cashback"];
 
+type RejectionReason = { id: string; reason: string; order: number; active: boolean };
+
+const initialRejectionReasons: RejectionReason[] = [
+  { id: "RR-1", reason: "Order Cancelled", order: 1, active: true },
+  { id: "RR-2", reason: "Order Returned", order: 2, active: true },
+  { id: "RR-3", reason: "Fraud Suspected", order: 3, active: true },
+  { id: "RR-4", reason: "Network Rejected", order: 4, active: true },
+  { id: "RR-5", reason: "Other", order: 5, active: true },
+];
+
 const initialClaims: Claim[] = [
   { id: "CLM-5042", userId: "USR-88214", user: "Ananya Rao", merchant: "Myntra", orderId: "MYN-77120934", clickId: "clk_9f42ab7c", claimDate: "21 Sep 2026", claimTime: "09:12", orderDate: "14 Sep 2026", orderValue: 4299, expectedCashback: 344, proof: "order-confirmation.png", comment: "Cashback did not track even though I came through the OfferPe app.", status: "Pending", reason: "", note: "" },
   { id: "CLM-5041", userId: "USR-75903", user: "Rahul Menon", merchant: "Croma", orderId: "CRM-4408217", clickId: "clk_2b71de09", claimDate: "20 Sep 2026", claimTime: "18:44", orderDate: "12 Sep 2026", orderValue: 28990, expectedCashback: 1449, proof: "invoice-croma.pdf", comment: "Bought a washing machine, cashback still missing after 7 days.", status: "Pending", reason: "", note: "" },

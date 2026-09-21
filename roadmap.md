@@ -27,3 +27,4 @@
 - [x] Build Promo Banners listing and full-page add/edit experiences
 - [x] Add banner image validation, live preview, state updates, and Catalog navigation
 - [x] Merchant Reviews: Merchants/Reviews tabs, pending approve & reject-with-reason, reviewed filters, merchant edit Reviews tab
+- [x] Merchants listing tabs reverted; Merchant Reviews is its own view; Merchant Onboarding Queue module under Operations

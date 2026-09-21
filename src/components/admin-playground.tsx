@@ -20,6 +20,7 @@ import {
   Eye,
   EyeOff,
   FileSpreadsheet,
+  FileText,
   Filter,
   GripVertical,
   LayoutDashboard,
@@ -31,6 +32,7 @@ import {
   Pencil,
   Plus,
   RotateCcw,
+  ClipboardCheck,
   Search,
   Settings2,
   ShieldCheck,
@@ -101,7 +103,7 @@ import {
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
 
-type View = "dashboard" | "merchants" | "merchant-reviews" | "merchant-edit" | "offers" | "offer-edit" | "promo-banners" | "promo-banner-edit" | "promo-banner-new" | "categories" | "category-mapping" | "category-edit" | "category-new" | "conversions";
+type View = "dashboard" | "merchants" | "reviews" | "merchant-onboarding-queue" | "merchant-edit" | "offers" | "offer-edit" | "promo-banners" | "promo-banner-edit" | "promo-banner-new" | "categories" | "category-mapping" | "category-edit" | "category-new" | "conversions";
 type RawMapping = { raw: string; mappedTo: string };
 type ReviewStatus = "Pending" | "Approved" | "Rejected";
 type Review = { id: string; user: string; merchant: string; rating: number; comment: string; photos: string[]; submitted: string; status: ReviewStatus; reason: string; note: string };
@@ -114,8 +116,8 @@ type Category = { id: string; channel: "Online" | "Offline"; name: string; order
 type OfferOrigin = { type: "merchant"; merchant: typeof merchants[number] } | { type: "listing" };
 
 const groups = [
-  { label: "Catalog", icon: ShoppingBag, items: [{ label: "Merchants", icon: Store, view: "merchants" as View }, { label: "Cashback Offers", icon: Tag, view: "offers" as View }, { label: "Promo Banners", icon: Megaphone, view: "promo-banners" as View }, { label: "Merchant Reviews", icon: Star, view: "merchant-reviews" as View }, { label: "Categories", icon: Tag, view: "categories" as View }, { label: "Cities", icon: Building2 }] },
-  { label: "Operations", icon: Settings2, items: [{ label: "Online Conversions", icon: CircleDollarSign, view: "conversions" as View }, { label: "Category Mapping", icon: Tag, view: "category-mapping" as View }, { label: "Users", icon: Users }] },
+  { label: "Catalog", icon: ShoppingBag, items: [{ label: "Merchants", icon: Store, view: "merchants" as View }, { label: "Cashback Offers", icon: Tag, view: "offers" as View }, { label: "Promo Banners", icon: Megaphone, view: "promo-banners" as View }, { label: "Merchant Reviews", icon: Star, view: "reviews" as View }, { label: "Categories", icon: Tag, view: "categories" as View }, { label: "Cities", icon: Building2 }] },
+  { label: "Operations", icon: Settings2, items: [{ label: "Merchant Onboarding Queue", icon: ClipboardCheck, view: "merchant-onboarding-queue" as View }, { label: "Online Conversions", icon: CircleDollarSign, view: "conversions" as View }, { label: "Category Mapping", icon: Tag, view: "category-mapping" as View }, { label: "Users", icon: Users }] },
   { label: "Financial", icon: WalletCards, items: [{ label: "Withdrawals", icon: BadgeIndianRupee }, { label: "Missing Claims", icon: FileSpreadsheet }] },
   { label: "Communication", icon: Megaphone, items: [{ label: "Notifications", icon: Megaphone }] },
   { label: "System", icon: SlidersHorizontal, items: [{ label: "Admin Roles", icon: ShieldCheck }, { label: "Settings", icon: Settings2 }] },
@@ -174,6 +176,19 @@ const initialPromoBanners: PromoBanner[] = [
   { id: "PB-106", section: "HERO", headline: "Festive season is here", image: "", tag: "FESTIVE", ctaText: "Discover Deals", ctaTarget: "offerpe://category/festive", order: 2, start: "2026-09-18T09:00", end: "2026-11-05T23:59", active: true },
   { id: "PB-107", section: "FLASH OFFERS", headline: "Nykaa: flash sale, up to 10% cashback", image: "", tag: "FLASH SALE", ctaText: "Shop Now", ctaTarget: "offerpe://merchant/nykaa", order: 2, start: "2026-09-20T09:00", end: "2026-09-25T23:59", active: true },
   { id: "PB-108", section: "PREMIUM DEALS", headline: "Myntra: up to 12% cashback on fashion", image: "", tag: "FASHION", ctaText: "View Offer", ctaTarget: "offerpe://merchant/myntra", order: 2, start: "2026-09-21T09:00", end: "2026-10-15T23:59", active: true },
+];
+
+type Application = { id: string; store: string; category: string; owner: string; phone: string; email: string; address: string; city: string; commission: string; documents: string[]; submitted: string; status: ReviewStatus; reason: string; note: string };
+
+const onboardingRejectionReasons = ["Invalid GST/FSSAI documents", "Store category outside OfferPe scope", "Commission rate below platform threshold", "Unverifiable store location / storefront", "Duplicate merchant registration"];
+
+const initialApplications: Application[] = [
+  { id: "APP-3012", store: "Blue Tokai Coffee Roasters", category: "Cafes & Dining", owner: "Nikhil Desai", phone: "+91 98200 41122", email: "nikhil@bluetokai.example", address: "Linking Road, Bandra West", city: "Mumbai", commission: "12%", documents: ["GST registration", "FSSAI license", "Storefront photo"], submitted: "21 Sep 2026, 08:40", status: "Pending", reason: "", note: "" },
+  { id: "APP-3011", store: "Third Wave Coffee Roasters", category: "Cafes & Dining", owner: "Shruti Kulkarni", phone: "+91 99019 77340", email: "shruti@thirdwave.example", address: "100 Feet Road, Indiranagar", city: "Bengaluru", commission: "10%", documents: ["GST registration", "FSSAI license"], submitted: "20 Sep 2026, 17:12", status: "Pending", reason: "", note: "" },
+  { id: "APP-3010", store: "Urban Threads Studio", category: "Retail", owner: "Farhan Qureshi", phone: "+91 98111 22003", email: "farhan@urbanthreads.example", address: "Khan Market", city: "New Delhi", commission: "9%", documents: ["GST registration", "Storefront photo"], submitted: "19 Sep 2026, 12:05", status: "Approved", reason: "", note: "" },
+  { id: "APP-3009", store: "Sunrise Kirana Mart", category: "Grocery", owner: "Rekha Patil", phone: "+91 90040 55871", email: "rekha@sunrisemart.example", address: "Kothrud", city: "Pune", commission: "4%", documents: ["GST registration"], submitted: "18 Sep 2026, 10:22", status: "Rejected", reason: "Commission rate below platform threshold", note: "Offered 4%, platform minimum for grocery is 6%." },
+  { id: "APP-3008", store: "Glow Aesthetics Clinic", category: "Wellness", owner: "Dr. Ira Menon", phone: "+91 97400 31188", email: "ira@glowaesthetics.example", address: "Jubilee Hills", city: "Hyderabad", commission: "14%", documents: ["GST registration", "Storefront photo"], submitted: "17 Sep 2026, 15:48", status: "Approved", reason: "", note: "" },
+  { id: "APP-3007", store: "Cafe Mocha Lane", category: "Cafes & Dining", owner: "Vikram Joshi", phone: "+91 98330 90210", email: "vikram@mochalane.example", address: "Salt Lake Sector V", city: "Kolkata", commission: "11%", documents: ["Storefront photo"], submitted: "16 Sep 2026, 09:31", status: "Rejected", reason: "Invalid GST/FSSAI documents", note: "GST certificate was illegible and FSSAI licence missing." },
 ];
 
 const rejectionReasons = ["Profanity / abusive content", "Irrelevant / spam", "False or misleading claims", "Competitor promotion", "Personal identification information (PII)"];
@@ -503,10 +518,105 @@ function ReviewsPanel({ reviews, merchantNames, scopedMerchant, onApprove, onRej
   </div>;
 }
 
-function Merchants({ rows: merchantRows, onEdit, tab, onTabChange, reviews, onApproveReview, onRejectReview, onRevertReview, onDeleteReview }: { rows: readonly (typeof merchants[number])[]; onEdit: (merchant: typeof merchants[number]) => void; tab: "merchants" | "reviews"; onTabChange: (tab: "merchants" | "reviews") => void; reviews: Review[]; onApproveReview: (review: Review) => void; onRejectReview: (review: Review, reason: string, note: string) => void; onRevertReview: (review: Review) => void; onDeleteReview: (review: Review) => void }) {
+function ApplicationDetails({ application }: { application: Application }) {
+  return <div className="mt-3 grid gap-3 text-sm sm:grid-cols-2 lg:grid-cols-3">
+    <div><div className="text-xs font-semibold uppercase text-muted-foreground">Applicant</div><div className="mt-0.5 font-medium">{application.owner}</div><div className="text-muted-foreground">{application.phone}</div><div className="text-muted-foreground">{application.email}</div></div>
+    <div><div className="text-xs font-semibold uppercase text-muted-foreground">Store address</div><div className="mt-0.5">{application.address}</div><div className="text-muted-foreground">{application.city}</div></div>
+    <div><div className="text-xs font-semibold uppercase text-muted-foreground">Proposed commission</div><div className="mt-0.5 font-heading text-lg font-bold">{application.commission}</div></div>
+    <div className="sm:col-span-2 lg:col-span-3"><div className="text-xs font-semibold uppercase text-muted-foreground">Documentation</div><div className="mt-1 flex flex-wrap gap-2">{application.documents.map((doc) => <span key={doc} className="inline-flex items-center gap-1 rounded-full border border-border bg-muted px-2 py-0.5 text-xs font-medium"><FileText className="h-3 w-3" />{doc}</span>)}</div></div>
+  </div>;
+}
+
+function RejectApplicationDialog({ application, onReject, children }: { application: Application; onReject: (application: Application, reason: string, note: string) => void; children: React.ReactNode }) {
+  const [open, setOpen] = useState(false);
+  const [reason, setReason] = useState(onboardingRejectionReasons[0] as string);
+  const [note, setNote] = useState("");
+  return <Dialog open={open} onOpenChange={setOpen}><DialogTrigger asChild>{children}</DialogTrigger><DialogContent className="max-w-lg bg-card"><DialogHeader><DialogTitle className="font-heading text-lg">Reject application</DialogTitle><DialogDescription>{application.store} will not be onboarded. A reason from the Onboarding Rejection Reasons list is required.</DialogDescription></DialogHeader><div className="space-y-4"><label className="block space-y-1.5 text-sm font-medium">Rejection reason <span className="text-destructive">*</span><Select value={reason} onValueChange={setReason}><SelectTrigger><SelectValue /></SelectTrigger><SelectContent>{onboardingRejectionReasons.map((item) => <SelectItem key={item} value={item}>{item}</SelectItem>)}</SelectContent></Select></label><label className="block space-y-1.5 text-sm font-medium">Admin remarks <span className="font-normal text-muted-foreground">(optional)</span><Textarea rows={3} value={note} onChange={(event) => setNote(event.target.value)} placeholder="Add internal context for this decision…" /></label></div><DialogFooter><Button variant="outline" onClick={() => setOpen(false)}>Cancel</Button><Button variant="destructive" onClick={() => { onReject(application, reason, note); setOpen(false); }}>Reject application</Button></DialogFooter></DialogContent></Dialog>;
+}
+
+function ApplicationHeadline({ application }: { application: Application }) {
+  return <div className="flex flex-wrap items-center gap-2">
+    <span className="font-heading text-base font-bold">{application.store}</span>
+    <span className="inline-flex rounded-full bg-info-soft px-2 py-0.5 text-xs font-semibold text-info">OFFLINE</span>
+    <span className="inline-flex items-center gap-1 rounded-full border border-border bg-muted px-2 py-0.5 text-xs font-medium"><Tag className="h-3 w-3" />{application.category}</span>
+    <span className="font-mono text-xs text-muted-foreground">{application.id}</span>
+    <span className="text-xs text-muted-foreground">Submitted {application.submitted}</span>
+  </div>;
+}
+
+function OnboardingQueue({ applications, onApprove, onReject, onRevert, onDelete }: { applications: Application[]; onApprove: (application: Application) => void; onReject: (application: Application, reason: string, note: string) => void; onRevert: (application: Application) => void; onDelete: (application: Application) => void }) {
+  const [status, setStatus] = useState("all");
+  const [category, setCategory] = useState("all");
+  const [from, setFrom] = useState("");
+  const [to, setTo] = useState("");
+  const [sort, setSort] = useState("newest");
+  const categories = Array.from(new Set(applications.map((application) => application.category)));
+  const pending = applications.filter((application) => application.status === "Pending");
+  const reviewed = useMemo(() => {
+    const parse = (value: string) => new Date(value.replace(",", "")).getTime();
+    return applications.filter((application) => application.status !== "Pending")
+      .filter((application) => status === "all" || application.status === status)
+      .filter((application) => category === "all" || application.category === category)
+      .filter((application) => !from || parse(application.submitted) >= new Date(from).getTime())
+      .filter((application) => !to || parse(application.submitted) <= new Date(to).getTime() + 86_400_000)
+      .sort((a, b) => sort === "oldest" ? parse(a.submitted) - parse(b.submitted) : sort === "store" ? a.store.localeCompare(b.store) : parse(b.submitted) - parse(a.submitted));
+  }, [applications, status, category, from, to, sort]);
+  return <><PageHeader title="Merchant Onboarding Queue" description={'Applications submitted via the web form or the merchant app\'s "Register your store" path. Approving creates a live OFFLINE merchant and grants the applicant immediate merchant-app login — no separate invite step. Rejecting requires a reason from the Onboarding Rejection Reasons list.'} />
+    <div className="space-y-8">
+      <section>
+        <h2 className="font-heading text-lg font-bold">Pending review ({pending.length})</h2>
+        {pending.length === 0 ? <p className="mt-2 text-sm text-muted-foreground">No submissions waiting for review.</p>
+          : <div className="mt-3 space-y-3">{pending.map((application) => <article key={application.id} className="rounded-lg border border-border bg-card p-4 shadow-card">
+            <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+              <ApplicationHeadline application={application} />
+              <div className="flex shrink-0 gap-2">
+                <Button size="sm" onClick={() => onApprove(application)}><Check />Approve</Button>
+                <RejectApplicationDialog application={application} onReject={onReject}><Button size="sm" variant="destructive"><X />Reject</Button></RejectApplicationDialog>
+              </div>
+            </div>
+            <ApplicationDetails application={application} />
+          </article>)}</div>}
+      </section>
+      <section>
+        <h2 className="font-heading text-lg font-bold">Reviewed</h2>
+        <div className="mt-3 grid gap-3 rounded-lg border border-border bg-card p-3 shadow-card sm:grid-cols-2 xl:grid-cols-5">
+          <label className="space-y-1.5 text-xs font-semibold uppercase text-muted-foreground">Status<Select value={status} onValueChange={setStatus}><SelectTrigger><SelectValue /></SelectTrigger><SelectContent><SelectItem value="all">All</SelectItem><SelectItem value="Approved">Approved</SelectItem><SelectItem value="Rejected">Rejected</SelectItem></SelectContent></Select></label>
+          <label className="space-y-1.5 text-xs font-semibold uppercase text-muted-foreground">Category<Select value={category} onValueChange={setCategory}><SelectTrigger><SelectValue /></SelectTrigger><SelectContent><SelectItem value="all">All</SelectItem>{categories.map((item) => <SelectItem key={item} value={item}>{item}</SelectItem>)}</SelectContent></Select></label>
+          <label className="space-y-1.5 text-xs font-semibold uppercase text-muted-foreground">From<Input type="date" value={from} onChange={(event) => setFrom(event.target.value)} /></label>
+          <label className="space-y-1.5 text-xs font-semibold uppercase text-muted-foreground">To<Input type="date" value={to} onChange={(event) => setTo(event.target.value)} /></label>
+          <label className="space-y-1.5 text-xs font-semibold uppercase text-muted-foreground">Sort by<Select value={sort} onValueChange={setSort}><SelectTrigger><SelectValue /></SelectTrigger><SelectContent><SelectItem value="newest">Newest submitted</SelectItem><SelectItem value="oldest">Oldest submitted</SelectItem><SelectItem value="store">Store name: A to Z</SelectItem></SelectContent></Select></label>
+        </div>
+        {reviewed.length === 0 ? <p className="mt-4 text-sm text-muted-foreground">Nothing reviewed yet.</p>
+          : <div className="mt-3 space-y-3">{reviewed.map((application) => <article key={application.id} className="rounded-lg border border-border bg-card p-4 shadow-card">
+            <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+              <div className="min-w-0">
+                <ApplicationHeadline application={application} />
+                <div className="mt-1.5 flex flex-wrap items-center gap-2 text-sm">
+                  <span className={cn("inline-flex rounded-full px-2 py-0.5 text-xs font-semibold", application.status === "Approved" ? "bg-success-soft text-success" : "bg-destructive-soft text-destructive")}>{application.status}</span>
+                  <span className="text-muted-foreground">{application.owner} · {application.city}</span>
+                </div>
+              </div>
+              <div className="flex shrink-0 gap-2">
+                <Dialog><DialogTrigger asChild><Button size="sm" variant="outline"><ExternalLink />View details</Button></DialogTrigger><DialogContent className="max-w-2xl bg-card"><DialogHeader><DialogTitle className="font-heading text-lg">{application.store}</DialogTitle><DialogDescription>Application {application.id} · submitted {application.submitted}</DialogDescription></DialogHeader><ApplicationDetails application={application} />{application.status === "Rejected" && <p className="mt-3 text-sm font-semibold text-destructive">Reason: {application.reason}{application.note && <span className="font-normal text-muted-foreground"> — {application.note}</span>}</p>}</DialogContent></Dialog>
+                <Button size="sm" variant="outline" onClick={() => onRevert(application)}><RotateCcw />Re-evaluate</Button>
+                <ConfirmDeleteDialog itemType="Application" name={application.store} onConfirm={() => onDelete(application)}><Button size="sm" variant="ghost" className="text-destructive" aria-label={`Delete application ${application.id}`}><Trash2 /></Button></ConfirmDeleteDialog>
+              </div>
+            </div>
+            {application.status === "Rejected" && <p className="mt-2 text-xs font-semibold text-destructive">Reason: {application.reason}{application.note && <span className="font-normal text-muted-foreground"> — {application.note}</span>}</p>}
+          </article>)}</div>}
+      </section>
+    </div>
+  </>;
+}
+
+function ReviewsPage(props: { reviews: Review[]; merchantNames: string[]; onApprove: (review: Review) => void; onReject: (review: Review, reason: string, note: string) => void; onRevert: (review: Review) => void; onDelete: (review: Review) => void }) {
+  return <><PageHeader title="Merchant Reviews" description="Vendor/store reviews submitted by verified purchasers. Approving makes the review (and any photos) publicly visible on the store's Store Detail page; rejecting requires a reason from the Rejection Reasons list." actions={<DropdownMenu><DropdownMenuTrigger asChild><Button variant="outline"><UploadCloud />Import &amp; Export<ChevronDown /></Button></DropdownMenuTrigger><DropdownMenuContent align="end"><DropdownMenuItem><Download />Export reviews CSV</DropdownMenuItem><DropdownMenuItem><UploadCloud />Import moderation decisions</DropdownMenuItem></DropdownMenuContent></DropdownMenu>} /><ReviewsPanel {...props} /></>;
+}
+
+function Merchants({ rows: merchantRows, onEdit }: { rows: readonly (typeof merchants[number])[]; onEdit: (merchant: typeof merchants[number]) => void }) {
   const [query, setQuery] = useState(""); const [statuses, setStatuses] = useState<Status[]>([]); const [sortAsc, setSortAsc] = useState(true);
   const rows = useMemo(() => merchantRows.filter((m) => (!query || `${m[0]} ${m[2]}`.toLowerCase().includes(query.toLowerCase())) && (!statuses.length || statuses.includes(m[4] as Status))).sort((a, b) => sortAsc ? a[0].localeCompare(b[0]) : b[0].localeCompare(a[0])), [query, statuses, sortAsc, merchantRows]);
-  return <><PageHeader title={tab === "reviews" ? "Merchant Reviews" : "Merchants"} description={tab === "reviews" ? "Vendor/store reviews submitted by verified purchasers. Approving makes the review (and any photos) publicly visible on the store's Store Detail page; rejecting requires a reason from the Rejection Reasons list." : "Manage merchant availability, categorisation, and channel details."} actions={tab === "reviews" ? <DropdownMenu><DropdownMenuTrigger asChild><Button variant="outline"><UploadCloud />Import &amp; Export<ChevronDown /></Button></DropdownMenuTrigger><DropdownMenuContent align="end"><DropdownMenuItem><Download />Export reviews CSV</DropdownMenuItem><DropdownMenuItem><UploadCloud />Import moderation decisions</DropdownMenuItem></DropdownMenuContent></DropdownMenu> : <Button><Plus />Add new</Button>} /><Tabs value={tab} onValueChange={(value) => onTabChange(value as "merchants" | "reviews")}><TabsList className="mb-5 h-auto w-full justify-start gap-6 rounded-none border-b border-border bg-transparent p-0"><TabsTrigger value="merchants" className={tabTriggerClass}>Merchants</TabsTrigger><TabsTrigger value="reviews" className={tabTriggerClass}>Reviews</TabsTrigger></TabsList><TabsContent value="merchants" className="mt-0"><FilterBar query={query} setQuery={setQuery} statuses={statuses} setStatuses={setStatuses} showChannel /><div className="overflow-hidden rounded-lg border border-border bg-card shadow-card"><div className="overflow-x-auto"><table className="w-full min-w-310 text-left text-sm"><thead className="bg-muted/70 text-[11px] uppercase text-muted-foreground"><tr><th className="sticky left-0 z-10 bg-muted px-4 py-2 shadow-sticky-left"><Button variant="ghost" size="sm" className="-ml-3 h-7 text-[11px] uppercase" onClick={() => setSortAsc(!sortAsc)}>Name <ChevronDown className={cn("transition-transform", !sortAsc && "rotate-180")} /></Button></th><th>Channel</th><th>Category</th><th>Offers</th><th>Commission</th><th>Cities</th><th>Order</th><th>Status</th><th className="pr-4 text-right">Actions</th></tr></thead><tbody>{rows.map((m) => <tr key={m[0]} className="group border-t border-border hover:bg-muted/50"><td className="sticky left-0 z-10 bg-card px-4 py-2 font-semibold shadow-sticky-left group-hover:bg-muted">{m[0]}</td><td><span className="inline-flex items-center gap-1.5 font-medium"><span className={cn("h-2 w-2 rounded-full", m[1] === "Online" ? "bg-success" : "bg-info")} />{m[1]}</span></td><td>{m[2]}</td><td><span className="inline-flex items-center gap-1 rounded-full bg-accent px-2 py-0.5 text-xs font-semibold text-accent-foreground"><Tag className="h-3 w-3" />{m[5]} active</span></td><td className="whitespace-nowrap font-semibold">{m[6]}</td><td><div className="flex min-w-64 items-center gap-1">{m[7].slice(0, 3).map((city) => <span key={city} className="rounded-full border border-border bg-muted px-2 py-0.5 text-xs font-medium">{city}</span>)}{m[7].length > 3 && <TooltipProvider><UiTooltip><UiTooltipTrigger asChild><button type="button" className="rounded-full border border-border bg-accent px-2 py-0.5 text-xs font-semibold text-primary">+{m[7].length - 3} more</button></UiTooltipTrigger><UiTooltipContent>{m[7].join(", ")}</UiTooltipContent></UiTooltip></TooltipProvider>}</div></td><td>{m[3]}</td><td><StatusBadge status={m[4] as Status} /></td><td className="pr-3 text-right"><IconButton className="h-7 w-7" label={`Edit ${m[0]}`} onClick={() => onEdit(m)}><Pencil className="h-3.5 w-3.5" /></IconButton><IconButton className="h-7 w-7" label={`Open ${m[0]}`} onClick={() => onEdit(m)}><ExternalLink className="h-3.5 w-3.5" /></IconButton></td></tr>)}</tbody></table></div></div><div className="mt-4 flex items-center justify-between text-sm text-muted-foreground"><span>Showing {rows.length} of {merchantRows.length} merchants</span><div className="flex gap-1"><Button variant="outline" size="icon" disabled><ChevronLeft /></Button><Button variant="outline" size="icon"><ChevronRight /></Button></div></div></TabsContent><TabsContent value="reviews" className="mt-0"><ReviewsPanel reviews={reviews} merchantNames={merchantRows.map((row) => row[0])} onApprove={onApproveReview} onReject={onRejectReview} onRevert={onRevertReview} onDelete={onDeleteReview} /></TabsContent></Tabs></>;
+  return <><PageHeader title="Merchants" description="Manage merchant availability, categorisation, and channel details." actions={<Button><Plus />Add new</Button>} /><FilterBar query={query} setQuery={setQuery} statuses={statuses} setStatuses={setStatuses} showChannel /><div className="overflow-hidden rounded-lg border border-border bg-card shadow-card"><div className="overflow-x-auto"><table className="w-full min-w-310 text-left text-sm"><thead className="bg-muted/70 text-[11px] uppercase text-muted-foreground"><tr><th className="sticky left-0 z-10 bg-muted px-4 py-2 shadow-sticky-left"><Button variant="ghost" size="sm" className="-ml-3 h-7 text-[11px] uppercase" onClick={() => setSortAsc(!sortAsc)}>Name <ChevronDown className={cn("transition-transform", !sortAsc && "rotate-180")} /></Button></th><th>Channel</th><th>Category</th><th>Offers</th><th>Commission</th><th>Cities</th><th>Order</th><th>Status</th><th className="pr-4 text-right">Actions</th></tr></thead><tbody>{rows.map((m) => <tr key={m[0]} className="group border-t border-border hover:bg-muted/50"><td className="sticky left-0 z-10 bg-card px-4 py-2 font-semibold shadow-sticky-left group-hover:bg-muted">{m[0]}</td><td><span className="inline-flex items-center gap-1.5 font-medium"><span className={cn("h-2 w-2 rounded-full", m[1] === "Online" ? "bg-success" : "bg-info")} />{m[1]}</span></td><td>{m[2]}</td><td><span className="inline-flex items-center gap-1 rounded-full bg-accent px-2 py-0.5 text-xs font-semibold text-accent-foreground"><Tag className="h-3 w-3" />{m[5]} active</span></td><td className="whitespace-nowrap font-semibold">{m[6]}</td><td><div className="flex min-w-64 items-center gap-1">{m[7].slice(0, 3).map((city) => <span key={city} className="rounded-full border border-border bg-muted px-2 py-0.5 text-xs font-medium">{city}</span>)}{m[7].length > 3 && <TooltipProvider><UiTooltip><UiTooltipTrigger asChild><button type="button" className="rounded-full border border-border bg-accent px-2 py-0.5 text-xs font-semibold text-primary">+{m[7].length - 3} more</button></UiTooltipTrigger><UiTooltipContent>{m[7].join(", ")}</UiTooltipContent></UiTooltip></TooltipProvider>}</div></td><td>{m[3]}</td><td><StatusBadge status={m[4] as Status} /></td><td className="pr-3 text-right"><IconButton className="h-7 w-7" label={`Edit ${m[0]}`} onClick={() => onEdit(m)}><Pencil className="h-3.5 w-3.5" /></IconButton><IconButton className="h-7 w-7" label={`Open ${m[0]}`} onClick={() => onEdit(m)}><ExternalLink className="h-3.5 w-3.5" /></IconButton></td></tr>)}</tbody></table></div></div><div className="mt-4 flex items-center justify-between text-sm text-muted-foreground"><span>Showing {rows.length} of {merchantRows.length} merchants</span><div className="flex gap-1"><Button variant="outline" size="icon" disabled><ChevronLeft /></Button><Button variant="outline" size="icon"><ChevronRight /></Button></div></div></>;
 }
 
 function OffersPage({ offers, onEdit, onCreate, onDelete }: { offers: Offer[]; onEdit: (offer: Offer) => void; onCreate: () => void; onDelete: (offer: Offer) => void }) {
@@ -605,6 +715,7 @@ export function AdminPlayground() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [merchantRows, setMerchantRows] = useState<readonly (typeof merchants[number])[]>(merchants);
   const [reviewRows, setReviewRows] = useState<Review[]>(initialReviews);
+  const [applicationRows, setApplicationRows] = useState<Application[]>(initialApplications);
   const [editingMerchant, setEditingMerchant] = useState<typeof merchants[number] | null>(null);
   const [categoryRows, setCategoryRows] = useState<Category[]>(initialCategories);
   const [mappingRows, setMappingRows] = useState<RawMapping[]>(initialMappings);
@@ -621,6 +732,11 @@ export function AdminPlayground() {
   const rejectReview = (review: Review, reason: string, note: string) => { setReviewStatus(review, "Rejected", reason, note); toast.success("Review rejected", { description: `${review.user}'s review was rejected: ${reason}.` }); };
   const revertReview = (review: Review) => { setReviewStatus(review, "Pending"); toast.success("Review moved back to pending", { description: `${review.user}'s review awaits moderation again.` }); };
   const deleteReview = (review: Review) => { setReviewRows((current) => current.filter((item) => item.id !== review.id)); toast.success("Review deleted", { description: `${review.user}'s review of ${review.merchant} was removed.` }); };
+  const setApplicationStatus = (application: Application, status: ReviewStatus, reason = "", note = "") => setApplicationRows((current) => current.map((item) => item.id === application.id ? { ...item, status, reason, note } : item));
+  const approveApplication = (application: Application) => { setApplicationStatus(application, "Approved"); toast.success("Application approved", { description: `${application.store} is live as an OFFLINE merchant — merchant-app login created for ${application.owner}.` }); };
+  const rejectApplication = (application: Application, reason: string, note: string) => { setApplicationStatus(application, "Rejected", reason, note); toast.success("Application rejected", { description: `${application.store} was rejected: ${reason}.` }); };
+  const revertApplication = (application: Application) => { setApplicationStatus(application, "Pending"); toast.success("Application moved back to pending", { description: `${application.store} awaits review again.` }); };
+  const deleteApplication = (application: Application) => { setApplicationRows((current) => current.filter((item) => item.id !== application.id)); toast.success("Application deleted", { description: `${application.store} was removed from the queue.` }); };
   const backToMerchants = () => { setEditingMerchant(null); setView("merchants"); };
   const deleteMerchant = () => { if (!editingMerchant) return; setMerchantRows((current) => current.filter((item) => item[0] !== editingMerchant[0])); toast.success("Merchant deleted", { description: `${editingMerchant[0]} was removed.` }); backToMerchants(); };
   const editCategory = (category: Category) => { setEditingCategory(category); setView("category-edit"); };
@@ -635,7 +751,9 @@ export function AdminPlayground() {
   const savePromoBanner = (updated: PromoBanner) => { setPromoBannerRows((current) => current.some((item) => item.id === updated.id) ? current.map((item) => item.id === updated.id ? updated : item) : [updated, ...current]); backToPromoBanners(); };
   const deletePromoBanner = (banner: PromoBanner) => { setPromoBannerRows((current) => current.filter((item) => item.id !== banner.id)); toast.success("Promo banner deleted", { description: `${banner.headline} was removed.` }); if (view === "promo-banner-edit") backToPromoBanners(); };
   const content = view === "dashboard" ? <Dashboard />
-    : view === "merchants" || view === "merchant-reviews" ? <Merchants rows={merchantRows} onEdit={editMerchant} tab={view === "merchant-reviews" ? "reviews" : "merchants"} onTabChange={(next) => setView(next === "reviews" ? "merchant-reviews" : "merchants")} reviews={reviewRows} onApproveReview={approveReview} onRejectReview={rejectReview} onRevertReview={revertReview} onDeleteReview={deleteReview} />
+    : view === "merchants" ? <Merchants rows={merchantRows} onEdit={editMerchant} />
+    : view === "reviews" ? <ReviewsPage reviews={reviewRows} merchantNames={merchantRows.map((row) => row[0])} onApprove={approveReview} onReject={rejectReview} onRevert={revertReview} onDelete={deleteReview} />
+    : view === "merchant-onboarding-queue" ? <OnboardingQueue applications={applicationRows} onApprove={approveApplication} onReject={rejectApplication} onRevert={revertApplication} onDelete={deleteApplication} />
     : view === "merchant-edit" && editingMerchant ? <MerchantEditPage merchant={editingMerchant} offers={offerRows} reviews={reviewRows} onApproveReview={approveReview} onRejectReview={rejectReview} onRevertReview={revertReview} onDeleteReview={deleteReview} initialTab={merchantTab} onBack={backToMerchants} onDeleteMerchant={deleteMerchant} onEditOffer={(offer) => openOffer(offer, { type: "merchant", merchant: editingMerchant })} onCreateOffer={() => openOffer(null, { type: "merchant", merchant: editingMerchant })} onDeleteOffer={deleteOffer} />
     : view === "offers" ? <OffersPage offers={offerRows} onEdit={(offer) => openOffer(offer, { type: "listing" })} onCreate={() => openOffer(null, { type: "listing" })} onDelete={deleteOffer} />
     : view === "offer-edit" ? <OfferEditPage key={editingOffer?.id ?? "new"} offer={editingOffer} origin={offerOrigin} onCancel={returnFromOffer} onSave={saveOffer} onDelete={deleteOffer} />

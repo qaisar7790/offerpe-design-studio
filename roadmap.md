@@ -34,3 +34,4 @@
 - [x] Cashback Claims: Pending Review and Reviewed split into two separate tabs (Pending Review default)
 - [x] Build Transactions with dense Online Conversions, Offline Conversions, and Ledger tabs
 - [x] Build Financial Clicks with user and merchant filters, readable pricing, and CSV export
+- [x] Build Financial Withdrawals with payout processing, bulk CSV, filters, and export

@@ -47,6 +47,7 @@ import {
   ShieldCheck,
   ShoppingBag,
   SlidersHorizontal,
+  Smartphone,
   Star,
   Store,
   Tag,

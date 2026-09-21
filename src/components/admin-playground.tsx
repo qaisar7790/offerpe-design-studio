@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useRef, useState } from "react";
+import { Fragment, useMemo, useRef, useState } from "react";
 import {
   AreaChart,
   ArrowDown,
@@ -56,6 +56,13 @@ import {
   Users,
   WalletCards,
   X,
+  Bold,
+  Italic,
+  Heading2,
+  List,
+  ListOrdered,
+  Undo2,
+  Redo2,
 } from "lucide-react";
 import {
   Bar,
@@ -801,6 +808,70 @@ This agreement is governed by the laws of India.`,
   },
 ];
 
+function legalContentToHtml(value: string) {
+  if (value.trim().startsWith("<")) return value;
+  const blocks: string[] = [];
+  let bullets: string[] = [];
+  const flush = () => {
+    if (bullets.length) {
+      blocks.push(`<ul>${bullets.map((item) => `<li>${item}</li>`).join("")}</ul>`);
+      bullets = [];
+    }
+  };
+  value.split("\n").forEach((rawLine) => {
+    const line = rawLine.trim();
+    if (!line) { flush(); return; }
+    if (line.startsWith("-")) { bullets.push(line.replace(/^-\s*/, "")); return; }
+    flush();
+    if (/^\d+\./.test(line)) blocks.push(`<h2>${line}</h2>`);
+    else blocks.push(`<p>${line}</p>`);
+  });
+  flush();
+  return blocks.join("");
+}
+
+function RichTextEditor({ value, onChange }: { value: string; onChange: (html: string) => void }) {
+  const editorRef = useRef<HTMLDivElement | null>(null);
+  const initialHtml = useRef(legalContentToHtml(value));
+
+  const run = (command: string, argument?: string) => {
+    editorRef.current?.focus();
+    document.execCommand(command, false, argument);
+    if (editorRef.current) onChange(editorRef.current.innerHTML);
+  };
+
+  const tools: { label: string; icon: typeof Bold; onClick: () => void }[] = [
+    { label: "Bold", icon: Bold, onClick: () => run("bold") },
+    { label: "Italic", icon: Italic, onClick: () => run("italic") },
+    { label: "Heading", icon: Heading2, onClick: () => run("formatBlock", "<h2>") },
+    { label: "Bullet list", icon: List, onClick: () => run("insertUnorderedList") },
+    { label: "Numbered list", icon: ListOrdered, onClick: () => run("insertOrderedList") },
+    { label: "Undo", icon: Undo2, onClick: () => run("undo") },
+    { label: "Redo", icon: Redo2, onClick: () => run("redo") },
+  ];
+
+  return <div className="overflow-hidden rounded-lg border border-border bg-card">
+    <div className="flex flex-wrap items-center gap-1 border-b border-border bg-muted/40 px-2 py-1.5">
+      {tools.map((tool, index) => <Fragment key={tool.label}>
+        {index === 5 ? <span className="mx-1 h-5 w-px bg-border" /> : null}
+        <Button type="button" variant="ghost" size="sm" className="h-8 w-8 p-0" title={tool.label} aria-label={tool.label} onMouseDown={(event) => event.preventDefault()} onClick={tool.onClick}>
+          <tool.icon className="h-4 w-4" />
+        </Button>
+      </Fragment>)}
+    </div>
+    <div
+      ref={editorRef}
+      contentEditable
+      suppressContentEditableWarning
+      role="textbox"
+      aria-multiline="true"
+      onInput={(event) => onChange(event.currentTarget.innerHTML)}
+      className="max-h-[520px] min-h-[320px] overflow-y-auto px-4 py-3 text-sm leading-6 outline-none [&_h2]:mb-2 [&_h2]:mt-4 [&_h2]:font-heading [&_h2]:text-base [&_h2]:font-semibold [&_li]:mb-1 [&_ol]:mb-3 [&_ol]:list-decimal [&_ol]:pl-5 [&_p]:mb-2 [&_ul]:mb-3 [&_ul]:list-disc [&_ul]:pl-5"
+      dangerouslySetInnerHTML={{ __html: initialHtml.current }}
+    />
+  </div>;
+}
+
 function LegalPagesPage({ pages, onSave, onDelete }: { pages: LegalPage[]; onSave: (page: LegalPage) => void; onDelete: (page: LegalPage) => void }) {
   const [selectedId, setSelectedId] = useState(pages[0]?.id ?? "");
   const selected = pages.find((page) => page.id === selectedId) ?? pages[0];
@@ -849,10 +920,10 @@ function LegalPagesPage({ pages, onSave, onDelete }: { pages: LegalPage[]; onSav
             <Input value={activeDraft.version} onChange={(event) => update({ version: event.target.value })} />
           </label>
         </div>
-        <label className="block space-y-1.5 text-sm font-medium">Content <span className="text-destructive">*</span>
-          <Textarea rows={22} className="font-mono text-[13px] leading-6" value={activeDraft.content} onChange={(event) => update({ content: event.target.value })} />
-        </label>
-        <p className="text-xs text-muted-foreground">Numbered lines become section headings on the public page; lines starting with &quot;-&quot; render as bullets.</p>
+        <div className="space-y-1.5 text-sm font-medium">Content <span className="text-destructive">*</span>
+          <RichTextEditor key={selected.id} value={activeDraft.content} onChange={(html) => update({ content: html })} />
+        </div>
+        <p className="text-xs text-muted-foreground">Headings, bold, italics and lists are carried through to the public page exactly as shown here.</p>
         <label className="flex items-center gap-2 text-sm font-medium">
           <Checkbox checked={activeDraft.published} onCheckedChange={(value) => update({ published: value === true })} />
           Published — visible on the public site

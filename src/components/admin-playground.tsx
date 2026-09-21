@@ -812,8 +812,8 @@ function OnboardingSlidesPage({ slides, app, onAppChange, onCreate, onEdit, onTo
             <div className="min-w-0 flex-1"><div className="truncate font-heading text-sm font-bold">{slide.title}</div><div className="truncate text-xs text-muted-foreground">{slide.body}</div></div>
             <StatusBadge status={slide.active ? "Active" : "Inactive"} />
             <div className="flex shrink-0 items-center gap-1">
-              <IconButton label={`Move ${slide.title} up`} className="h-8 w-8" disabled={index === 0} onClick={() => onMove(slide, -1)}><ArrowUp className="h-4 w-4" /></IconButton>
-              <IconButton label={`Move ${slide.title} down`} className="h-8 w-8" disabled={index === rows.length - 1} onClick={() => onMove(slide, 1)}><ArrowDown className="h-4 w-4" /></IconButton>
+              <Button variant="ghost" size="icon" className="h-8 w-8" aria-label={`Move ${slide.title} up`} disabled={index === 0} onClick={() => onMove(slide, -1)}><ArrowUp className="h-4 w-4" /></Button>
+              <Button variant="ghost" size="icon" className="h-8 w-8" aria-label={`Move ${slide.title} down`} disabled={index === rows.length - 1} onClick={() => onMove(slide, 1)}><ArrowDown className="h-4 w-4" /></Button>
               <Button variant="ghost" size="sm" className="h-8" onClick={() => onToggle(slide)}>{slide.active ? "Deactivate" : "Activate"}</Button>
               <Button variant="ghost" size="sm" className="h-8" onClick={() => onEdit(slide)}><Pencil className="h-3.5 w-3.5" />Edit</Button>
               <ConfirmDeleteDialog itemType="Onboarding Slide" name={slide.title} onConfirm={() => onDelete(slide)}><Button variant="ghost" size="sm" className="h-8 text-destructive"><Trash2 className="h-3.5 w-3.5" />Delete</Button></ConfirmDeleteDialog>

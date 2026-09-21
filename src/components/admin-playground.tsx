@@ -107,7 +107,7 @@ import {
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
 
-type View = "dashboard" | "merchants" | "reviews" | "merchant-onboarding-queue" | "trackier-queue" | "affiliate-networks" | "affiliate-network-new" | "affiliate-network-edit" | "merchant-edit" | "offers" | "offer-edit" | "promo-banners" | "promo-banner-edit" | "promo-banner-new" | "categories" | "category-mapping" | "category-edit" | "category-new" | "conversions";
+type View = "dashboard" | "merchants" | "reviews" | "merchant-onboarding-queue" | "trackier-queue" | "affiliate-networks" | "affiliate-network-new" | "affiliate-network-edit" | "merchant-edit" | "offers" | "offer-edit" | "promo-banners" | "promo-banner-edit" | "promo-banner-new" | "categories" | "category-mapping" | "category-edit" | "category-new" | "cashback-claims" | "conversions";
 type RawMapping = { raw: string; mappedTo: string };
 type ReviewStatus = "Pending" | "Approved" | "Rejected";
 type Review = { id: string; user: string; merchant: string; rating: number; comment: string; photos: string[]; submitted: string; status: ReviewStatus; reason: string; note: string };
@@ -123,7 +123,7 @@ type OfferOrigin = { type: "merchant"; merchant: typeof merchants[number] } | { 
 const groups = [
   { label: "Catalog", icon: ShoppingBag, items: [{ label: "Merchants", icon: Store, view: "merchants" as View }, { label: "Cashback Offers", icon: Tag, view: "offers" as View }, { label: "Promo Banners", icon: Megaphone, view: "promo-banners" as View }, { label: "Merchant Reviews", icon: Star, view: "reviews" as View }, { label: "Categories", icon: Tag, view: "categories" as View }, { label: "Cities", icon: Building2 }] },
   { label: "Operations", icon: Settings2, items: [{ label: "Merchant Onboarding Queue", icon: ClipboardCheck, view: "merchant-onboarding-queue" as View }, { label: "Trackier Import Queue", icon: DownloadCloud, view: "trackier-queue" as View }, { label: "Affiliate Networks", icon: Share2, view: "affiliate-networks" as View }, { label: "Online Conversions", icon: CircleDollarSign, view: "conversions" as View }, { label: "Category Mapping", icon: Tag, view: "category-mapping" as View }, { label: "Users", icon: Users }] },
-  { label: "Financial", icon: WalletCards, items: [{ label: "Withdrawals", icon: BadgeIndianRupee }, { label: "Missing Claims", icon: FileSpreadsheet }] },
+  { label: "Financial", icon: WalletCards, items: [{ label: "Cashback Claims", icon: CircleDollarSign, view: "cashback-claims" as View }, { label: "Withdrawals", icon: BadgeIndianRupee }, { label: "Missing Claims", icon: FileSpreadsheet }] },
   { label: "Communication", icon: Megaphone, items: [{ label: "Notifications", icon: Megaphone }] },
   { label: "System", icon: SlidersHorizontal, items: [{ label: "Admin Roles", icon: ShieldCheck }, { label: "Settings", icon: Settings2 }] },
 ];
@@ -201,6 +201,21 @@ const initialApplications: Application[] = [
   { id: "APP-3008", store: "Glow Aesthetics Clinic", category: "Wellness", owner: "Dr. Ira Menon", phone: "+91 97400 31188", email: "ira@glowaesthetics.example", address: "Jubilee Hills", city: "Hyderabad", commission: "14%", documents: ["GST registration", "Storefront photo"], submitted: "17 Sep 2026, 15:48", status: "Approved", reason: "", note: "" },
   { id: "APP-3007", store: "Cafe Mocha Lane", category: "Cafes & Dining", owner: "Vikram Joshi", phone: "+91 98330 90210", email: "vikram@mochalane.example", address: "Salt Lake Sector V", city: "Kolkata", commission: "11%", documents: ["Storefront photo"], submitted: "16 Sep 2026, 09:31", status: "Rejected", reason: "Invalid GST/FSSAI documents", note: "GST certificate was illegible and FSSAI licence missing." },
 ];
+
+type Claim = { id: string; user: string; email: string; merchant: string; orderId: string; clickId: string; orderDate: string; orderValue: number; expectedCashback: number; proof: string; comment: string; submitted: string; status: ReviewStatus; reason: string; note: string };
+
+const claimRejectionReasons = ["No matching click found", "Order placed outside OfferPe click window", "Order cancelled or returned", "Proof of purchase unreadable", "Duplicate claim for the same order", "Merchant category excluded from cashback"];
+
+const initialClaims: Claim[] = [
+  { id: "CLM-5042", user: "Ananya Rao", email: "ananya.rao@example.com", merchant: "Myntra", orderId: "MYN-77120934", clickId: "clk_9f42ab7c", orderDate: "14 Sep 2026", orderValue: 4299, expectedCashback: 344, proof: "order-confirmation.png", comment: "Cashback did not track even though I came through the OfferPe app.", submitted: "21 Sep 2026, 09:12", status: "Pending", reason: "", note: "" },
+  { id: "CLM-5041", user: "Rahul Menon", email: "rahul.menon@example.com", merchant: "Croma", orderId: "CRM-4408217", clickId: "clk_2b71de09", orderDate: "12 Sep 2026", orderValue: 28990, expectedCashback: 1449, proof: "invoice-croma.pdf", comment: "Bought a washing machine, cashback still missing after 7 days.", submitted: "20 Sep 2026, 18:44", status: "Pending", reason: "", note: "" },
+  { id: "CLM-5040", user: "Sneha Iyer", email: "sneha.iyer@example.com", merchant: "Nykaa", orderId: "NYK-33019876", clickId: "clk_77c1a4e2", orderDate: "11 Sep 2026", orderValue: 2150, expectedCashback: 215, proof: "nykaa-order.png", comment: "Order delivered, no cashback in wallet.", submitted: "20 Sep 2026, 11:05", status: "Pending", reason: "", note: "" },
+  { id: "CLM-5039", user: "Imran Shaikh", email: "imran.shaikh@example.com", merchant: "Myntra", orderId: "MYN-77118420", clickId: "clk_51ba0d33", orderDate: "08 Sep 2026", orderValue: 1899, expectedCashback: 152, proof: "myntra-order.png", comment: "Missing cashback on a fashion order.", submitted: "19 Sep 2026, 16:20", status: "Approved", reason: "", note: "Click found in logs, conversion created with source = CLAIM." },
+  { id: "CLM-5038", user: "Priya Nair", email: "priya.nair@example.com", merchant: "Croma", orderId: "CRM-4407004", clickId: "", orderDate: "05 Sep 2026", orderValue: 7499, expectedCashback: 375, proof: "screenshot.jpg", comment: "Cashback not credited.", submitted: "18 Sep 2026, 10:02", status: "Rejected", reason: "No matching click found", note: "No OfferPe click recorded within 30 days of the order date." },
+  { id: "CLM-5037", user: "Devansh Gupta", email: "devansh.gupta@example.com", merchant: "Nykaa", orderId: "NYK-33015512", clickId: "clk_1de9f004", orderDate: "02 Sep 2026", orderValue: 999, expectedCashback: 100, proof: "nykaa-invoice.pdf", comment: "Placed via app, no cashback.", submitted: "17 Sep 2026, 14:37", status: "Approved", reason: "", note: "" },
+  { id: "CLM-5036", user: "Meera Krishnan", email: "meera.k@example.com", merchant: "Myntra", orderId: "MYN-77101288", clickId: "clk_84aa22b1", orderDate: "29 Aug 2026", orderValue: 3499, expectedCashback: 280, proof: "order.png", comment: "Returned one item but kept the rest.", submitted: "16 Sep 2026, 09:55", status: "Rejected", reason: "Order cancelled or returned", note: "Merchant reported the full order as returned." },
+];
+
 
 
 type StagedOffer = { headline: string; terms: string; discountType: string; discountValue: string; commissionType: string; commissionValue: string };
@@ -640,6 +655,105 @@ function OnboardingQueue({ applications, onApprove, onReject, onRevert, onDelete
   </>;
 }
 
+const inr = (value: number) => `₹${value.toLocaleString("en-IN")}`;
+
+function ClaimDetails({ claim }: { claim: Claim }) {
+  return <div className="mt-3 grid gap-3 text-sm sm:grid-cols-2 lg:grid-cols-4">
+    <div><div className="text-xs font-semibold uppercase text-muted-foreground">Claimant</div><div className="mt-0.5 font-medium">{claim.user}</div><div className="text-muted-foreground">{claim.email}</div></div>
+    <div><div className="text-xs font-semibold uppercase text-muted-foreground">Order</div><div className="mt-0.5 font-mono text-xs">{claim.orderId}</div><div className="text-muted-foreground">{claim.orderDate}</div></div>
+    <div><div className="text-xs font-semibold uppercase text-muted-foreground">Click ID</div><div className="mt-0.5 font-mono text-xs">{claim.clickId || "—"}</div><div className="text-muted-foreground">{claim.clickId ? "Matched in click log" : "No click matched"}</div></div>
+    <div><div className="text-xs font-semibold uppercase text-muted-foreground">Order value / expected cashback</div><div className="mt-0.5 font-heading text-lg font-bold">{inr(claim.orderValue)}</div><div className="font-semibold text-primary">{inr(claim.expectedCashback)} expected</div></div>
+    <div className="sm:col-span-2 lg:col-span-4"><div className="text-xs font-semibold uppercase text-muted-foreground">Customer comment</div><p className="mt-0.5 leading-6">{claim.comment}</p><span className="mt-2 inline-flex items-center gap-1 rounded-full border border-border bg-muted px-2 py-0.5 text-xs font-medium"><ImageIcon className="h-3 w-3" />{claim.proof}</span></div>
+  </div>;
+}
+
+function ClaimHeadline({ claim }: { claim: Claim }) {
+  return <div className="flex flex-wrap items-center gap-2">
+    <span className="font-heading text-base font-bold">{claim.merchant}</span>
+    <span className="inline-flex rounded-full bg-info-soft px-2 py-0.5 text-xs font-semibold text-info">ONLINE</span>
+    <span className="font-mono text-xs text-muted-foreground">{claim.id}</span>
+    <span className="text-xs text-muted-foreground">Submitted {claim.submitted}</span>
+  </div>;
+}
+
+function RejectClaimDialog({ claim, onReject, children }: { claim: Claim; onReject: (claim: Claim, reason: string, note: string) => void; children: React.ReactNode }) {
+  const [open, setOpen] = useState(false);
+  const [reason, setReason] = useState(claimRejectionReasons[0] as string);
+  const [note, setNote] = useState("");
+  return <Dialog open={open} onOpenChange={setOpen}><DialogTrigger asChild>{children}</DialogTrigger><DialogContent className="max-w-lg bg-card"><DialogHeader><DialogTitle className="font-heading text-lg">Reject claim</DialogTitle><DialogDescription>{claim.user}&apos;s claim on order {claim.orderId} will be declined. A reason from the Rejection Reasons list is required and is shown to the customer.</DialogDescription></DialogHeader><div className="space-y-4"><label className="block space-y-1.5 text-sm font-medium">Rejection reason <span className="text-destructive">*</span><Select value={reason} onValueChange={setReason}><SelectTrigger><SelectValue /></SelectTrigger><SelectContent>{claimRejectionReasons.map((item) => <SelectItem key={item} value={item}>{item}</SelectItem>)}</SelectContent></Select></label><label className="block space-y-1.5 text-sm font-medium">Admin remarks <span className="font-normal text-muted-foreground">(optional)</span><Textarea rows={3} value={note} onChange={(event) => setNote(event.target.value)} placeholder="Add internal context for this decision…" /></label></div><DialogFooter><Button variant="outline" onClick={() => setOpen(false)}>Cancel</Button><Button variant="destructive" onClick={() => { onReject(claim, reason, note); setOpen(false); }}>Reject claim</Button></DialogFooter></DialogContent></Dialog>;
+}
+
+function CashbackClaims({ claims, onApprove, onReject, onRevert, onDelete }: { claims: Claim[]; onApprove: (claim: Claim) => void; onReject: (claim: Claim, reason: string, note: string) => void; onRevert: (claim: Claim) => void; onDelete: (claim: Claim) => void }) {
+  const [query, setQuery] = useState("");
+  const [status, setStatus] = useState("all");
+  const [merchant, setMerchant] = useState("all");
+  const [from, setFrom] = useState("");
+  const [to, setTo] = useState("");
+  const [sort, setSort] = useState("newest");
+  const merchantNames = Array.from(new Set(claims.map((claim) => claim.merchant)));
+  const pending = claims.filter((claim) => claim.status === "Pending");
+  const reviewed = useMemo(() => {
+    const parse = (value: string) => new Date(value.replace(",", "")).getTime();
+    return claims.filter((claim) => claim.status !== "Pending")
+      .filter((claim) => !query || `${claim.orderId} ${claim.id} ${claim.user}`.toLowerCase().includes(query.toLowerCase()))
+      .filter((claim) => status === "all" || claim.status === status)
+      .filter((claim) => merchant === "all" || claim.merchant === merchant)
+      .filter((claim) => !from || parse(claim.submitted) >= new Date(from).getTime())
+      .filter((claim) => !to || parse(claim.submitted) <= new Date(to).getTime() + 86_400_000)
+      .sort((a, b) => sort === "oldest" ? parse(a.submitted) - parse(b.submitted) : sort === "value-high" ? b.orderValue - a.orderValue : sort === "value-low" ? a.orderValue - b.orderValue : parse(b.submitted) - parse(a.submitted));
+  }, [claims, query, status, merchant, from, to, sort]);
+  const pendingValue = pending.reduce((total, claim) => total + claim.expectedCashback, 0);
+  return <><PageHeader title="Cashback Claims" description="Online missing-cashback claims raised by customers. Approving accepts a claim into the same online-conversion pipeline a real network webhook uses (source = CLAIM) — it does not itself credit the wallet. Resolve the resulting conversion from Online Conversions to actually credit it." actions={<DropdownMenu><DropdownMenuTrigger asChild><Button variant="outline"><UploadCloud />Import &amp; Export<ChevronDown /></Button></DropdownMenuTrigger><DropdownMenuContent align="end"><DropdownMenuItem><Download />Export claims CSV</DropdownMenuItem><DropdownMenuItem><UploadCloud />Import claim decisions</DropdownMenuItem></DropdownMenuContent></DropdownMenu>} />
+    <div className="mb-6 grid gap-3 sm:grid-cols-3">
+      <div className="rounded-lg border border-border bg-card p-4 shadow-card"><p className="text-xs font-semibold uppercase text-muted-foreground">Pending claims</p><p className="mt-1 font-heading text-2xl font-bold">{pending.length}</p></div>
+      <div className="rounded-lg border border-border bg-card p-4 shadow-card"><p className="text-xs font-semibold uppercase text-muted-foreground">Cashback at stake</p><p className="mt-1 font-heading text-2xl font-bold">{inr(pendingValue)}</p></div>
+      <div className="rounded-lg border border-border bg-card p-4 shadow-card"><p className="text-xs font-semibold uppercase text-muted-foreground">Reviewed claims</p><p className="mt-1 font-heading text-2xl font-bold">{claims.length - pending.length}</p></div>
+    </div>
+    <div className="space-y-8">
+      <section>
+        <h2 className="font-heading text-lg font-bold">Pending review ({pending.length})</h2>
+        {pending.length === 0 ? <p className="mt-2 text-sm text-muted-foreground">No claims waiting for review.</p>
+          : <div className="mt-3 space-y-3">{pending.map((claim) => <article key={claim.id} className="rounded-lg border border-border bg-card p-4 shadow-card">
+            <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+              <ClaimHeadline claim={claim} />
+              <div className="flex shrink-0 gap-2">
+                <Button size="sm" onClick={() => onApprove(claim)}><Check />Approve</Button>
+                <RejectClaimDialog claim={claim} onReject={onReject}><Button size="sm" variant="destructive"><X />Reject</Button></RejectClaimDialog>
+              </div>
+            </div>
+            <ClaimDetails claim={claim} />
+          </article>)}</div>}
+      </section>
+      <section>
+        <h2 className="font-heading text-lg font-bold">Reviewed</h2>
+        <div className="mt-3 grid gap-3 rounded-lg border border-border bg-card p-3 shadow-card sm:grid-cols-2 xl:grid-cols-6">
+          <label className="space-y-1.5 text-xs font-semibold uppercase text-muted-foreground xl:col-span-2">Order ID<div className="relative"><Search className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground" /><Input className="w-full pl-9" value={query} onChange={(event) => setQuery(event.target.value)} placeholder="Search order ID, claim ID, or customer…" /></div></label>
+          <label className="space-y-1.5 text-xs font-semibold uppercase text-muted-foreground">Status<Select value={status} onValueChange={setStatus}><SelectTrigger><SelectValue /></SelectTrigger><SelectContent><SelectItem value="all">All</SelectItem><SelectItem value="Approved">Approved</SelectItem><SelectItem value="Rejected">Rejected</SelectItem></SelectContent></Select></label>
+          <label className="space-y-1.5 text-xs font-semibold uppercase text-muted-foreground">Merchant<Select value={merchant} onValueChange={setMerchant}><SelectTrigger><SelectValue /></SelectTrigger><SelectContent><SelectItem value="all">All</SelectItem>{merchantNames.map((item) => <SelectItem key={item} value={item}>{item}</SelectItem>)}</SelectContent></Select></label>
+          <label className="space-y-1.5 text-xs font-semibold uppercase text-muted-foreground">From<Input type="date" value={from} onChange={(event) => setFrom(event.target.value)} /></label>
+          <label className="space-y-1.5 text-xs font-semibold uppercase text-muted-foreground">To<Input type="date" value={to} onChange={(event) => setTo(event.target.value)} /></label>
+          <label className="space-y-1.5 text-xs font-semibold uppercase text-muted-foreground xl:col-span-2">Sort by<Select value={sort} onValueChange={setSort}><SelectTrigger><SelectValue /></SelectTrigger><SelectContent><SelectItem value="newest">Newest submitted</SelectItem><SelectItem value="oldest">Oldest submitted</SelectItem><SelectItem value="value-high">Order value: High to Low</SelectItem><SelectItem value="value-low">Order value: Low to High</SelectItem></SelectContent></Select></label>
+        </div>
+        {reviewed.length === 0 ? <p className="mt-4 text-sm text-muted-foreground">Nothing reviewed yet.</p>
+          : <div className="mt-3 overflow-hidden rounded-lg border border-border bg-card shadow-card"><div className="overflow-x-auto"><table className="w-full min-w-250 text-left text-sm"><thead className="bg-muted/70 text-[11px] uppercase text-muted-foreground"><tr><th>Claim</th><th>Customer</th><th>Merchant</th><th>Order ID</th><th>Order value</th><th>Cashback</th><th>Status</th><th className="pr-4 text-right">Actions</th></tr></thead><tbody>{reviewed.map((claim) => <tr key={claim.id} className="border-t border-border align-top hover:bg-muted/50">
+            <td className="px-4 py-2 font-mono text-xs">{claim.id}<div className="font-sans text-xs text-muted-foreground">{claim.submitted}</div></td>
+            <td className="font-medium">{claim.user}</td>
+            <td>{claim.merchant}</td>
+            <td className="font-mono text-xs">{claim.orderId}</td>
+            <td className="font-semibold">{inr(claim.orderValue)}</td>
+            <td className="font-semibold text-primary">{inr(claim.expectedCashback)}</td>
+            <td><span className={cn("inline-flex rounded-full px-2 py-0.5 text-xs font-semibold", claim.status === "Approved" ? "status-approved" : "status-rejected")}>{claim.status}</span>{claim.status === "Rejected" && <div className="mt-1 max-w-56 whitespace-normal text-xs text-destructive">{claim.reason}</div>}</td>
+            <td className="pr-3 text-right"><div className="flex justify-end gap-1">
+              <Dialog><DialogTrigger asChild><IconButton className="h-7 w-7" label={`View claim ${claim.id}`}><ExternalLink className="h-3.5 w-3.5" /></IconButton></DialogTrigger><DialogContent className="max-w-2xl bg-card"><DialogHeader><DialogTitle className="font-heading text-lg">{claim.merchant} · {claim.orderId}</DialogTitle><DialogDescription>Claim {claim.id} · submitted {claim.submitted}</DialogDescription></DialogHeader><ClaimDetails claim={claim} />{claim.status === "Rejected" && <p className="mt-3 text-sm font-semibold text-destructive">Reason: {claim.reason}{claim.note && <span className="font-normal text-muted-foreground"> — {claim.note}</span>}</p>}{claim.status === "Approved" && claim.note && <p className="mt-3 text-sm text-muted-foreground">{claim.note}</p>}</DialogContent></Dialog>
+              <IconButton className="h-7 w-7" label={`Re-evaluate claim ${claim.id}`} onClick={() => onRevert(claim)}><RotateCcw className="h-3.5 w-3.5" /></IconButton>
+              <ConfirmDeleteDialog itemType="Claim" name={claim.id} onConfirm={() => onDelete(claim)}><Button variant="ghost" size="icon" className="h-7 w-7 text-destructive" aria-label={`Delete claim ${claim.id}`}><Trash2 className="h-3.5 w-3.5" /></Button></ConfirmDeleteDialog>
+            </div></td>
+          </tr>)}</tbody></table></div></div>}
+      </section>
+    </div>
+  </>;
+}
+
 function ReviewsPage(props: { reviews: Review[]; merchantNames: string[]; onApprove: (review: Review) => void; onReject: (review: Review, reason: string, note: string) => void; onRevert: (review: Review) => void; onDelete: (review: Review) => void }) {
   return <><PageHeader title="Merchant Reviews" description="Vendor/store reviews submitted by verified purchasers. Approving makes the review (and any photos) publicly visible on the store's Store Detail page; rejecting requires a reason from the Rejection Reasons list." actions={<DropdownMenu><DropdownMenuTrigger asChild><Button variant="outline"><UploadCloud />Import &amp; Export<ChevronDown /></Button></DropdownMenuTrigger><DropdownMenuContent align="end"><DropdownMenuItem><Download />Export reviews CSV</DropdownMenuItem><DropdownMenuItem><UploadCloud />Import moderation decisions</DropdownMenuItem></DropdownMenuContent></DropdownMenu>} /><ReviewsPanel {...props} /></>;
 }
@@ -877,6 +991,7 @@ export function AdminPlayground() {
   const [merchantRows, setMerchantRows] = useState<readonly (typeof merchants[number])[]>(merchants);
   const [reviewRows, setReviewRows] = useState<Review[]>(initialReviews);
   const [applicationRows, setApplicationRows] = useState<Application[]>(initialApplications);
+  const [claimRows, setClaimRows] = useState<Claim[]>(initialClaims);
   const [campaignRows, setCampaignRows] = useState<StagedCampaign[]>(initialCampaigns);
   const [syncRuns, setSyncRuns] = useState<SyncRun[]>(initialSyncRuns);
   const [syncing, setSyncing] = useState(false);
@@ -903,6 +1018,11 @@ export function AdminPlayground() {
   const rejectApplication = (application: Application, reason: string, note: string) => { setApplicationStatus(application, "Rejected", reason, note); toast.success("Application rejected", { description: `${application.store} was rejected: ${reason}.` }); };
   const revertApplication = (application: Application) => { setApplicationStatus(application, "Pending"); toast.success("Application moved back to pending", { description: `${application.store} awaits review again.` }); };
   const deleteApplication = (application: Application) => { setApplicationRows((current) => current.filter((item) => item.id !== application.id)); toast.success("Application deleted", { description: `${application.store} was removed from the queue.` }); };
+  const setClaimStatus = (claim: Claim, status: ReviewStatus, reason = "", note = "") => setClaimRows((current) => current.map((item) => item.id === claim.id ? { ...item, status, reason, note } : item));
+  const approveClaim = (claim: Claim) => { setClaimStatus(claim, "Approved", "", "Accepted into the online-conversion pipeline (source = CLAIM)."); toast.success("Claim approved", { description: `${claim.orderId} was staged as an online conversion — resolve it from Online Conversions to credit ₹${claim.expectedCashback.toLocaleString("en-IN")}.` }); };
+  const rejectClaim = (claim: Claim, reason: string, note: string) => { setClaimStatus(claim, "Rejected", reason, note); toast.success("Claim rejected", { description: `${claim.user}'s claim on ${claim.orderId} was rejected: ${reason}.` }); };
+  const revertClaim = (claim: Claim) => { setClaimStatus(claim, "Pending"); toast.success("Claim moved back to pending", { description: `${claim.id} awaits review again.` }); };
+  const deleteClaim = (claim: Claim) => { setClaimRows((current) => current.filter((item) => item.id !== claim.id)); toast.success("Claim deleted", { description: `${claim.id} was removed.` }); };
   const runSync = () => {
     setSyncing(true);
     window.setTimeout(() => {
@@ -949,6 +1069,7 @@ export function AdminPlayground() {
     : view === "affiliate-network-new" ? <AffiliateNetworkFormPage key="new-affiliate-network" network={null} onCancel={backToAffiliateNetworks} onSave={saveAffiliateNetwork} onDelete={deleteAffiliateNetwork} />
     : view === "affiliate-network-edit" && editingAffiliateNetwork ? <AffiliateNetworkFormPage key={editingAffiliateNetwork.id} network={editingAffiliateNetwork} onCancel={backToAffiliateNetworks} onSave={saveAffiliateNetwork} onDelete={deleteAffiliateNetwork} />
     : view === "merchant-onboarding-queue" ? <OnboardingQueue applications={applicationRows} onApprove={approveApplication} onReject={rejectApplication} onRevert={revertApplication} onDelete={deleteApplication} />
+    : view === "cashback-claims" ? <CashbackClaims claims={claimRows} onApprove={approveClaim} onReject={rejectClaim} onRevert={revertClaim} onDelete={deleteClaim} />
     : view === "merchant-edit" && editingMerchant ? <MerchantEditPage merchant={editingMerchant} offers={offerRows} reviews={reviewRows} onApproveReview={approveReview} onRejectReview={rejectReview} onRevertReview={revertReview} onDeleteReview={deleteReview} initialTab={merchantTab} onBack={backToMerchants} onDeleteMerchant={deleteMerchant} onEditOffer={(offer) => openOffer(offer, { type: "merchant", merchant: editingMerchant })} onCreateOffer={() => openOffer(null, { type: "merchant", merchant: editingMerchant })} onDeleteOffer={deleteOffer} />
     : view === "offers" ? <OffersPage offers={offerRows} onEdit={(offer) => openOffer(offer, { type: "listing" })} onCreate={() => openOffer(null, { type: "listing" })} onDelete={deleteOffer} />
     : view === "offer-edit" ? <OfferEditPage key={editingOffer?.id ?? "new"} offer={editingOffer} origin={offerOrigin} onCancel={returnFromOffer} onSave={saveOffer} onDelete={deleteOffer} />

@@ -826,7 +826,8 @@ function LegalPagesPage({ pages, onSave, onDelete }: { pages: LegalPage[]; onSav
         <SelectContent>{pages.map((page) => <SelectItem key={page.id} value={page.id}>{page.name}</SelectItem>)}</SelectContent>
       </Select>
       <div className="flex flex-1 items-center justify-end gap-2 text-xs text-muted-foreground">
-        <StatusBadge status={selected.published ? "Published" : "Unpublished"} />
+        <StatusBadge status={selected.published ? "Active" : "Inactive"} />
+        <span>{selected.published ? "Published" : "Unpublished"}</span>
         <span>Last updated {selected.updatedAt}</span>
       </div>
     </div>

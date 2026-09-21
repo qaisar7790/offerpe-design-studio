@@ -1433,8 +1433,9 @@ function ReviewStatusBadge({ review }: { review: Review }) {
 }
 
 function PendingReviewCard({ review, showMerchant, onApprove, onReject }: { review: Review; showMerchant: boolean; onApprove: (review: Review) => void; onReject: (review: Review, reason: string, note: string) => void }) {
-  return <article className="rounded-lg border border-border bg-card p-4 shadow-card">
-    <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+  return <article className="flex min-h-80 flex-col overflow-hidden rounded-lg border border-border bg-card shadow-card">
+    <div className="flex h-32 items-center justify-center border-b border-border bg-muted/40"><MerchantLogo name={review.merchant} /></div>
+    <div className="flex flex-1 flex-col p-4"><div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
       <div className="min-w-0">
         <div className="flex flex-wrap items-center gap-2">
           <span className="font-heading text-sm font-bold">{review.user}</span>
@@ -1452,8 +1453,9 @@ function PendingReviewCard({ review, showMerchant, onApprove, onReject }: { revi
         <RejectReviewDialog review={review} onReject={onReject}><Button size="sm" variant="destructive"><X />Reject</Button></RejectReviewDialog>
       </div>
     </div>
-    <p className="mt-3 text-sm leading-6 text-muted-foreground">{review.comment}</p>
+    <p className="mt-3 line-clamp-3 text-sm leading-6 text-muted-foreground">{review.comment}</p>
     {review.photos.length > 0 && <div className="mt-3 flex flex-wrap gap-2">{review.photos.map((photo) => <ReviewPhoto key={photo} src={photo} user={review.user} />)}</div>}
+    </div>
   </article>;
 }
 
@@ -1506,12 +1508,14 @@ function ReviewsPanel({ reviews, merchantNames, scopedMerchant, onApprove, onRej
     <TabsContent value="pending" className="mt-4">
       {pending.length === 0 ? <p className="text-sm text-muted-foreground">No reviews waiting for review.</p>
         : layout === "list" ? reviewTable(pending, "pending")
-        : <div className="space-y-3">{pending.map((review) => <PendingReviewCard key={review.id} review={review} showMerchant={!scopedMerchant} onApprove={onApprove} onReject={onReject} />)}</div>}
+        : <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">{pending.map((review) => <PendingReviewCard key={review.id} review={review} showMerchant={!scopedMerchant} onApprove={onApprove} onReject={onReject} />)}</div>}
     </TabsContent>
     <TabsContent value="reviewed" className="mt-4">
       {reviewed.length === 0 ? <p className="text-sm text-muted-foreground">Nothing reviewed yet.</p>
         : layout === "list" ? reviewTable(reviewed, "reviewed")
-        : <div className="space-y-3">{reviewed.map((review) => <article key={review.id} className="rounded-lg border border-border bg-card p-4 shadow-card">
+        : <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">{reviewed.map((review) => <article key={review.id} className="flex min-h-80 flex-col overflow-hidden rounded-lg border border-border bg-card shadow-card">
+          <div className="flex h-32 items-center justify-center border-b border-border bg-muted/40"><MerchantLogo name={review.merchant} /></div>
+          <div className="flex flex-1 flex-col p-4">
           <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
             <div className="min-w-0">
               <div className="flex flex-wrap items-center gap-2">
@@ -1530,9 +1534,10 @@ function ReviewsPanel({ reviews, merchantNames, scopedMerchant, onApprove, onRej
               <ConfirmDeleteDialog itemType="Review" name={`${review.user} — ${review.merchant}`} onConfirm={() => onDelete(review)}><Button size="sm" variant="ghost" className="text-destructive" aria-label={`Delete review ${review.id}`}><Trash2 /></Button></ConfirmDeleteDialog>
             </div>
           </div>
-          <p className="mt-3 text-sm leading-6 text-muted-foreground">{review.comment}</p>
+          <p className="mt-3 line-clamp-3 text-sm leading-6 text-muted-foreground">{review.comment}</p>
           {review.status === "Rejected" && <p className="mt-2 text-xs font-semibold text-destructive">Reason: {review.reason}{review.note && <span className="font-normal text-muted-foreground"> — {review.note}</span>}</p>}
           {review.photos.length > 0 && <div className="mt-3 flex flex-wrap gap-2">{review.photos.map((photo) => <ReviewPhoto key={photo} src={photo} user={review.user} />)}</div>}
+          </div>
         </article>)}</div>}
     </TabsContent>
   </Tabs>;

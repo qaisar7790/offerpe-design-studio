@@ -112,7 +112,7 @@ import {
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
 
-type View = "dashboard" | "merchants" | "reviews" | "merchant-onboarding-queue" | "trackier-queue" | "affiliate-networks" | "affiliate-network-new" | "affiliate-network-edit" | "merchant-edit" | "offers" | "offer-edit" | "promo-banners" | "promo-banner-edit" | "promo-banner-new" | "categories" | "category-mapping" | "category-edit" | "category-new" | "cashback-claims" | "transactions" | "clicks" | "withdrawals" | "rejection-reasons" | "communication-templates" | "communication-dispatches" | "users" | "conversions";
+type View = "dashboard" | "merchants" | "reviews" | "merchant-onboarding-queue" | "trackier-queue" | "affiliate-networks" | "affiliate-network-new" | "affiliate-network-edit" | "merchant-edit" | "offers" | "offer-edit" | "promo-banners" | "promo-banner-edit" | "promo-banner-new" | "categories" | "category-mapping" | "category-edit" | "category-new" | "cashback-claims" | "transactions" | "clicks" | "withdrawals" | "rejection-reasons" | "communication-templates" | "communication-dispatches" | "users" | "roles" | "role-edit" | "conversions";
 type RawMapping = { raw: string; mappedTo: string };
 type ReviewStatus = "Pending" | "Approved" | "Rejected";
 type Review = { id: string; user: string; merchant: string; rating: number; comment: string; photos: string[]; submitted: string; status: ReviewStatus; reason: string; note: string };
@@ -133,7 +133,7 @@ const groups = [
   { label: "Operations", icon: Settings2, items: [{ label: "Merchant Onboarding Queue", icon: ClipboardCheck, view: "merchant-onboarding-queue" as View }, { label: "Trackier Import Queue", icon: DownloadCloud, view: "trackier-queue" as View }, { label: "Affiliate Networks", icon: Share2, view: "affiliate-networks" as View }, { label: "Online Conversions", icon: CircleDollarSign, view: "conversions" as View }, { label: "Category Mapping", icon: Tag, view: "category-mapping" as View }] },
   { label: "Financial", icon: WalletCards, items: [{ label: "Cashback Claims", icon: CircleDollarSign, view: "cashback-claims" as View }, { label: "Transactions", icon: ArrowDown, view: "transactions" as View }, { label: "Clicks", icon: MousePointerClick, view: "clicks" as View }, { label: "Withdrawals", icon: BadgeIndianRupee, view: "withdrawals" as View }, { label: "Rejection Reasons", icon: Flag, view: "rejection-reasons" as View }, { label: "Missing Claims", icon: FileSpreadsheet }] },
   { label: "Communication", icon: Megaphone, items: [{ label: "Templates", icon: MessageSquare, view: "communication-templates" as View }, { label: "Dispatches & Notifications", icon: Bell, view: "communication-dispatches" as View }] },
-  { label: "System", icon: SlidersHorizontal, items: [{ label: "Users", icon: Users, view: "users" as View }, { label: "Admin Roles", icon: ShieldCheck }, { label: "Settings", icon: Settings2 }] },
+  { label: "System", icon: SlidersHorizontal, items: [{ label: "Users", icon: Users, view: "users" as View }, { label: "Roles", icon: ShieldCheck, view: "roles" as View }, { label: "Settings", icon: Settings2 }] },
 ];
 
 const merchants = [
@@ -452,6 +452,9 @@ type UserStatus = "Active" | "Inactive";
 type DeletedFilter = "all" | "yes" | "no";
 type UserDateField = "lastLogin" | "signedUp" | "deletedAt" | "reRegisteredAt";
 type UserRecord = { id: string; name: string; phone: string; email: string; status: UserStatus; deleted: boolean; reRegistered: boolean; lastLoginIp: string; lastLoginAgent: string; lastLoginAt: string; lastLoginDate: string; signedUp: string; signedUpDate: string; deletedAt: string; deletedDate: string; reRegisteredAt: string; reRegisteredDate: string; city: string; source: string; wallet: number };
+type PermissionGroupName = "Catalog" | "Operations" | "Financial" | "Communication" | "System";
+type Permission = { key: string; group: PermissionGroupName };
+type AdminRole = { id: string; name: string; description: string; permissions: string[]; admins: number; system: boolean; updated: string };
 
 const onlineTransactions: OnlineTransaction[] = [
   { id: "TXN-94128", status: "Pending", userId: "USR-10294", orderValue: 4299, reported: 344, calculated: 322, rejection: "—", click: "clk_9f42ab7c", created: "21 Sep 2026, 09:18", updated: "21 Sep 2026, 09:22" },
@@ -555,6 +558,27 @@ const userSeeds: UserRecord[] = [
 
 const initialUsers: UserRecord[] = userSeeds.flatMap((row, index): UserRecord[] => [row, { ...row, id: `USR-${String(20000 + index).padStart(5, "0")}`, phone: `${row.phone.slice(0, -2)}${String(index + 21).padStart(2, "0")}`, wallet: Math.max(0, row.wallet + index * 37), deleted: index % 7 === 0 ? true : row.deleted, status: index % 7 === 0 ? "Inactive" : row.status }]);
 
+const buildPermissions = (group: PermissionGroupName, keys: string[]): Permission[] => keys.map((key) => ({ key, group }));
+
+const permissionCatalog: Record<PermissionGroupName, Permission[]> = {
+  Catalog: buildPermissions("Catalog", ["categories.EDIT", "categories.ADD", "categories.DELETE", "categories.VIEW", "cities.ADD", "cities.DELETE", "cities.EDIT", "cities.VIEW", "gift_card_types.ADD", "gift_card_types.EDIT", "gift_card_types.DELETE", "gift_card_types.VIEW", "legal_pages.EDIT", "legal_pages.VIEW", "merchant_banners.VIEW", "merchant_banners.EDIT", "merchant_banners.ADD", "merchant_banners.DELETE", "merchant_page_sections.ADD", "merchant_page_sections.EDIT", "merchant_page_sections.DELETE", "merchant_page_sections.VIEW", "merchant_reviews.VIEW", "merchant_reviews.EDIT", "merchants.ADD", "merchants.EDIT", "merchants.DELETE", "merchants.VIEW", "offers.ADD", "offers.EDIT", "offers.DELETE", "offers.VIEW", "onboarding_settings.EDIT", "onboarding_slides.ADD", "onboarding_slides.VIEW", "onboarding_slides.EDIT", "onboarding_slides.DELETE", "promo_banners.ADD", "promo_banners.EDIT", "promo_banners.DELETE", "promo_banners.VIEW"]),
+  Operations: buildPermissions("Operations", ["affiliate_networks.ADD", "affiliate_networks.EDIT", "affiliate_networks.DELETE", "affiliate_networks.VIEW", "merchant_onboarding.VIEW", "merchant_onboarding.EDIT", "merchant_onboarding_rejection_reasons.ADD", "merchant_onboarding_rejection_reasons.EDIT", "merchant_onboarding_rejection_reasons.VIEW", "merchant_staff.ADD", "merchant_staff.EDIT", "merchant_staff.DELETE", "merchant_staff.VIEW", "sync_settings.VIEW", "sync_settings.EDIT", "trackier_categories.EDIT", "trackier_categories.VIEW", "trackier_import_queue.ADD", "trackier_import_queue.DELETE", "trackier_import_queue.IMPORT", "trackier_import_queue.VIEW", "trackier_statuses.EDIT", "trackier_statuses.VIEW"]),
+  Financial: buildPermissions("Financial", ["cashback_claims.EDIT", "cashback_claims.VIEW", "claims_settings.EDIT", "claims_settings.VIEW", "clicks.VIEW", "conversion_resolutions.EDIT", "conversion_resolutions.IMPORT", "conversion_resolutions.VIEW", "ledger.VIEW", "offline_redemptions.VIEW", "online_conversions.DELETE", "online_conversions.EDIT", "online_conversions.EXPORT", "online_conversions.IMPORT", "online_conversions.VIEW", "reconciliation_log.EXPORT", "reconciliation_log.VIEW", "referral_settings.EDIT", "referral_settings.VIEW", "rejection_reasons.ADD", "rejection_reasons.EDIT", "rejection_reasons.VIEW", "withdrawal_settings.EDIT", "withdrawal_settings.VIEW", "withdrawals.EDIT", "withdrawals.EXPORT", "withdrawals.IMPORT", "withdrawals.VIEW"]),
+  Communication: buildPermissions("Communication", ["communication_dispatches.VIEW", "communication_templates.EDIT", "communication_templates.VIEW", "notifications.VIEW"]),
+  System: buildPermissions("System", ["admin_users.ADD", "admin_users.DELETE", "admin_users.EDIT", "admin_users.VIEW", "analytics_events.VIEW", "app_versions.EDIT", "app_versions.VIEW", "role_management.ADD", "role_management.DELETE", "role_management.EDIT", "role_management.VIEW", "users.EXPORT", "users.IMPORT", "users.VIEW"]),
+};
+
+const allPermissionKeys = Object.values(permissionCatalog).flat().map((permission) => permission.key);
+
+const initialRoles: AdminRole[] = [
+  { id: "ROLE-OWNER", name: "Owner", description: "Every permission in the system. System role — cannot be edited or deleted.", permissions: allPermissionKeys, admins: 6, system: true, updated: "21 Sep 2026, 10:19 am" },
+  { id: "ROLE-CONTENT", name: "Content Manager", description: "Every permission except SUPER_ADMIN-only resources such as payout config, admin user management, and affiliate network config.", permissions: allPermissionKeys.filter((key) => !key.startsWith("admin_users") && !key.startsWith("role_management") && !key.startsWith("withdrawal_settings") && !key.startsWith("affiliate_networks")), admins: 7, system: false, updated: "20 Sep 2026, 4:12 pm" },
+  { id: "ROLE-FINANCE", name: "Finance Manager", description: "Owns cashback claims, conversions, ledger review, withdrawals, and financial exports.", permissions: [...permissionCatalog.Financial.map((permission) => permission.key), "users.VIEW", "communication_dispatches.VIEW"], admins: 3, system: false, updated: "19 Sep 2026, 6:42 pm" },
+  { id: "ROLE-OPS", name: "Operations Manager", description: "Handles merchant onboarding, Trackier imports, affiliate network hygiene, and catalog publishing checks.", permissions: [...permissionCatalog.Operations.map((permission) => permission.key), "merchants.VIEW", "offers.VIEW", "categories.VIEW", "promo_banners.VIEW"], admins: 4, system: false, updated: "18 Sep 2026, 11:20 am" },
+  { id: "ROLE-SUPPORT", name: "Support Analyst", description: "Read-focused access for customer support with limited claim and review moderation actions.", permissions: ["users.VIEW", "cashback_claims.VIEW", "cashback_claims.EDIT", "clicks.VIEW", "online_conversions.VIEW", "ledger.VIEW", "communication_dispatches.VIEW", "notifications.VIEW", "merchant_reviews.VIEW", "merchant_reviews.EDIT"], admins: 9, system: false, updated: "17 Sep 2026, 3:04 pm" },
+];
+
+
 const chartData = {
   users: [{ name: "Today", value: 7 }, { name: "Yesterday", value: 12 }, { name: "7d", value: 49 }, { name: "30d", value: 184 }],
   clicks: [{ name: "Today", value: 42 }, { name: "Yesterday", value: 57 }, { name: "7d", value: 319 }, { name: "30d", value: 1240 }],
@@ -573,7 +597,7 @@ function IconButton({ label, children, className, onClick }: { label: string; ch
 
 function Sidebar({ view, setView, open, setOpen }: { view: View; setView: (v: View) => void; open: boolean; setOpen: (v: boolean) => void }) {
   const [expanded, setExpanded] = useState<string | null>(() => {
-    const activeView = view === "merchant-edit" ? "merchants" : view === "offer-edit" ? "offers" : view === "promo-banner-edit" || view === "promo-banner-new" ? "promo-banners" : view === "category-edit" || view === "category-new" ? "categories" : view === "affiliate-network-edit" || view === "affiliate-network-new" ? "affiliate-networks" : view;
+    const activeView = view === "merchant-edit" ? "merchants" : view === "offer-edit" ? "offers" : view === "promo-banner-edit" || view === "promo-banner-new" ? "promo-banners" : view === "category-edit" || view === "category-new" ? "categories" : view === "affiliate-network-edit" || view === "affiliate-network-new" ? "affiliate-networks" : view === "role-edit" ? "roles" : view;
     const activeGroup = groups.find((group) => group.items.some((item) => item.view === activeView));
     return activeGroup?.label ?? "Catalog";
   });
@@ -601,7 +625,7 @@ function Sidebar({ view, setView, open, setOpen }: { view: View; setView: (v: Vi
                   <group.icon className="h-3.5 w-3.5" /><span className="flex-1 text-left">{group.label}</span><ChevronRight className={cn("h-3.5 w-3.5 transition-transform", isOpen && "rotate-90")} />
                 </Button>
                 {isOpen && <div className="ml-4 border-l border-sidebar-border pl-2">
-                   {group.items.map((item) => <Button key={item.label} variant="ghost" disabled={!item.view} className={cn("my-0.5 h-9 w-full justify-start gap-2.5 px-3 text-[13px] text-sidebar-foreground disabled:opacity-55", (item.view === view || (view === "merchant-edit" && item.view === "merchants") || (view === "offer-edit" && item.view === "offers") || ((view === "promo-banner-edit" || view === "promo-banner-new") && item.view === "promo-banners") || ((view === "category-edit" || view === "category-new") && item.view === "categories") || ((view === "affiliate-network-edit" || view === "affiliate-network-new") && item.view === "affiliate-networks")) && "bg-sidebar-accent font-semibold text-sidebar-primary hover:bg-sidebar-accent")} onClick={() => item.view && chooseGroupedItem(item.view, group.label)}><item.icon className="h-4 w-4" />{item.label}</Button>)}
+                   {group.items.map((item) => <Button key={item.label} variant="ghost" disabled={!item.view} className={cn("my-0.5 h-9 w-full justify-start gap-2.5 px-3 text-[13px] text-sidebar-foreground disabled:opacity-55", (item.view === view || (view === "merchant-edit" && item.view === "merchants") || (view === "offer-edit" && item.view === "offers") || ((view === "promo-banner-edit" || view === "promo-banner-new") && item.view === "promo-banners") || ((view === "category-edit" || view === "category-new") && item.view === "categories") || ((view === "affiliate-network-edit" || view === "affiliate-network-new") && item.view === "affiliate-networks") || (view === "role-edit" && item.view === "roles")) && "bg-sidebar-accent font-semibold text-sidebar-primary hover:bg-sidebar-accent")} onClick={() => item.view && chooseGroupedItem(item.view, group.label)}><item.icon className="h-4 w-4" />{item.label}</Button>)}
                 </div>}
               </div>;
             })}
@@ -1468,6 +1492,83 @@ function UsersPage() {
   </>;
 }
 
+
+function permissionDescription(key: string) {
+  const [resource = "", action = ""] = key.split(".");
+  const resourceLabel = resource.replaceAll("_", " ").replace(/\b\w/g, (match) => match.toUpperCase());
+  const actionText: Record<string, string> = {
+    ADD: "Create new records and start setup workflows.",
+    EDIT: "Update records, review decisions, or operational settings.",
+    VIEW: "Open the screen and inspect records without making changes.",
+    DELETE: "Remove records or revoke access after confirmation.",
+    IMPORT: "Upload CSV or network data for bulk processing.",
+    EXPORT: "Download filtered records for reconciliation or reporting.",
+  };
+  return `${actionText[action] ?? "Manage this access area."} Scope: ${resourceLabel}.`;
+}
+
+function AddRoleDialog({ open, onOpenChange, onCreate }: { open: boolean; onOpenChange: (v: boolean) => void; onCreate: (role: AdminRole) => void }) {
+  const [name, setName] = useState("");
+  const [description, setDescription] = useState("");
+  const close = (nextOpen: boolean) => { onOpenChange(nextOpen); if (!nextOpen) { setName(""); setDescription(""); } };
+  return <Dialog open={open} onOpenChange={close}><DialogContent className="max-w-xl bg-card"><DialogHeader><DialogTitle className="font-heading text-xl">Create role</DialogTitle><DialogDescription>Create the role first, then assign permissions on the full edit screen.</DialogDescription></DialogHeader><div className="grid gap-5"><label className="space-y-1.5 text-sm font-medium">Name <span className="text-destructive">*</span><Input aria-label="Role name" value={name} onChange={(event) => setName(event.target.value)} placeholder="e.g. Finance Reviewer" /></label><label className="space-y-1.5 text-sm font-medium">Description<Textarea aria-label="Role description" rows={3} value={description} onChange={(event) => setDescription(event.target.value)} placeholder="Briefly describe who should receive this role…" /></label></div><DialogFooter><Button variant="destructiveSoft" onClick={() => close(false)}>Cancel</Button><Button disabled={!name.trim()} onClick={() => { onCreate({ id: `ROLE-${Date.now()}`, name: name.trim(), description: description.trim() || "Custom admin role. Configure permissions before assigning admins.", permissions: [], admins: 0, system: false, updated: "21 Sep 2026, 7:06 pm" }); close(false); }}><Plus />Create role</Button></DialogFooter></DialogContent></Dialog>;
+}
+
+function RolesPage({ roles, onCreate, onEdit, onDelete }: { roles: AdminRole[]; onCreate: (role: AdminRole) => void; onEdit: (role: AdminRole) => void; onDelete: (role: AdminRole) => void }) {
+  const [query, setQuery] = useState("");
+  const [scope, setScope] = useState<"all" | "system" | "custom">("all");
+  const [page, setPage] = useState(1);
+  const [pageSize, setPageSize] = useState(10);
+  const [addOpen, setAddOpen] = useState(false);
+  const search = query.toLowerCase();
+  const rows = roles.filter((role) => (!search || `${role.name} ${role.description}`.toLowerCase().includes(search)) && (scope === "all" || (scope === "system") === role.system));
+  const pageCount = Math.max(1, Math.ceil(rows.length / pageSize));
+  const currentPage = Math.min(page, pageCount);
+  const start = (currentPage - 1) * pageSize;
+  const visibleRows = rows.slice(start, start + pageSize);
+  const pageItems = Array.from(new Set([1, currentPage - 1, currentPage, currentPage + 1, pageCount])).filter((item) => item >= 1 && item <= pageCount).sort((a, b) => a - b);
+  const hasFilters = Boolean(query || scope !== "all");
+  return <><PageHeader title="Roles" description="Compact role list with permission counts, admin assignments, and full-page editing for complex access control." actions={<Button onClick={() => setAddOpen(true)}><Plus />Add new</Button>} />
+    <div className="mb-5 flex flex-col gap-3 rounded-lg border border-border bg-card p-3 shadow-card lg:flex-row lg:flex-wrap lg:items-center">
+      <div className="relative min-w-[280px] flex-1"><Search className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground" /><Input className="w-full pl-9" value={query} onChange={(event) => { setQuery(event.target.value); setPage(1); }} placeholder="Search role name or description…" /></div>
+      <DropdownMenu><DropdownMenuTrigger asChild><Button variant="outline" className="shrink-0"><ShieldCheck className="mr-2 h-4 w-4 text-muted-foreground" />Type: {scope === "all" ? "All" : scope === "system" ? "System" : "Custom"}<ChevronDown className="ml-2 h-3.5 w-3.5 opacity-60" /></Button></DropdownMenuTrigger><DropdownMenuContent align="end" className="w-44 border-border bg-card"><DropdownMenuItem onSelect={() => { setScope("all"); setPage(1); }}>Type: All</DropdownMenuItem><DropdownMenuItem onSelect={() => { setScope("system"); setPage(1); }}>Type: System</DropdownMenuItem><DropdownMenuItem onSelect={() => { setScope("custom"); setPage(1); }}>Type: Custom</DropdownMenuItem></DropdownMenuContent></DropdownMenu>
+      {hasFilters && <Button variant="ghost" size="sm" onClick={() => { setQuery(""); setScope("all"); setPage(1); }} className="shrink-0 text-muted-foreground hover:text-foreground"><RotateCcw className="mr-1 h-3.5 w-3.5" />Reset</Button>}
+    </div>
+    <div className="min-w-0 max-w-full overflow-hidden rounded-lg border border-border bg-card shadow-card"><div className="table-scrollbar max-w-full overflow-x-auto"><table className="w-max min-w-260 border-separate border-spacing-0 text-left text-sm"><thead className="text-[11px] uppercase text-muted-foreground"><tr>{["Role", "Description", "Permissions", "Admins", "Type", "Last Updated"].map((label, index) => <th key={label} className={cn("sticky top-0 z-10 border-b border-border bg-muted/95 px-4 py-2 backdrop-blur", index === 0 && "left-0 z-30 shadow-sticky-left")}>{label}</th>)}<th className="sticky right-0 top-0 z-30 border-b border-border bg-muted/95 pr-4 text-right backdrop-blur shadow-sticky-right">Actions</th></tr></thead><tbody>{visibleRows.map((role) => <tr key={role.id} className="group hover:bg-muted/50"><td className="sticky left-0 z-20 border-b border-border bg-card px-4 py-2 shadow-sticky-left group-hover:bg-muted"><span className="flex items-center gap-2 font-heading font-bold">{role.name}{role.system && <span className="rounded-full bg-muted px-1.5 py-0.5 text-[10px] font-bold uppercase text-muted-foreground">System</span>}</span></td><td className="max-w-160 truncate border-b border-border text-muted-foreground" title={role.description}>{role.description}</td><td className="border-b border-border"><span className="font-heading text-lg font-bold text-foreground">{role.permissions.length}</span><span className="ml-1 text-xs text-muted-foreground">of {allPermissionKeys.length}</span></td><td className="border-b border-border font-semibold">{role.admins}</td><td className="border-b border-border"><span className={cn("inline-flex rounded-full px-2 py-0.5 text-[11px] font-semibold", role.system ? "bg-info-soft text-info" : "status-active")}>{role.system ? "Locked" : "Editable"}</span></td><td className="whitespace-nowrap border-b border-border text-xs text-muted-foreground">{role.updated}</td><td className="sticky right-0 z-20 border-b border-border bg-card pr-3 text-right shadow-sticky-right group-hover:bg-muted"><span className="inline-flex items-center"><IconButton className="h-7 w-7" label={`Edit ${role.name}`} onClick={() => onEdit(role)}><Pencil className="h-3.5 w-3.5" /></IconButton>{!role.system && <ConfirmDeleteDialog itemType="Role" name={role.name} onConfirm={() => onDelete(role)}><Button variant="ghost" size="icon" className="h-7 w-7 text-destructive" aria-label={`Delete ${role.name}`}><Trash2 className="h-3.5 w-3.5" /></Button></ConfirmDeleteDialog>}</span></td></tr>)}</tbody></table>{!visibleRows.length && <div className="px-6 py-14 text-center"><ShieldCheck className="mx-auto h-8 w-8 text-muted-foreground" /><h3 className="mt-3 font-heading font-semibold">No roles found</h3><p className="mt-1 text-sm text-muted-foreground">Try changing or resetting the current filters.</p></div>}</div></div>
+    <div className="mt-4 grid gap-4 rounded-lg border border-border bg-card p-3 text-sm text-muted-foreground lg:grid-cols-[minmax(0,1fr)_auto] lg:items-center"><div className="flex min-w-0 flex-wrap items-center gap-4"><span>Showing <strong className="text-foreground">{rows.length ? start + 1 : 0}</strong> to <strong className="text-foreground">{Math.min(start + pageSize, rows.length)}</strong> of <strong className="text-foreground">{rows.length}</strong> roles</span><div className="flex shrink-0 items-center gap-2"><span>Rows per page</span><Select value={String(pageSize)} onValueChange={(value) => { setPageSize(Number(value)); setPage(1); }}><SelectTrigger className="h-8 w-20"><SelectValue /></SelectTrigger><SelectContent>{[10, 25, 50].map((size) => <SelectItem key={size} value={String(size)}>{size}</SelectItem>)}</SelectContent></Select></div></div><div className="flex min-w-0 items-center gap-1 overflow-x-auto pb-1 lg:justify-end"><Button variant="outline" size="sm" disabled={currentPage === 1} onClick={() => setPage(currentPage - 1)}><ChevronLeft />Previous</Button>{pageItems.map((item) => <Button key={item} variant={item === currentPage ? "default" : "outline"} size="icon" className="h-8 w-8 shrink-0" onClick={() => setPage(item)} aria-current={item === currentPage ? "page" : undefined}>{item}</Button>)}<Button variant="outline" size="sm" disabled={currentPage === pageCount} onClick={() => setPage(currentPage + 1)}>Next<ChevronRight /></Button></div></div>
+    <AddRoleDialog open={addOpen} onOpenChange={setAddOpen} onCreate={(role) => { onCreate(role); setAddOpen(false); }} />
+  </>;
+}
+
+function RoleEditPage({ role, onCancel, onSave, onDelete }: { role: AdminRole; onCancel: () => void; onSave: (role: AdminRole) => void; onDelete: (role: AdminRole) => void }) {
+  const [name, setName] = useState(role.name);
+  const [description, setDescription] = useState(role.description);
+  const [permissions, setPermissions] = useState<string[]>(role.permissions);
+  const [activeGroup, setActiveGroup] = useState<PermissionGroupName>("Catalog");
+  const [query, setQuery] = useState("");
+  const locked = role.system;
+  const search = query.toLowerCase();
+  const selectedCount = permissions.length;
+  const visibleGroupPermissions = (group: PermissionGroupName) => permissionCatalog[group].filter((permission) => !search || `${permission.key} ${permissionDescription(permission.key)}`.toLowerCase().includes(search));
+  const groupSelectedCount = (group: PermissionGroupName) => permissionCatalog[group].filter((permission) => permissions.includes(permission.key)).length;
+  const togglePermission = (key: string) => setPermissions((current) => current.includes(key) ? current.filter((item) => item !== key) : [...current, key]);
+  const setGroupPermissions = (group: PermissionGroupName, checked: boolean) => {
+    const groupKeys = permissionCatalog[group].map((permission) => permission.key);
+    setPermissions((current) => checked ? Array.from(new Set([...current, ...groupKeys])) : current.filter((key) => !groupKeys.includes(key)));
+  };
+  const save = () => { onSave({ ...role, name: name.trim(), description: description.trim(), permissions, updated: "21 Sep 2026, 7:06 pm" }); toast.success("Role permissions saved", { description: `${name.trim()} now has ${permissions.length} permissions.` }); };
+  return <><div className="mb-4 flex flex-wrap items-center gap-2 text-sm text-muted-foreground"><button type="button" onClick={onCancel} className="font-medium text-primary hover:underline">Roles</button><ChevronRight className="h-4 w-4" /><span>{role.name}</span><ChevronRight className="h-4 w-4" /><span className="text-foreground">Edit</span></div><PageHeader title={role.system ? `View role: ${role.name}` : `Edit role: ${role.name}`} description="Permissions are grouped by admin area, searchable, and paired with generated descriptions so admins can understand each grant before saving." actions={!locked && <ConfirmDeleteDialog itemType="Role" name={role.name} onConfirm={() => onDelete(role)}><Button variant="destructive"><Trash2 />Delete</Button></ConfirmDeleteDialog>} />
+    <div className="grid gap-5 xl:grid-cols-[minmax(0,1fr)_18rem]">
+      <div className="space-y-5">
+        <section className="rounded-lg border border-border bg-card p-5 shadow-card"><div className="grid gap-5 lg:grid-cols-[minmax(260px,360px)_1fr]"><label className="space-y-1.5 text-sm font-medium">Name <span className="text-destructive">*</span><Input aria-label="Role name" value={name} onChange={(event) => setName(event.target.value)} readOnly={locked} className={cn(locked && "bg-muted text-muted-foreground")} /></label><label className="space-y-1.5 text-sm font-medium">Description<Textarea aria-label="Role description" rows={3} value={description} onChange={(event) => setDescription(event.target.value)} readOnly={locked} className={cn(locked && "bg-muted text-muted-foreground")} /></label></div>{locked && <div className="mt-4 inline-flex items-center gap-2 rounded-md border border-border bg-muted px-3 py-2 text-sm text-muted-foreground"><Lock className="h-4 w-4" />System roles are view-only in this playground.</div>}</section>
+        <section className="rounded-lg border border-border bg-card shadow-card"><div className="flex flex-col gap-3 border-b border-border p-4 lg:flex-row lg:flex-wrap lg:items-center"><div className="relative min-w-[280px] flex-1"><Search className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground" /><Input value={query} onChange={(event) => { const value = event.target.value; setQuery(value); const nextGroup = (Object.keys(permissionCatalog) as PermissionGroupName[]).find((group) => permissionCatalog[group].some((permission) => `${permission.key} ${permissionDescription(permission.key)}`.toLowerCase().includes(value.toLowerCase()))); if (value && nextGroup) setActiveGroup(nextGroup); }} className="pl-9" placeholder="Search permissions or descriptions…" /></div><Button variant="outline" className="shrink-0" disabled={locked} onClick={() => setGroupPermissions(activeGroup, true)}><Check />Select group</Button><Button variant="outline" className="shrink-0" disabled={locked} onClick={() => setGroupPermissions(activeGroup, false)}><X />Clear group</Button>{query && <Button variant="ghost" size="sm" onClick={() => setQuery("")}><RotateCcw />Reset</Button>}</div><Tabs value={activeGroup} onValueChange={(value) => setActiveGroup(value as PermissionGroupName)}><TabsList className="h-auto w-full justify-start gap-6 overflow-x-auto rounded-none border-b border-border bg-transparent px-4 py-0">{(Object.keys(permissionCatalog) as PermissionGroupName[]).map((group) => <TabsTrigger key={group} value={group} className={tabTriggerClass}>{group}<span className="ml-2 rounded-full bg-muted px-1.5 py-0.5 text-[10px] font-bold text-muted-foreground">{groupSelectedCount(group)}/{permissionCatalog[group].length}</span></TabsTrigger>)}</TabsList>{(Object.keys(permissionCatalog) as PermissionGroupName[]).map((group) => { const groupPermissions = visibleGroupPermissions(group); return <TabsContent key={group} value={group} className="m-0"><div className="grid gap-2 p-4 md:grid-cols-2 xl:grid-cols-3">{groupPermissions.map((permission) => { const checked = permissions.includes(permission.key); return <label key={permission.key} className={cn("flex min-h-20 cursor-pointer items-start gap-3 rounded-lg border border-border bg-card p-3 transition-colors hover:bg-muted/60", checked && "border-primary bg-accent", locked && "cursor-default opacity-80")}><Checkbox checked={checked} disabled={locked} onCheckedChange={() => togglePermission(permission.key)} aria-label={permission.key} className="mt-1" /><span className="min-w-0"><span className="block break-words font-mono text-xs font-bold text-foreground">{permission.key}</span><span className="mt-1 block text-xs leading-5 text-muted-foreground">{permissionDescription(permission.key)}</span></span></label>; })}</div>{!groupPermissions.length && <div className="px-6 py-14 text-center"><ShieldCheck className="mx-auto h-8 w-8 text-muted-foreground" /><h3 className="mt-3 font-heading font-semibold">No permissions found</h3><p className="mt-1 text-sm text-muted-foreground">Try a different permission search.</p></div>}</TabsContent>; })}</Tabs></section>
+      </div>
+      <aside className="h-fit rounded-lg border border-border bg-card p-4 shadow-card xl:sticky xl:top-6"><h2 className="font-heading text-base font-bold">Permission summary</h2><p className="mt-1 text-sm text-muted-foreground">{selectedCount} of {allPermissionKeys.length} permissions selected</p><div className="mt-4 space-y-3">{(Object.keys(permissionCatalog) as PermissionGroupName[]).map((group) => { const count = groupSelectedCount(group); const total = permissionCatalog[group].length; return <button key={group} type="button" onClick={() => setActiveGroup(group)} className={cn("w-full rounded-md border border-border p-3 text-left hover:bg-muted/60", activeGroup === group && "border-primary bg-accent")}><span className="flex items-center justify-between gap-3 text-sm font-semibold"><span>{group}</span><span>{count}/{total}</span></span><span className="mt-2 block h-1.5 rounded-full bg-muted"><span className="block h-1.5 rounded-full bg-primary" style={{ width: `${Math.round((count / total) * 100)}%` }} /></span></button>; })}</div></aside>
+    </div>
+    <div className="sticky bottom-0 z-20 mt-6 flex justify-end gap-2 border-t border-border bg-background/95 py-4 backdrop-blur"><Button variant="destructiveSoft" onClick={onCancel}>Cancel</Button><Button disabled={locked || !name.trim()} onClick={save}><Check />Save permissions</Button></div>
+  </>;
+}
+
 function DeliveryBadge({ delivery }: { delivery: DispatchDelivery }) {
   return <span className={cn("inline-flex rounded-full px-2 py-0.5 text-[11px] font-bold", delivery === "DELIVERED" || delivery === "SENT" ? "status-approved" : delivery === "FAILED" ? "status-rejected" : "status-pending")}>{delivery}</span>;
 }
@@ -1570,7 +1671,9 @@ export function AdminPlayground() {
   const [affiliateNetworkRows, setAffiliateNetworkRows] = useState<AffiliateNetwork[]>(initialAffiliateNetworks);
   const [rejectionReasonRows, setRejectionReasonRows] = useState<RejectionReason[]>(initialRejectionReasons);
   const [communicationTemplateRows, setCommunicationTemplateRows] = useState<CommunicationTemplate[]>(initialCommunicationTemplates);
+  const [roleRows, setRoleRows] = useState<AdminRole[]>(initialRoles);
   const [editingAffiliateNetwork, setEditingAffiliateNetwork] = useState<AffiliateNetwork | null>(null);
+  const [editingRole, setEditingRole] = useState<AdminRole | null>(null);
   const [editingMerchant, setEditingMerchant] = useState<typeof merchants[number] | null>(null);
   const [categoryRows, setCategoryRows] = useState<Category[]>(initialCategories);
   const [mappingRows, setMappingRows] = useState<RawMapping[]>(initialMappings);
@@ -1635,6 +1738,10 @@ export function AdminPlayground() {
   const backToAffiliateNetworks = () => { setEditingAffiliateNetwork(null); setView("affiliate-networks"); };
   const saveAffiliateNetwork = (updated: AffiliateNetwork) => { setAffiliateNetworkRows((current) => current.some((item) => item.id === updated.id) ? current.map((item) => item.id === updated.id ? updated : item) : [updated, ...current]); backToAffiliateNetworks(); };
   const deleteAffiliateNetwork = (network: AffiliateNetwork) => { setAffiliateNetworkRows((current) => current.filter((item) => item.id !== network.id)); toast.success("Affiliate network deleted", { description: `${network.name} was removed.` }); if (view === "affiliate-network-edit") backToAffiliateNetworks(); };
+  const backToRoles = () => { setEditingRole(null); setView("roles"); };
+  const createRole = (role: AdminRole) => { setRoleRows((current) => [role, ...current]); setEditingRole(role); setView("role-edit"); toast.success("Role created", { description: `${role.name} is ready for permission assignment.` }); };
+  const saveRole = (updated: AdminRole) => { setRoleRows((current) => current.map((item) => item.id === updated.id ? updated : item)); backToRoles(); };
+  const deleteRole = (role: AdminRole) => { setRoleRows((current) => current.filter((item) => item.id !== role.id)); toast.success("Role deleted", { description: `${role.name} was removed.` }); if (view === "role-edit") backToRoles(); };
   const content = view === "dashboard" ? <Dashboard />
     : view === "merchants" ? <Merchants rows={merchantRows} onEdit={editMerchant} />
     : view === "reviews" ? <ReviewsPage reviews={reviewRows} merchantNames={merchantRows.map((row) => row[0])} onApprove={approveReview} onReject={rejectReview} onRevert={revertReview} onDelete={deleteReview} />
@@ -1651,6 +1758,8 @@ export function AdminPlayground() {
     : view === "communication-templates" ? <CommunicationTemplates templates={communicationTemplateRows} onChange={(template) => setCommunicationTemplateRows((current) => current.map((item) => item.id === template.id ? template : item))} />
     : view === "communication-dispatches" ? <CommunicationLogs />
     : view === "users" ? <UsersPage />
+    : view === "roles" ? <RolesPage roles={roleRows} onCreate={createRole} onEdit={(role) => { setEditingRole(role); setView("role-edit"); }} onDelete={deleteRole} />
+    : view === "role-edit" && editingRole ? <RoleEditPage key={editingRole.id} role={editingRole} onCancel={backToRoles} onSave={saveRole} onDelete={deleteRole} />
     : view === "merchant-edit" && editingMerchant ? <MerchantEditPage merchant={editingMerchant} offers={offerRows} reviews={reviewRows} onApproveReview={approveReview} onRejectReview={rejectReview} onRevertReview={revertReview} onDeleteReview={deleteReview} initialTab={merchantTab} onBack={backToMerchants} onDeleteMerchant={deleteMerchant} onEditOffer={(offer) => openOffer(offer, { type: "merchant", merchant: editingMerchant })} onCreateOffer={() => openOffer(null, { type: "merchant", merchant: editingMerchant })} onDeleteOffer={deleteOffer} />
     : view === "offers" ? <OffersPage offers={offerRows} onEdit={(offer) => openOffer(offer, { type: "listing" })} onCreate={() => openOffer(null, { type: "listing" })} onDelete={deleteOffer} />
     : view === "offer-edit" ? <OfferEditPage key={editingOffer?.id ?? "new"} offer={editingOffer} origin={offerOrigin} onCancel={returnFromOffer} onSave={saveOffer} onDelete={deleteOffer} />
@@ -1661,5 +1770,5 @@ export function AdminPlayground() {
     : view === "category-edit" ? <CategoryFormPage key={editingCategory?.id} category={editingCategory} onCancel={backToCategories} onSave={saveCategory} onDelete={deleteCategory} />
     : view === "category-new" ? <CategoryFormPage key="new-category" category={null} onCancel={backToCategories} onSave={saveCategory} onDelete={deleteCategory} />
     : <Conversions />;
-  return <div className="flex h-screen overflow-hidden bg-background text-foreground"><Sidebar view={view} setView={(next) => { setView(next); if (next !== "merchant-edit" && next !== "offer-edit") setEditingMerchant(null); if (next !== "category-edit" && next !== "category-new") setEditingCategory(null); if (next !== "promo-banner-edit" && next !== "promo-banner-new") setEditingPromoBanner(null); if (next !== "affiliate-network-edit" && next !== "affiliate-network-new") setEditingAffiliateNetwork(null); }} open={sidebarOpen} setOpen={setSidebarOpen} /><div className="min-w-0 flex-1 overflow-y-auto"><div className="sticky top-0 z-20 flex h-14 items-center border-b border-border bg-card/95 px-4 backdrop-blur md:hidden"><IconButton label="Open navigation" onClick={() => setSidebarOpen(true)}><Menu /></IconButton><span className="ml-2 font-heading font-bold">OfferPe Admin</span></div><main className="mx-auto w-full max-w-400 p-4 sm:p-6 lg:p-8">{content}</main></div></div>;
+  return <div className="flex h-screen overflow-hidden bg-background text-foreground"><Sidebar view={view} setView={(next) => { setView(next); if (next !== "merchant-edit" && next !== "offer-edit") setEditingMerchant(null); if (next !== "category-edit" && next !== "category-new") setEditingCategory(null); if (next !== "promo-banner-edit" && next !== "promo-banner-new") setEditingPromoBanner(null); if (next !== "affiliate-network-edit" && next !== "affiliate-network-new") setEditingAffiliateNetwork(null); if (next !== "role-edit") setEditingRole(null); }} open={sidebarOpen} setOpen={setSidebarOpen} /><div className="min-w-0 flex-1 overflow-y-auto"><div className="sticky top-0 z-20 flex h-14 items-center border-b border-border bg-card/95 px-4 backdrop-blur md:hidden"><IconButton label="Open navigation" onClick={() => setSidebarOpen(true)}><Menu /></IconButton><span className="ml-2 font-heading font-bold">OfferPe Admin</span></div><main className="mx-auto w-full max-w-400 p-4 sm:p-6 lg:p-8">{content}</main></div></div>;
 }

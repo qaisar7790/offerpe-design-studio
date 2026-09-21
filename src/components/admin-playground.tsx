@@ -151,8 +151,15 @@ function IconButton({ label, children, className, onClick }: { label: string; ch
 }
 
 function Sidebar({ view, setView, open, setOpen }: { view: View; setView: (v: View) => void; open: boolean; setOpen: (v: boolean) => void }) {
-  const [expanded, setExpanded] = useState(() => new Set(["Catalog", "Operations"]));
+  const [expanded, setExpanded] = useState<string | null>(() => {
+    const activeGroup = groups.find((group) => group.items.some((item) => item.view === view));
+    return activeGroup?.label ?? "Catalog";
+  });
   const choose = (next: View) => { setView(next); setOpen(false); };
+  const chooseGroupedItem = (next: View, groupLabel: string) => {
+    setExpanded(groupLabel);
+    choose(next);
+  };
   return (
     <>
       {open && <button aria-label="Close navigation" className="fixed inset-0 z-30 bg-overlay md:hidden" onClick={() => setOpen(false)} />}
@@ -166,13 +173,13 @@ function Sidebar({ view, setView, open, setOpen }: { view: View; setView: (v: Vi
           <Button variant="ghost" className={cn("mb-3 h-10 w-full justify-start gap-3 px-3", view === "dashboard" && "bg-sidebar-accent text-sidebar-primary hover:bg-sidebar-accent")} onClick={() => choose("dashboard")}><LayoutDashboard />Dashboard</Button>
           <div className="space-y-1">
             {groups.map((group) => {
-              const isOpen = expanded.has(group.label);
+              const isOpen = expanded === group.label;
               return <div key={group.label}>
-                <Button variant="ghost" className="h-9 w-full justify-start gap-2 px-3 text-[11px] font-bold uppercase text-muted-foreground hover:bg-sidebar-accent" onClick={() => setExpanded((current) => { const next = new Set(current); isOpen ? next.delete(group.label) : next.add(group.label); return next; })}>
+                <Button variant="ghost" className="h-9 w-full justify-start gap-2 px-3 text-[11px] font-bold uppercase text-muted-foreground hover:bg-sidebar-accent" onClick={() => setExpanded(isOpen ? null : group.label)} aria-expanded={isOpen}>
                   <group.icon className="h-3.5 w-3.5" /><span className="flex-1 text-left">{group.label}</span><ChevronRight className={cn("h-3.5 w-3.5 transition-transform", isOpen && "rotate-90")} />
                 </Button>
                 {isOpen && <div className="ml-4 border-l border-sidebar-border pl-2">
-                  {group.items.map((item) => <Button key={item.label} variant="ghost" disabled={!item.view} className={cn("my-0.5 h-9 w-full justify-start gap-2.5 px-3 text-[13px] text-sidebar-foreground disabled:opacity-55", item.view === view && "bg-sidebar-accent font-semibold text-sidebar-primary hover:bg-sidebar-accent")} onClick={() => item.view && choose(item.view)}><item.icon className="h-4 w-4" />{item.label}</Button>)}
+                  {group.items.map((item) => <Button key={item.label} variant="ghost" disabled={!item.view} className={cn("my-0.5 h-9 w-full justify-start gap-2.5 px-3 text-[13px] text-sidebar-foreground disabled:opacity-55", item.view === view && "bg-sidebar-accent font-semibold text-sidebar-primary hover:bg-sidebar-accent")} onClick={() => item.view && chooseGroupedItem(item.view, group.label)}><item.icon className="h-4 w-4" />{item.label}</Button>)}
                 </div>}
               </div>;
             })}

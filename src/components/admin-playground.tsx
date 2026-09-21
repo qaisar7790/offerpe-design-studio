@@ -1754,6 +1754,12 @@ export function AdminPlayground() {
   const [rejectionReasonRows, setRejectionReasonRows] = useState<RejectionReason[]>(initialRejectionReasons);
   const [communicationTemplateRows, setCommunicationTemplateRows] = useState<CommunicationTemplate[]>(initialCommunicationTemplates);
   const [roleRows, setRoleRows] = useState<AdminRole[]>(initialRoles);
+  const [adminUserRows, setAdminUserRows] = useState<AdminUser[]>(initialAdminUsers);
+  const saveAdminUser = (admin: AdminUser, isNew: boolean) => {
+    setAdminUserRows((current) => isNew ? [admin, ...current] : current.map((item) => item.id === admin.id ? admin : item));
+    toast.success(isNew ? "Invite sent" : "Admin updated", { description: isNew ? `${admin.email} was invited as ${admin.role}.` : `${admin.name} is now a ${admin.role}.` });
+  };
+  const deleteAdminUser = (admin: AdminUser) => { setAdminUserRows((current) => current.filter((item) => item.id !== admin.id)); toast.success("Admin removed", { description: `${admin.name} no longer has portal access.` }); };
   const [editingAffiliateNetwork, setEditingAffiliateNetwork] = useState<AffiliateNetwork | null>(null);
   const [editingRole, setEditingRole] = useState<AdminRole | null>(null);
   const [editingMerchant, setEditingMerchant] = useState<typeof merchants[number] | null>(null);
@@ -1840,6 +1846,7 @@ export function AdminPlayground() {
     : view === "communication-templates" ? <CommunicationTemplates templates={communicationTemplateRows} onChange={(template) => setCommunicationTemplateRows((current) => current.map((item) => item.id === template.id ? template : item))} />
     : view === "communication-dispatches" ? <CommunicationLogs />
     : view === "users" ? <UsersPage />
+    : view === "admin-users" ? <AdminUsersPage admins={adminUserRows} roles={roleRows} onSave={saveAdminUser} onDelete={deleteAdminUser} />
     : view === "roles" ? <RolesPage roles={roleRows} onCreate={createRole} onEdit={(role) => { setEditingRole(role); setView("role-edit"); }} onDelete={deleteRole} />
     : view === "role-edit" && editingRole ? <RoleEditPage key={editingRole.id} role={editingRole} onCancel={backToRoles} onSave={saveRole} onDelete={deleteRole} />
     : view === "merchant-edit" && editingMerchant ? <MerchantEditPage merchant={editingMerchant} offers={offerRows} reviews={reviewRows} onApproveReview={approveReview} onRejectReview={rejectReview} onRevertReview={revertReview} onDeleteReview={deleteReview} initialTab={merchantTab} onBack={backToMerchants} onDeleteMerchant={deleteMerchant} onEditOffer={(offer) => openOffer(offer, { type: "merchant", merchant: editingMerchant })} onCreateOffer={() => openOffer(null, { type: "merchant", merchant: editingMerchant })} onDeleteOffer={deleteOffer} />

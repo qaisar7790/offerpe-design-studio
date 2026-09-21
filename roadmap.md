@@ -7,4 +7,5 @@
 - [x] Add the Import Offline Report upload modal
 - [x] Add page metadata and verify desktop/mobile interaction flows
 - [x] Expand Online Conversions to 16 columns with isolated horizontal scrolling
-- [x] Add interactive enterprise pagination with page-size controls
+- [x] Add interactive enterprise pagination with page-size controls- [x] Upgrade Edit Conversion with full prefilled editing and saved row updates
+- [x] Add save confirmation and verify locked/editable invoice behavior

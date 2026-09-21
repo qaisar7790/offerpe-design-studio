@@ -13,3 +13,4 @@
 - [x] Reduce listing table row heights and compact badges and row actions
 - [x] Add copy controls with visual feedback for Click ID and Order ID
 - [x] Add the Dashboard admin welcome and operational health banner
+- [x] Enforce single-group accordion behavior in the sidebar navigation

@@ -44,3 +44,4 @@
 - [x] Build System Roles with listing, add dialog, full-page edit, grouped searchable permissions, generated descriptions, and delete confirmations
 - [x] Build Admins module (System) with listing, filters, invite dialog, edit dialog, resend invite, and delete confirmation
 - [x] System > App Versions (per-app version gates, update copy, store URLs)
+- [x] System > Settings (withdrawal, referral, Trackier sync with save reconfirmation)

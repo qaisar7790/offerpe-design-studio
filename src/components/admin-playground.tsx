@@ -98,7 +98,8 @@ import {
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
 
-type View = "dashboard" | "merchants" | "merchant-edit" | "offers" | "offer-edit" | "categories" | "category-edit" | "category-new" | "conversions";
+type View = "dashboard" | "merchants" | "merchant-edit" | "offers" | "offer-edit" | "categories" | "category-mapping" | "category-edit" | "category-new" | "conversions";
+type RawMapping = { raw: string; mappedTo: string };
 type Status = "Active" | "Inactive" | "Pending" | "Approved" | "Rejected" | "Requested" | "Paid";
 type Offer = { id: string; merchant: string; headline: string; subtext: string; details: string; terms: string; discountType: "Percentage" | "Flat amount"; discountValue: number; commissionType: "Percentage" | "Flat amount"; commissionValue: number; start: string; end: string; minBill: number; sortOrder: number; discountCap: number; commissionCap: number; redirectUrl: string; voucherLink: string; productLink: string; affiliate: string; featured: boolean; active: boolean };
 type Banner = { id: string; title: string; placement: string; target: string; image: string; start: string; end: string; active: boolean };

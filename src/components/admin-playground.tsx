@@ -682,6 +682,7 @@ function CashbackClaims({ claims, onApprove, onReject, onRevert, onDelete }: { c
   const [from, setFrom] = useState("");
   const [to, setTo] = useState("");
   const [sort, setSort] = useState("newest");
+  const [tab, setTab] = useState<"pending" | "reviewed">("pending");
   const merchantNames = Array.from(new Set(claims.map((claim) => claim.merchant)));
   const pending = claims.filter((claim) => claim.status === "Pending");
   const reviewed = useMemo(() => {
@@ -751,7 +752,8 @@ function CashbackClaims({ claims, onApprove, onReject, onRevert, onDelete }: { c
             </div></td>
           </tr>)}</tbody></table></div></div>}
       </section>
-    </div>
+      </TabsContent>
+    </Tabs>
   </>;
 }
 

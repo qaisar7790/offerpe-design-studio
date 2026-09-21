@@ -667,14 +667,6 @@ function ClaimDetails({ claim }: { claim: Claim }) {
   </div>;
 }
 
-function ClaimHeadline({ claim }: { claim: Claim }) {
-  return <div className="flex flex-wrap items-center gap-2">
-    <span className="font-heading text-base font-bold">{claim.merchant}</span>
-    <span className="inline-flex rounded-full bg-info-soft px-2 py-0.5 text-xs font-semibold text-info">ONLINE</span>
-    <span className="font-mono text-xs text-muted-foreground">{claim.id}</span>
-    <span className="text-xs text-muted-foreground">Submitted {claim.submitted}</span>
-  </div>;
-}
 
 function RejectClaimDialog({ claim, onReject, children }: { claim: Claim; onReject: (claim: Claim, reason: string, note: string) => void; children: React.ReactNode }) {
   const [open, setOpen] = useState(false);

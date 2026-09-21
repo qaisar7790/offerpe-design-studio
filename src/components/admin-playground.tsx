@@ -1175,6 +1175,13 @@ function LayoutToggle({ value, onChange }: { value: LayoutMode; onChange: (mode:
   </div>;
 }
 
+function MerchantLogo({ name, compact = false }: { name: string; compact?: boolean }) {
+  const initials = name.split(/\s+/).filter(Boolean).slice(0, 2).map((word) => word[0]).join("").toUpperCase();
+  return <div aria-label={`${name} logo`} className={cn("flex shrink-0 items-center justify-center rounded-lg border border-border bg-card font-heading font-bold text-primary shadow-card", compact ? "h-11 w-11 text-sm" : "h-20 w-20 text-2xl")}>
+    {initials || <Store className={compact ? "h-4 w-4" : "h-7 w-7"} />}
+  </div>;
+}
+
 function OnboardingSlidesPage({ slides, app, onAppChange, onCreate, onEdit, onToggle, onMove, onDelete }: { slides: OnboardingSlide[]; app: OnboardingApp; onAppChange: (app: OnboardingApp) => void; onCreate: () => void; onEdit: (slide: OnboardingSlide) => void; onToggle: (slide: OnboardingSlide) => void; onMove: (slide: OnboardingSlide, direction: -1 | 1) => void; onDelete: (slide: OnboardingSlide) => void }) {
   const rows = slides.filter((slide) => slide.app === app);
   const [layout, setLayout] = useState<LayoutMode>("list");
@@ -1183,10 +1190,10 @@ function OnboardingSlidesPage({ slides, app, onAppChange, onCreate, onEdit, onTo
     <Tabs value={app} onValueChange={(value) => onAppChange(value as OnboardingApp)}>
       <TabsList className="mb-5 h-auto w-full justify-start gap-6 rounded-none border-b border-border bg-transparent p-0"><TabsTrigger value="Consumer" className={tabTriggerClass}>Consumer</TabsTrigger><TabsTrigger value="Merchant" className={tabTriggerClass}>Merchant</TabsTrigger></TabsList>
       <TabsContent value={app} className="mt-0">
-        {layout === "grid" && <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
+        {layout === "grid" && <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
           {rows.map((slide, index) => <article key={slide.id} className="flex flex-col overflow-hidden rounded-lg border border-border bg-card shadow-card">
-            <div className="relative h-36 w-full bg-muted">{slide.image ? <img src={slide.image} alt="" className="h-full w-full object-cover" /> : <span className="flex h-full w-full items-center justify-center"><ImageIcon className="h-6 w-6 text-muted-foreground" /></span>}<span className="absolute left-2 top-2 flex h-6 w-6 items-center justify-center rounded-md bg-card font-heading text-xs font-bold text-primary shadow-card">{index + 1}</span></div>
-            <div className="flex flex-1 flex-col gap-2 p-3">
+            <div className="relative h-40 w-full border-b border-border bg-muted/40">{slide.image ? <img src={slide.image} alt="" className="h-full w-full object-cover" /> : <span className="flex h-full w-full items-center justify-center"><ImageIcon className="h-6 w-6 text-muted-foreground" /></span>}<span className="absolute left-3 top-3 flex h-7 w-7 items-center justify-center rounded-md bg-card font-heading text-xs font-bold text-primary shadow-card">{index + 1}</span></div>
+            <div className="flex min-h-44 flex-1 flex-col gap-2 p-4">
               <div className="flex items-start justify-between gap-2"><span className="font-heading text-sm font-bold">{slide.title}</span><StatusBadge status={slide.active ? "Active" : "Inactive"} /></div>
               <p className="line-clamp-3 text-xs text-muted-foreground">{slide.body}</p>
               <div className="mt-auto flex flex-wrap items-center gap-1 pt-1">
@@ -1426,8 +1433,9 @@ function ReviewStatusBadge({ review }: { review: Review }) {
 }
 
 function PendingReviewCard({ review, showMerchant, onApprove, onReject }: { review: Review; showMerchant: boolean; onApprove: (review: Review) => void; onReject: (review: Review, reason: string, note: string) => void }) {
-  return <article className="rounded-lg border border-border bg-card p-4 shadow-card">
-    <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+  return <article className="flex min-h-88 flex-col overflow-hidden rounded-lg border border-border bg-card shadow-card">
+    <div className="flex h-40 items-center justify-center border-b border-border bg-muted/40"><MerchantLogo name={review.merchant} /></div>
+    <div className="flex flex-1 flex-col p-4"><div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
       <div className="min-w-0">
         <div className="flex flex-wrap items-center gap-2">
           <span className="font-heading text-sm font-bold">{review.user}</span>
@@ -1445,8 +1453,9 @@ function PendingReviewCard({ review, showMerchant, onApprove, onReject }: { revi
         <RejectReviewDialog review={review} onReject={onReject}><Button size="sm" variant="destructive"><X />Reject</Button></RejectReviewDialog>
       </div>
     </div>
-    <p className="mt-3 text-sm leading-6 text-muted-foreground">{review.comment}</p>
+    <p className="mt-3 line-clamp-3 text-sm leading-6 text-muted-foreground">{review.comment}</p>
     {review.photos.length > 0 && <div className="mt-3 flex flex-wrap gap-2">{review.photos.map((photo) => <ReviewPhoto key={photo} src={photo} user={review.user} />)}</div>}
+    </div>
   </article>;
 }
 
@@ -1499,12 +1508,14 @@ function ReviewsPanel({ reviews, merchantNames, scopedMerchant, onApprove, onRej
     <TabsContent value="pending" className="mt-4">
       {pending.length === 0 ? <p className="text-sm text-muted-foreground">No reviews waiting for review.</p>
         : layout === "list" ? reviewTable(pending, "pending")
-        : <div className="space-y-3">{pending.map((review) => <PendingReviewCard key={review.id} review={review} showMerchant={!scopedMerchant} onApprove={onApprove} onReject={onReject} />)}</div>}
+        : <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">{pending.map((review) => <PendingReviewCard key={review.id} review={review} showMerchant={!scopedMerchant} onApprove={onApprove} onReject={onReject} />)}</div>}
     </TabsContent>
     <TabsContent value="reviewed" className="mt-4">
       {reviewed.length === 0 ? <p className="text-sm text-muted-foreground">Nothing reviewed yet.</p>
         : layout === "list" ? reviewTable(reviewed, "reviewed")
-        : <div className="space-y-3">{reviewed.map((review) => <article key={review.id} className="rounded-lg border border-border bg-card p-4 shadow-card">
+        : <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">{reviewed.map((review) => <article key={review.id} className="flex min-h-88 flex-col overflow-hidden rounded-lg border border-border bg-card shadow-card">
+          <div className="flex h-40 items-center justify-center border-b border-border bg-muted/40"><MerchantLogo name={review.merchant} /></div>
+          <div className="flex flex-1 flex-col p-4">
           <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
             <div className="min-w-0">
               <div className="flex flex-wrap items-center gap-2">
@@ -1523,9 +1534,10 @@ function ReviewsPanel({ reviews, merchantNames, scopedMerchant, onApprove, onRej
               <ConfirmDeleteDialog itemType="Review" name={`${review.user} — ${review.merchant}`} onConfirm={() => onDelete(review)}><Button size="sm" variant="ghost" className="text-destructive" aria-label={`Delete review ${review.id}`}><Trash2 /></Button></ConfirmDeleteDialog>
             </div>
           </div>
-          <p className="mt-3 text-sm leading-6 text-muted-foreground">{review.comment}</p>
+          <p className="mt-3 line-clamp-3 text-sm leading-6 text-muted-foreground">{review.comment}</p>
           {review.status === "Rejected" && <p className="mt-2 text-xs font-semibold text-destructive">Reason: {review.reason}{review.note && <span className="font-normal text-muted-foreground"> — {review.note}</span>}</p>}
           {review.photos.length > 0 && <div className="mt-3 flex flex-wrap gap-2">{review.photos.map((photo) => <ReviewPhoto key={photo} src={photo} user={review.user} />)}</div>}
+          </div>
         </article>)}</div>}
     </TabsContent>
   </Tabs>;
@@ -1621,22 +1633,30 @@ function OnboardingQueue({ applications, onApprove, onReject, onRevert, onDelete
       <TabsContent value="pending" className="mt-4">
         {pending.length === 0 ? <p className="text-sm text-muted-foreground">No submissions waiting for review.</p>
           : layout === "list" ? queueTable(pending, "pending")
-          : <div className="space-y-3">{pending.map((application) => <article key={application.id} className="rounded-lg border border-border bg-card p-4 shadow-card">
-            <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+          : <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">{pending.map((application) => <article key={application.id} className="flex min-h-88 flex-col overflow-hidden rounded-lg border border-border bg-card shadow-card">
+            <div className="flex h-40 items-center justify-center border-b border-border bg-muted/40"><MerchantLogo name={application.store} /></div>
+            <div className="flex flex-1 flex-col p-4"><div className="flex flex-col gap-3">
               <ApplicationHeadline application={application} />
-              <div className="flex shrink-0 gap-2">
+              <div className="mt-auto flex shrink-0 gap-2 pt-3">
                 <Button size="sm" onClick={() => onApprove(application)}><Check />Approve</Button>
                 <RejectApplicationDialog application={application} onReject={onReject}><Button size="sm" variant="destructive"><X />Reject</Button></RejectApplicationDialog>
               </div>
             </div>
-            <ApplicationDetails application={application} />
+            <div className="mt-4 grid gap-3 border-t border-border pt-3 text-xs sm:grid-cols-2">
+              <div><div className="font-semibold uppercase text-muted-foreground">Applicant</div><div className="mt-1 font-medium text-foreground">{application.owner}</div><div className="text-muted-foreground">{application.phone}</div></div>
+              <div><div className="font-semibold uppercase text-muted-foreground">Location</div><div className="mt-1 font-medium text-foreground">{application.city}</div><div className="line-clamp-2 text-muted-foreground">{application.address}</div></div>
+              <div><div className="font-semibold uppercase text-muted-foreground">Commission</div><div className="mt-1 font-heading text-base font-bold text-foreground">{application.commission}</div></div>
+              <div><div className="font-semibold uppercase text-muted-foreground">Documents</div><div className="mt-1 font-medium text-foreground">{application.documents.length} attached</div></div>
+            </div>
+            </div>
           </article>)}</div>}
       </TabsContent>
       <TabsContent value="reviewed" className="mt-4">
         {reviewed.length === 0 ? <p className="text-sm text-muted-foreground">Nothing reviewed yet.</p>
           : layout === "list" ? queueTable(reviewed, "reviewed")
-          : <div className="space-y-3">{reviewed.map((application) => <article key={application.id} className="rounded-lg border border-border bg-card p-4 shadow-card">
-            <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+          : <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">{reviewed.map((application) => <article key={application.id} className="flex min-h-88 flex-col overflow-hidden rounded-lg border border-border bg-card shadow-card">
+            <div className="flex h-40 items-center justify-center border-b border-border bg-muted/40"><MerchantLogo name={application.store} /></div>
+            <div className="flex flex-1 flex-col p-4"><div className="flex flex-col gap-3">
               <div className="min-w-0">
                 <ApplicationHeadline application={application} />
                 <div className="mt-1.5 flex flex-wrap items-center gap-2 text-sm">
@@ -1644,13 +1664,14 @@ function OnboardingQueue({ applications, onApprove, onReject, onRevert, onDelete
                   <span className="text-muted-foreground">{application.owner} · {application.city}</span>
                 </div>
               </div>
-              <div className="flex shrink-0 gap-2">
+              <div className="flex shrink-0 flex-wrap gap-2">
                 <Dialog><DialogTrigger asChild><Button size="sm" variant="outline"><ExternalLink />View details</Button></DialogTrigger><DialogContent className="max-w-2xl bg-card"><DialogHeader><DialogTitle className="font-heading text-lg">{application.store}</DialogTitle><DialogDescription>Application {application.id} · submitted {application.submitted}</DialogDescription></DialogHeader><ApplicationDetails application={application} />{application.status === "Rejected" && <p className="mt-3 text-sm font-semibold text-destructive">Reason: {application.reason}{application.note && <span className="font-normal text-muted-foreground"> — {application.note}</span>}</p>}</DialogContent></Dialog>
                 <Button size="sm" variant="outline" onClick={() => onRevert(application)}><RotateCcw />Re-evaluate</Button>
                 <ConfirmDeleteDialog itemType="Application" name={application.store} onConfirm={() => onDelete(application)}><Button size="sm" variant="ghost" className="text-destructive" aria-label={`Delete application ${application.id}`}><Trash2 /></Button></ConfirmDeleteDialog>
               </div>
             </div>
             {application.status === "Rejected" && <p className="mt-2 text-xs font-semibold text-destructive">Reason: {application.reason}{application.note && <span className="font-normal text-muted-foreground"> — {application.note}</span>}</p>}
+            </div>
           </article>)}</div>}
       </TabsContent>
     </Tabs>
@@ -1782,11 +1803,13 @@ function ReviewsPage(props: { reviews: Review[]; merchantNames: string[]; onAppr
 function Merchants({ rows: merchantRows, onEdit }: { rows: readonly (typeof merchants[number])[]; onEdit: (merchant: typeof merchants[number]) => void }) {
   const [query, setQuery] = useState(""); const [statuses, setStatuses] = useState<Status[]>([]); const [sortAsc, setSortAsc] = useState(true); const [layout, setLayout] = useState<LayoutMode>("list");
   const rows = useMemo(() => merchantRows.filter((m) => (!query || `${m[0]} ${m[2]}`.toLowerCase().includes(query.toLowerCase())) && (!statuses.length || statuses.includes(m[4] as Status))).sort((a, b) => sortAsc ? a[0].localeCompare(b[0]) : b[0].localeCompare(a[0])), [query, statuses, sortAsc, merchantRows]);
-  return <><PageHeader title="Merchants" description="Manage merchant availability, categorisation, and channel details." actions={<><LayoutToggle value={layout} onChange={setLayout} /><Button variant="outline" onClick={() => downloadCsv(rows.map((m) => ({ Name: m[0], Channel: m[1], Category: m[2], Offers: m[5], Commission: m[6], Cities: (m[7] as readonly string[]).join(" | "), Order: m[3], Status: m[4] })), "offerpe-merchants.csv")}><Download />Export CSV</Button><Button><Plus />Add new</Button></>} /><FilterBar query={query} setQuery={setQuery} statuses={statuses} setStatuses={setStatuses} showChannel />{layout === "grid" ? <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">{rows.map((m) => <article key={m[0]} className="flex flex-col gap-2 rounded-lg border border-border bg-card p-4 shadow-card">
-      <div className="flex items-start justify-between gap-2"><div className="min-w-0"><div className="font-heading text-sm font-bold">{m[0]}</div><div className="mt-1 flex items-center gap-1.5 text-xs text-muted-foreground"><span className={cn("h-2 w-2 rounded-full", m[1] === "Online" ? "bg-success" : "bg-info")} />{m[1]} · {m[2]}</div></div><StatusBadge status={m[4] as Status} /></div>
+  return <><PageHeader title="Merchants" description="Manage merchant availability, categorisation, and channel details." actions={<><LayoutToggle value={layout} onChange={setLayout} /><Button variant="outline" onClick={() => downloadCsv(rows.map((m) => ({ Name: m[0], Channel: m[1], Category: m[2], Offers: m[5], Commission: m[6], Cities: (m[7] as readonly string[]).join(" | "), Order: m[3], Status: m[4] })), "offerpe-merchants.csv")}><Download />Export CSV</Button><Button><Plus />Add new</Button></>} /><FilterBar query={query} setQuery={setQuery} statuses={statuses} setStatuses={setStatuses} showChannel />{layout === "grid" ? <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">{rows.map((m) => <article key={m[0]} className="flex min-h-88 flex-col overflow-hidden rounded-lg border border-border bg-card shadow-card">
+      <div className="flex h-40 items-center justify-center border-b border-border bg-muted/40"><MerchantLogo name={m[0]} /></div>
+      <div className="flex flex-1 flex-col gap-3 p-4"><div className="flex items-start justify-between gap-2"><div className="min-w-0"><div className="font-heading text-base font-bold">{m[0]}</div><div className="mt-1 flex items-center gap-1.5 text-xs text-muted-foreground"><span className={cn("h-2 w-2 rounded-full", m[1] === "Online" ? "bg-success" : "bg-info")} />{m[1]} · {m[2]}</div></div><StatusBadge status={m[4] as Status} /></div>
       <div className="flex flex-wrap items-center gap-2 text-xs"><span className="inline-flex items-center gap-1 rounded-full bg-accent px-2 py-0.5 font-semibold text-accent-foreground"><Tag className="h-3 w-3" />{m[5]} active offers</span><span className="rounded-full border border-border bg-muted px-2 py-0.5 font-semibold">{m[6]} commission</span></div>
       <div className="flex flex-wrap gap-1">{(m[7] as readonly string[]).slice(0, 4).map((city) => <span key={city} className="rounded-full border border-border bg-muted px-2 py-0.5 text-xs font-medium">{city}</span>)}{m[7].length > 4 && <span className="rounded-full border border-border bg-accent px-2 py-0.5 text-xs font-semibold text-primary">+{m[7].length - 4}</span>}</div>
       <div className="mt-auto flex items-center justify-between pt-1 text-xs text-muted-foreground"><span>Order {m[3]}</span><Button variant="outline" size="sm" className="h-8" onClick={() => onEdit(m)}><Pencil className="h-3.5 w-3.5" />Edit</Button></div>
+      </div>
     </article>)}{rows.length === 0 && <div className="rounded-lg border border-dashed border-border bg-card p-10 text-center text-sm text-muted-foreground sm:col-span-2 xl:col-span-3">No merchants match these filters.</div>}</div> : <div className="overflow-hidden rounded-lg border border-border bg-card shadow-card"><div className="overflow-x-auto"><table className="w-full min-w-310 text-left text-sm"><thead className="bg-muted/70 text-[11px] uppercase text-muted-foreground"><tr><th className="sticky left-0 z-10 bg-muted px-4 py-2 shadow-sticky-left"><Button variant="ghost" size="sm" className="-ml-3 h-7 text-[11px] uppercase" onClick={() => setSortAsc(!sortAsc)}>Name <ChevronDown className={cn("transition-transform", !sortAsc && "rotate-180")} /></Button></th><th>Channel</th><th>Category</th><th>Offers</th><th>Commission</th><th>Cities</th><th>Order</th><th>Status</th><th className="pr-4 text-right">Actions</th></tr></thead><tbody>{rows.map((m) => <tr key={m[0]} className="group border-t border-border hover:bg-muted/50"><td className="sticky left-0 z-10 bg-card px-4 py-2 font-semibold shadow-sticky-left group-hover:bg-muted">{m[0]}</td><td><span className="inline-flex items-center gap-1.5 font-medium"><span className={cn("h-2 w-2 rounded-full", m[1] === "Online" ? "bg-success" : "bg-info")} />{m[1]}</span></td><td>{m[2]}</td><td><span className="inline-flex items-center gap-1 rounded-full bg-accent px-2 py-0.5 text-xs font-semibold text-accent-foreground"><Tag className="h-3 w-3" />{m[5]} active</span></td><td className="whitespace-nowrap font-semibold">{m[6]}</td><td><div className="flex min-w-64 items-center gap-1">{m[7].slice(0, 3).map((city) => <span key={city} className="rounded-full border border-border bg-muted px-2 py-0.5 text-xs font-medium">{city}</span>)}{m[7].length > 3 && <TooltipProvider><UiTooltip><UiTooltipTrigger asChild><button type="button" className="rounded-full border border-border bg-accent px-2 py-0.5 text-xs font-semibold text-primary">+{m[7].length - 3} more</button></UiTooltipTrigger><UiTooltipContent>{m[7].join(", ")}</UiTooltipContent></UiTooltip></TooltipProvider>}</div></td><td>{m[3]}</td><td><StatusBadge status={m[4] as Status} /></td><td className="pr-3 text-right"><IconButton className="h-7 w-7" label={`Edit ${m[0]}`} onClick={() => onEdit(m)}><Pencil className="h-3.5 w-3.5" /></IconButton><IconButton className="h-7 w-7" label={`Open ${m[0]}`} onClick={() => onEdit(m)}><ExternalLink className="h-3.5 w-3.5" /></IconButton></td></tr>)}</tbody></table></div></div>}<div className="mt-4 flex items-center justify-between text-sm text-muted-foreground"><span>Showing {rows.length} of {merchantRows.length} merchants</span><div className="flex gap-1"><Button variant="outline" size="icon" disabled><ChevronLeft /></Button><Button variant="outline" size="icon"><ChevronRight /></Button></div></div></>;
 }
 
@@ -1794,11 +1817,13 @@ function OffersPage({ offers, onEdit, onCreate, onDelete }: { offers: Offer[]; o
   const [query, setQuery] = useState(""); const [statuses, setStatuses] = useState<Status[]>([]); const [merchantFilter, setMerchantFilter] = useState("all"); const [page, setPage] = useState(1); const [pageSize, setPageSize] = useState(10); const [layout, setLayout] = useState<LayoutMode>("list");
   const filtered = offers.filter((offer) => (!query || `${offer.headline} ${offer.merchant}`.toLowerCase().includes(query.toLowerCase())) && (!statuses.length || statuses.includes(offer.active ? "Active" : "Inactive")) && (merchantFilter === "all" || offer.merchant === merchantFilter));
   const pageCount = Math.max(1, Math.ceil(filtered.length / pageSize)); const currentPage = Math.min(page, pageCount); const start = (currentPage - 1) * pageSize; const rows = filtered.slice(start, start + pageSize);
-  return <><PageHeader title="Offers" description="Manage customer cashback, merchant commissions, validity, and visibility." actions={<><LayoutToggle value={layout} onChange={setLayout} /><Button variant="outline" onClick={() => downloadCsv(filtered, "offerpe-offers.csv")}><Download />Export CSV</Button><Button onClick={onCreate}><Plus />Add new offer</Button></>} /><div className="mb-5 flex flex-col gap-3 rounded-lg border border-border bg-card p-3 shadow-card lg:flex-row"><div className="relative flex-1"><Search className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground" /><Input className="pl-9" value={query} onChange={(event) => { setQuery(event.target.value); setPage(1); }} placeholder="Search offer headline or merchant…" /></div><DropdownMenu><DropdownMenuTrigger asChild><Button variant="outline"><Filter />Status{statuses.length ? ` (${statuses.length})` : ""}<ChevronDown /></Button></DropdownMenuTrigger><DropdownMenuContent>{(["Active", "Inactive"] as Status[]).map((status) => <DropdownMenuCheckboxItem key={status} checked={statuses.includes(status)} onCheckedChange={() => { setStatuses(statuses.includes(status) ? statuses.filter((item) => item !== status) : [...statuses, status]); setPage(1); }}>{status}</DropdownMenuCheckboxItem>)}</DropdownMenuContent></DropdownMenu><Select value={merchantFilter} onValueChange={(value) => { setMerchantFilter(value); setPage(1); }}><SelectTrigger className="w-full lg:w-52"><SelectValue placeholder="All merchants" /></SelectTrigger><SelectContent><SelectItem value="all">All merchants</SelectItem>{merchants.map((merchant) => <SelectItem key={merchant[0]} value={merchant[0]}>{merchant[0]}</SelectItem>)}</SelectContent></Select></div>{layout === "grid" ? <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">{rows.map((offer) => <article key={offer.id} className="flex flex-col gap-2 rounded-lg border border-border bg-card p-4 shadow-card">
-      <div className="flex items-start justify-between gap-2"><div className="min-w-0"><div className="font-heading text-sm font-bold">{offer.headline}</div><div className="mt-1 flex items-center gap-1.5 text-xs text-muted-foreground"><Store className="h-3 w-3" />{offer.merchant}</div></div><StatusBadge status={offer.active ? "Active" : "Inactive"} /></div>
+  return <><PageHeader title="Offers" description="Manage customer cashback, merchant commissions, validity, and visibility." actions={<><LayoutToggle value={layout} onChange={setLayout} /><Button variant="outline" onClick={() => downloadCsv(filtered, "offerpe-offers.csv")}><Download />Export CSV</Button><Button onClick={onCreate}><Plus />Add new offer</Button></>} /><div className="mb-5 flex flex-col gap-3 rounded-lg border border-border bg-card p-3 shadow-card lg:flex-row"><div className="relative flex-1"><Search className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground" /><Input className="pl-9" value={query} onChange={(event) => { setQuery(event.target.value); setPage(1); }} placeholder="Search offer headline or merchant…" /></div><DropdownMenu><DropdownMenuTrigger asChild><Button variant="outline"><Filter />Status{statuses.length ? ` (${statuses.length})` : ""}<ChevronDown /></Button></DropdownMenuTrigger><DropdownMenuContent>{(["Active", "Inactive"] as Status[]).map((status) => <DropdownMenuCheckboxItem key={status} checked={statuses.includes(status)} onCheckedChange={() => { setStatuses(statuses.includes(status) ? statuses.filter((item) => item !== status) : [...statuses, status]); setPage(1); }}>{status}</DropdownMenuCheckboxItem>)}</DropdownMenuContent></DropdownMenu><Select value={merchantFilter} onValueChange={(value) => { setMerchantFilter(value); setPage(1); }}><SelectTrigger className="w-full lg:w-52"><SelectValue placeholder="All merchants" /></SelectTrigger><SelectContent><SelectItem value="all">All merchants</SelectItem>{merchants.map((merchant) => <SelectItem key={merchant[0]} value={merchant[0]}>{merchant[0]}</SelectItem>)}</SelectContent></Select></div>{layout === "grid" ? <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">{rows.map((offer) => <article key={offer.id} className="flex min-h-88 flex-col overflow-hidden rounded-lg border border-border bg-card shadow-card">
+      <div className="flex h-40 items-center justify-center border-b border-border bg-muted/40"><MerchantLogo name={offer.merchant} /></div>
+      <div className="flex flex-1 flex-col gap-3 p-4"><div className="flex items-start justify-between gap-2"><div className="min-w-0"><div className="font-heading text-base font-bold">{offer.headline}</div><div className="mt-1 flex items-center gap-1.5 text-xs text-muted-foreground"><Store className="h-3 w-3" />{offer.merchant}</div></div><StatusBadge status={offer.active ? "Active" : "Inactive"} /></div>
       <p className="line-clamp-2 text-xs text-muted-foreground">{offer.subtext}</p>
       <div className="flex flex-wrap gap-2 text-xs"><span className="rounded-full bg-accent px-2 py-0.5 font-semibold text-accent-foreground">Cashback {offer.discountType === "Percentage" ? `${offer.discountValue}%` : inr(offer.discountValue)}</span><span className="rounded-full border border-border bg-muted px-2 py-0.5 font-semibold">Commission {offer.commissionType === "Percentage" ? `${offer.commissionValue}%` : inr(offer.commissionValue)}</span>{offer.featured && <span className="rounded-full bg-success-soft px-2 py-0.5 font-semibold text-success">Featured</span>}</div>
       <div className="mt-auto flex items-center justify-between pt-1 text-xs text-muted-foreground"><span>{offer.start} — {offer.end}</span><span className="flex gap-1"><IconButton className="h-7 w-7" label={`Edit ${offer.headline}`} onClick={() => onEdit(offer)}><Pencil className="h-3.5 w-3.5" /></IconButton><ConfirmDeleteDialog itemType="Offer" name={offer.headline} onConfirm={() => onDelete(offer)}><Button variant="ghost" size="icon" className="h-7 w-7 text-destructive" aria-label={`Delete ${offer.headline}`}><Trash2 className="h-3.5 w-3.5" /></Button></ConfirmDeleteDialog></span></div>
+      </div>
     </article>)}{rows.length === 0 && <div className="rounded-lg border border-dashed border-border bg-card p-10 text-center text-sm text-muted-foreground sm:col-span-2 xl:col-span-3">No offers match these filters.</div>}</div> : <OfferTable offers={rows} onEdit={onEdit} onDelete={onDelete} showMerchant />}<div className="mt-4 flex flex-col gap-3 rounded-lg border border-border bg-card p-3 text-sm text-muted-foreground sm:flex-row sm:items-center sm:justify-between"><div className="flex flex-wrap items-center gap-4"><span>Showing <strong className="text-foreground">{filtered.length ? start + 1 : 0}</strong> to <strong className="text-foreground">{Math.min(start + pageSize, filtered.length)}</strong> of <strong className="text-foreground">{filtered.length}</strong> results</span><div className="flex items-center gap-2">Rows per page<Select value={String(pageSize)} onValueChange={(value) => { setPageSize(Number(value)); setPage(1); }}><SelectTrigger className="h-8 w-20"><SelectValue /></SelectTrigger><SelectContent>{[10, 25, 50, 100].map((size) => <SelectItem key={size} value={String(size)}>{size}</SelectItem>)}</SelectContent></Select></div></div><div className="flex gap-1"><Button variant="outline" size="sm" disabled={currentPage === 1} onClick={() => setPage(currentPage - 1)}><ChevronLeft />Previous</Button><Button size="icon" className="h-8 w-8">{currentPage}</Button><Button variant="outline" size="sm" disabled={currentPage === pageCount} onClick={() => setPage(currentPage + 1)}>Next<ChevronRight /></Button></div></div></>;
 }
 

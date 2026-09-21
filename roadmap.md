@@ -48,3 +48,4 @@
 - [x] Renamed Cashback Offers to Offers, moved Online Conversions into Financial, built Conversion Resolutions (pending/reviewed tabs, filters, exports, bulk CSV)
 - [x] Merchant Reviews: split into Pending Review (default) / Reviewed tabs with shared filters
 - [x] Export CSV moved to tab level (Transactions, Dispatches, Cashback Claims, Merchant Reviews); Import limited to Pending Review; Export added to Merchants and Offers; Conversions button renamed to Import
+- List/Grid toggle added to Merchants, Offers, Merchant Reviews, Merchant Onboarding Queue and Onboarding Screens

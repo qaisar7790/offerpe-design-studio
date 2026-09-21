@@ -84,17 +84,29 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
 
-type View = "dashboard" | "merchants" | "merchant-edit" | "offers" | "offer-edit" | "conversions";
+type View = "dashboard" | "merchants" | "merchant-edit" | "offers" | "offer-edit" | "categories" | "category-edit" | "category-new" | "conversions";
 type Status = "Active" | "Inactive" | "Pending" | "Approved" | "Rejected" | "Requested" | "Paid";
 type Offer = { id: string; merchant: string; headline: string; subtext: string; details: string; terms: string; discountType: "Percentage" | "Flat amount"; discountValue: number; commissionType: "Percentage" | "Flat amount"; commissionValue: number; start: string; end: string; minBill: number; sortOrder: number; discountCap: number; commissionCap: number; redirectUrl: string; voucherLink: string; productLink: string; affiliate: string; featured: boolean; active: boolean };
 type Banner = { id: string; title: string; placement: string; target: string; image: string; start: string; end: string; active: boolean };
+type Category = { id: string; channel: "Online" | "Offline"; name: string; order: number; active: boolean; image: string; line1: string; line2: string };
 type OfferOrigin = { type: "merchant"; merchant: typeof merchants[number] } | { type: "listing" };
 
 const groups = [
-  { label: "Catalog", icon: ShoppingBag, items: [{ label: "Merchants", icon: Store, view: "merchants" as View }, { label: "Cashback Offers", icon: Tag, view: "offers" as View }, { label: "Categories", icon: Tag }, { label: "Cities", icon: Building2 }] },
+  { label: "Catalog", icon: ShoppingBag, items: [{ label: "Merchants", icon: Store, view: "merchants" as View }, { label: "Cashback Offers", icon: Tag, view: "offers" as View }, { label: "Categories", icon: Tag, view: "categories" as View }, { label: "Cities", icon: Building2 }] },
   { label: "Operations", icon: Settings2, items: [{ label: "Online Conversions", icon: CircleDollarSign, view: "conversions" as View }, { label: "Users", icon: Users }] },
   { label: "Financial", icon: WalletCards, items: [{ label: "Withdrawals", icon: BadgeIndianRupee }, { label: "Missing Claims", icon: FileSpreadsheet }] },
   { label: "Communication", icon: Megaphone, items: [{ label: "Notifications", icon: Megaphone }, { label: "Promo Banners", icon: AreaChart }] },
@@ -121,6 +133,15 @@ const initialOffers: Offer[] = [
   { id: "OFF-1039", merchant: "Croma", headline: "Electronics weekend cashback", subtext: "Selected electronics", details: "Cashback on eligible electronics purchased online.", terms: "Exclusions apply.", discountType: "Percentage", discountValue: 4, commissionType: "Percentage", commissionValue: 6, start: "2026-09-01T00:00", end: "2026-11-30T23:59", minBill: 4999, sortOrder: 1, discountCap: 1500, commissionCap: 2000, redirectUrl: "https://offerpe.link/r/croma", voucherLink: "", productLink: "", affiliate: "Trackier", featured: true, active: true },
   { id: "OFF-1038", merchant: "Nykaa", headline: "Beauty essentials cashback", subtext: "Across selected brands", details: "Earn cashback on qualifying beauty purchases.", terms: "Selected products only.", discountType: "Percentage", discountValue: 8, commissionType: "Percentage", commissionValue: 11, start: "2026-08-15T00:00", end: "2026-10-31T23:59", minBill: 799, sortOrder: 2, discountCap: 500, commissionCap: 650, redirectUrl: "https://offerpe.link/r/nykaa", voucherLink: "", productLink: "", affiliate: "Impact", featured: false, active: true },
   { id: "OFF-1037", merchant: "Myntra", headline: "Fashion season offer", subtext: "App-only savings", details: "Cashback on fashion orders.", terms: "Not valid with select coupons.", discountType: "Percentage", discountValue: 6, commissionType: "Percentage", commissionValue: 9, start: "2026-07-01T00:00", end: "2026-08-31T23:59", minBill: 999, sortOrder: 4, discountCap: 400, commissionCap: 600, redirectUrl: "https://offerpe.link/r/myntra", voucherLink: "", productLink: "", affiliate: "Involve Asia", featured: false, active: false },
+];
+
+const initialCategories: Category[] = [
+  { id: "CAT-101", channel: "Offline", name: "Restaurants", order: 1, active: true, image: "https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?w=240", line1: "Eat out. Earn more.", line2: "Cashback at restaurants near you." },
+  { id: "CAT-102", channel: "Online", name: "Fashion", order: 2, active: true, image: "https://images.unsplash.com/photo-1445205170230-053b83016050?w=240", line1: "Fresh styles, rewarding prices.", line2: "Shop fashion from leading brands." },
+  { id: "CAT-103", channel: "Online", name: "Electronics", order: 3, active: true, image: "https://images.unsplash.com/photo-1498049794561-7780e7231661?w=240", line1: "Upgrade and earn.", line2: "Cashback on the latest technology." },
+  { id: "CAT-104", channel: "Online", name: "Beauty", order: 4, active: true, image: "", line1: "Beauty that gives back.", line2: "Discover everyday essentials." },
+  { id: "CAT-105", channel: "Offline", name: "Department Stores", order: 5, active: false, image: "", line1: "Everything in one place.", line2: "More value on every visit." },
+  { id: "CAT-106", channel: "Online", name: "Travel", order: 6, active: true, image: "", line1: "Go farther for less.", line2: "Rewards on flights and stays." },
 ];
 
 function createBlankOffer(merchant: string): Offer {

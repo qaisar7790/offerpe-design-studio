@@ -704,25 +704,30 @@ function CashbackClaims({ claims, onApprove, onReject, onRevert, onDelete }: { c
   }, [claims, query, status, merchant, from, to, sort]);
   const pendingValue = pending.reduce((total, claim) => total + claim.expectedCashback, 0);
   return <><PageHeader title="Cashback Claims" description="Online missing-cashback claims raised by customers. Approving accepts a claim into the same online-conversion pipeline a real network webhook uses (source = CLAIM) — it does not itself credit the wallet. Resolve the resulting conversion from Online Conversions to actually credit it." actions={<DropdownMenu><DropdownMenuTrigger asChild><Button variant="outline"><UploadCloud />Import &amp; Export<ChevronDown /></Button></DropdownMenuTrigger><DropdownMenuContent align="end"><DropdownMenuItem><Download />Export claims CSV</DropdownMenuItem><DropdownMenuItem><UploadCloud />Import claim decisions</DropdownMenuItem></DropdownMenuContent></DropdownMenu>} />
-    <div className="mb-6 grid gap-3 sm:grid-cols-3">
-      <div className="rounded-lg border border-border bg-card p-4 shadow-card"><p className="text-xs font-semibold uppercase text-muted-foreground">Pending claims</p><p className="mt-1 font-heading text-2xl font-bold">{pending.length}</p></div>
-      <div className="rounded-lg border border-border bg-card p-4 shadow-card"><p className="text-xs font-semibold uppercase text-muted-foreground">Cashback at stake</p><p className="mt-1 font-heading text-2xl font-bold">{inr(pendingValue)}</p></div>
-      <div className="rounded-lg border border-border bg-card p-4 shadow-card"><p className="text-xs font-semibold uppercase text-muted-foreground">Reviewed claims</p><p className="mt-1 font-heading text-2xl font-bold">{claims.length - pending.length}</p></div>
+    <div className="mb-5 flex flex-wrap items-center gap-2 text-xs">
+      <span className="inline-flex items-center gap-1.5 rounded-full border border-border bg-card px-3 py-1.5 font-semibold shadow-card"><span className="h-1.5 w-1.5 rounded-full bg-amber-500" />{pending.length} pending review</span>
+      <span className="inline-flex items-center gap-1.5 rounded-full border border-border bg-card px-3 py-1.5 font-semibold shadow-card">Cashback at stake <span className="text-primary">{inr(pendingValue)}</span></span>
+      <span className="inline-flex items-center gap-1.5 rounded-full border border-border bg-card px-3 py-1.5 font-semibold shadow-card">{claims.length - pending.length} reviewed</span>
     </div>
     <div className="space-y-8">
       <section>
         <h2 className="font-heading text-lg font-bold">Pending review ({pending.length})</h2>
         {pending.length === 0 ? <p className="mt-2 text-sm text-muted-foreground">No claims waiting for review.</p>
-          : <div className="mt-3 space-y-3">{pending.map((claim) => <article key={claim.id} className="rounded-lg border border-border bg-card p-4 shadow-card">
-            <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
-              <ClaimHeadline claim={claim} />
-              <div className="flex shrink-0 gap-2">
-                <Button size="sm" onClick={() => onApprove(claim)}><Check />Approve</Button>
-                <RejectClaimDialog claim={claim} onReject={onReject}><Button size="sm" variant="destructive"><X />Reject</Button></RejectClaimDialog>
-              </div>
-            </div>
-            <ClaimDetails claim={claim} />
-          </article>)}</div>}
+          : <div className="mt-3 overflow-hidden rounded-lg border border-border bg-card shadow-card"><div className="overflow-x-auto"><table className="w-full min-w-290 text-left text-sm"><thead className="bg-muted/70 text-[11px] uppercase text-muted-foreground"><tr><th>Claim</th><th>Customer</th><th>Merchant</th><th>Order ID</th><th>Click match</th><th>Order value</th><th>Cashback</th><th>Proof</th><th className="pr-4 text-right">Actions</th></tr></thead><tbody>{pending.map((claim) => <tr key={claim.id} className="border-t border-border hover:bg-muted/50">
+            <td className="px-4 py-2 font-mono text-xs">{claim.id}<div className="font-sans text-xs text-muted-foreground">{claim.submitted}</div></td>
+            <td><div className="font-medium">{claim.user}</div><div className="text-xs text-muted-foreground">{claim.email}</div></td>
+            <td className="font-medium">{claim.merchant}</td>
+            <td className="font-mono text-xs">{claim.orderId}<div className="font-sans text-xs text-muted-foreground">{claim.orderDate}</div></td>
+            <td>{claim.clickId ? <span className="inline-flex items-center gap-1 rounded-full bg-success-soft px-2 py-0.5 text-xs font-semibold text-success"><Check className="h-3 w-3" />Matched</span> : <span className="inline-flex items-center gap-1 rounded-full status-pending px-2 py-0.5 text-xs font-semibold"><X className="h-3 w-3" />No match</span>}</td>
+            <td className="whitespace-nowrap font-semibold">{inr(claim.orderValue)}</td>
+            <td className="whitespace-nowrap font-semibold text-primary">{inr(claim.expectedCashback)}</td>
+            <td><span className="inline-flex items-center gap-1 rounded-full border border-border bg-muted px-2 py-0.5 text-xs font-medium"><ImageIcon className="h-3 w-3" />{claim.proof}</span></td>
+            <td className="pr-3 text-right"><div className="flex justify-end gap-1">
+              <Dialog><DialogTrigger asChild><IconButton className="h-7 w-7" label={`View claim ${claim.id}`}><ExternalLink className="h-3.5 w-3.5" /></IconButton></DialogTrigger><DialogContent className="max-w-2xl bg-card"><DialogHeader><DialogTitle className="font-heading text-lg">{claim.merchant} · {claim.orderId}</DialogTitle><DialogDescription>Claim {claim.id} · submitted {claim.submitted}</DialogDescription></DialogHeader><ClaimDetails claim={claim} /></DialogContent></Dialog>
+              <Button size="sm" className="h-7 px-2.5 text-xs" onClick={() => onApprove(claim)}><Check />Approve</Button>
+              <RejectClaimDialog claim={claim} onReject={onReject}><Button size="sm" variant="destructive" className="h-7 px-2.5 text-xs"><X />Reject</Button></RejectClaimDialog>
+            </div></td>
+          </tr>)}</tbody></table></div></div>}
       </section>
       <section>
         <h2 className="font-heading text-lg font-bold">Reviewed</h2>

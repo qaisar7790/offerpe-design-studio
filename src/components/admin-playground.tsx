@@ -701,9 +701,13 @@ function CashbackClaims({ claims, onApprove, onReject, onRevert, onDelete }: { c
       <span className="inline-flex items-center gap-1.5 rounded-full border border-border bg-card px-3 py-1.5 font-semibold shadow-card">Cashback at stake <span className="text-primary">{inr(pendingValue)}</span></span>
       <span className="inline-flex items-center gap-1.5 rounded-full border border-border bg-card px-3 py-1.5 font-semibold shadow-card">{claims.length - pending.length} reviewed</span>
     </div>
-    <div className="space-y-8">
-      <section>
-        <h2 className="font-heading text-lg font-bold">Pending review ({pending.length})</h2>
+    <Tabs value={tab} onValueChange={(value) => setTab(value as "pending" | "reviewed")}>
+      <TabsList className="mb-5 h-auto w-full justify-start gap-6 rounded-none border-b border-border bg-transparent p-0">
+        <TabsTrigger value="pending" className={tabTriggerClass}>Pending review ({pending.length})</TabsTrigger>
+        <TabsTrigger value="reviewed" className={tabTriggerClass}>Reviewed</TabsTrigger>
+      </TabsList>
+      <TabsContent value="pending" className="mt-0">
+        <section>
         {pending.length === 0 ? <p className="mt-2 text-sm text-muted-foreground">No claims waiting for review.</p>
           : <div className="mt-3 overflow-hidden rounded-lg border border-border bg-card shadow-card"><div className="overflow-x-auto"><table className="w-full min-w-290 text-left text-sm"><thead className="bg-muted/70 text-[11px] uppercase text-muted-foreground"><tr><th>Claim</th><th>Customer</th><th>Merchant</th><th>Order ID</th><th>Click match</th><th>Order value</th><th>Cashback</th><th>Proof</th><th className="pr-4 text-right">Actions</th></tr></thead><tbody>{pending.map((claim) => <tr key={claim.id} className="border-t border-border hover:bg-muted/50">
             <td className="px-4 py-2 font-mono text-xs">{claim.id}<div className="font-sans text-xs text-muted-foreground">{claim.submitted}</div></td>
@@ -720,9 +724,9 @@ function CashbackClaims({ claims, onApprove, onReject, onRevert, onDelete }: { c
               <RejectClaimDialog claim={claim} onReject={onReject}><Button size="sm" variant="destructive" className="h-7 px-2.5 text-xs"><X />Reject</Button></RejectClaimDialog>
             </div></td>
           </tr>)}</tbody></table></div></div>}
-      </section>
-      <section>
-        <h2 className="font-heading text-lg font-bold">Reviewed</h2>
+      </TabsContent>
+      <TabsContent value="reviewed" className="mt-0">
+        <section>
         <div className="mt-3 grid gap-3 rounded-lg border border-border bg-card p-3 shadow-card sm:grid-cols-2 xl:grid-cols-6">
           <label className="space-y-1.5 text-xs font-semibold uppercase text-muted-foreground xl:col-span-2">Order ID<div className="relative"><Search className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground" /><Input className="w-full pl-9" value={query} onChange={(event) => setQuery(event.target.value)} placeholder="Search order ID, claim ID, or customer…" /></div></label>
           <label className="space-y-1.5 text-xs font-semibold uppercase text-muted-foreground">Status<Select value={status} onValueChange={setStatus}><SelectTrigger><SelectValue /></SelectTrigger><SelectContent><SelectItem value="all">All</SelectItem><SelectItem value="Approved">Approved</SelectItem><SelectItem value="Rejected">Rejected</SelectItem></SelectContent></Select></label>

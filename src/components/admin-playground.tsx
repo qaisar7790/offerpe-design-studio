@@ -1586,11 +1586,28 @@ function OnboardingQueue({ applications, onApprove, onReject, onRevert, onDelete
     toast.success(`${rows.length} application${rows.length === 1 ? "" : "s"} exported`);
   };
   const activeRows = tab === "pending" ? pending : reviewed;
+  const [layout, setLayout] = useState<LayoutMode>("grid");
+  const queueTable = (rows: Application[], mode: "pending" | "reviewed") => <div className="overflow-hidden rounded-lg border border-border bg-card shadow-card"><div className="table-scrollbar overflow-x-auto"><table className="w-full min-w-300 text-left text-sm"><thead className="bg-muted/70 text-[11px] uppercase text-muted-foreground"><tr><th className="px-4 py-2">Application ID</th><th>Store</th><th>Category</th><th>Applicant</th><th>City</th><th>Commission</th><th>Submitted</th>{mode === "reviewed" && <th>Status</th>}<th className="pr-4 text-right">Actions</th></tr></thead><tbody>{rows.map((application) => <tr key={application.id} className="border-t border-border hover:bg-muted/50">
+    <td className="px-4 py-2 font-mono text-xs">{application.id}</td>
+    <td className="font-semibold">{application.store}</td>
+    <td className="text-xs text-muted-foreground">{application.category}</td>
+    <td>{application.owner}<div className="text-xs text-muted-foreground">{application.phone}</div></td>
+    <td className="text-xs text-muted-foreground">{application.city}</td>
+    <td className="whitespace-nowrap font-semibold">{application.commission}</td>
+    <td className="whitespace-nowrap text-xs text-muted-foreground">{application.submitted}</td>
+    {mode === "reviewed" && <td><span className={cn("inline-flex rounded-full px-2 py-0.5 text-xs font-semibold", application.status === "Approved" ? "bg-success-soft text-success" : "bg-destructive-soft text-destructive")}>{application.status}</span>{application.status === "Rejected" && application.reason && <div className="mt-1 text-xs text-muted-foreground">{application.reason}</div>}</td>}
+    <td className="pr-3 text-right"><div className="flex justify-end gap-1">
+      <Dialog><DialogTrigger asChild><IconButton className="h-7 w-7" label={`View application ${application.id}`}><ExternalLink className="h-3.5 w-3.5" /></IconButton></DialogTrigger><DialogContent className="max-w-2xl bg-card"><DialogHeader><DialogTitle className="font-heading text-lg">{application.store}</DialogTitle><DialogDescription>Application {application.id} · submitted {application.submitted}</DialogDescription></DialogHeader><ApplicationDetails application={application} /></DialogContent></Dialog>
+      {mode === "pending"
+        ? <><Button size="sm" className="h-7 px-2.5 text-xs" onClick={() => onApprove(application)}><Check />Approve</Button><RejectApplicationDialog application={application} onReject={onReject}><Button size="sm" variant="destructive" className="h-7 px-2.5 text-xs"><X />Reject</Button></RejectApplicationDialog></>
+        : <><IconButton className="h-7 w-7" label={`Re-evaluate application ${application.id}`} onClick={() => onRevert(application)}><RotateCcw className="h-3.5 w-3.5" /></IconButton><ConfirmDeleteDialog itemType="Application" name={application.store} onConfirm={() => onDelete(application)}><Button variant="ghost" size="icon" className="h-7 w-7 text-destructive" aria-label={`Delete application ${application.id}`}><Trash2 className="h-3.5 w-3.5" /></Button></ConfirmDeleteDialog></>}
+    </div></td>
+  </tr>)}</tbody></table></div></div>;
   return <><PageHeader title="Merchant Onboarding Queue" description={'Applications submitted via the web form or the merchant app\'s "Register your store" path. Approving creates a live OFFLINE merchant and grants the applicant immediate merchant-app login — no separate invite step. Rejecting requires a reason from the Onboarding Rejection Reasons list.'} />
     <Tabs value={tab} onValueChange={setTab}>
       <div className="flex flex-wrap items-center justify-between gap-3">
         <TabsList><TabsTrigger value="pending" className={tabTriggerClass}>Pending Review ({pending.length})</TabsTrigger><TabsTrigger value="reviewed" className={tabTriggerClass}>Reviewed ({reviewed.length})</TabsTrigger></TabsList>
-        <Button variant="outline" className="shrink-0" onClick={() => exportRows(activeRows)}><Download />Export CSV</Button>
+        <div className="flex items-center gap-2"><LayoutToggle value={layout} onChange={setLayout} /><Button variant="outline" className="shrink-0" onClick={() => exportRows(activeRows)}><Download />Export CSV</Button></div>
       </div>
       <div className="mt-4 flex flex-col gap-3 rounded-lg border border-border bg-card p-3 shadow-card lg:flex-row lg:flex-wrap lg:items-center">
         <div className="relative min-w-64 flex-1"><Search className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground" /><Input className="pl-9" value={query} onChange={(event) => setQuery(event.target.value)} placeholder="Search store, applicant, or application ID…" /></div>
@@ -1603,6 +1620,7 @@ function OnboardingQueue({ applications, onApprove, onReject, onRevert, onDelete
       </div>
       <TabsContent value="pending" className="mt-4">
         {pending.length === 0 ? <p className="text-sm text-muted-foreground">No submissions waiting for review.</p>
+          : layout === "list" ? queueTable(pending, "pending")
           : <div className="space-y-3">{pending.map((application) => <article key={application.id} className="rounded-lg border border-border bg-card p-4 shadow-card">
             <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
               <ApplicationHeadline application={application} />
@@ -1616,6 +1634,7 @@ function OnboardingQueue({ applications, onApprove, onReject, onRevert, onDelete
       </TabsContent>
       <TabsContent value="reviewed" className="mt-4">
         {reviewed.length === 0 ? <p className="text-sm text-muted-foreground">Nothing reviewed yet.</p>
+          : layout === "list" ? queueTable(reviewed, "reviewed")
           : <div className="space-y-3">{reviewed.map((application) => <article key={application.id} className="rounded-lg border border-border bg-card p-4 shadow-card">
             <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
               <div className="min-w-0">

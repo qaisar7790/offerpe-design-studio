@@ -1174,6 +1174,40 @@ function TrackierQueue({ campaigns, runs, categories, syncing, onSync, onChange,
   </>;
 }
 
+function RejectionReasonDialog({ reason, nextOrder, onClose, onSave }: { reason: RejectionReason | null; nextOrder: number; onClose: () => void; onSave: (reason: RejectionReason) => void }) {
+  const [text, setText] = useState(reason?.reason ?? "");
+  const [order, setOrder] = useState(reason?.order ?? nextOrder);
+  const [active, setActive] = useState(reason?.active ?? true);
+  return <Dialog open onOpenChange={(open) => !open && onClose()}><DialogContent className="max-w-lg bg-card"><DialogHeader><DialogTitle className="font-heading text-xl">{reason ? "Edit rejection reason" : "New rejection reason"}</DialogTitle><DialogDescription>{reason ? "Update the label, ordering, or deactivate this reason." : "Add a reason to the whitelist used when conversions are rejected."}</DialogDescription></DialogHeader><div className="grid gap-4 sm:grid-cols-2"><label className="space-y-1.5 text-sm font-medium">Reason <span className="text-destructive">*</span><Input aria-label="Reason" value={text} onChange={(event) => setText(event.target.value)} placeholder="e.g. Payment failed" /></label><label className="space-y-1.5 text-sm font-medium">Display order <span className="text-destructive">*</span><Input aria-label="Display order" type="number" min={0} value={order} onChange={(event) => setOrder(Math.max(0, Number(event.target.value)))} /></label><label className="flex items-center gap-2.5 text-sm font-medium sm:col-span-2"><Checkbox checked={active} onCheckedChange={(checked) => setActive(checked === true)} aria-label="Active" />Active<span className="text-xs font-normal text-muted-foreground">Inactive reasons stay on historical conversions but can't be newly assigned.</span></label></div><DialogFooter><Button variant="outline" onClick={onClose}>Cancel</Button><Button disabled={!text.trim()} onClick={() => onSave({ id: reason?.id ?? `RR-${Date.now()}`, reason: text.trim(), order, active })}><Check />Save</Button></DialogFooter></DialogContent></Dialog>;
+}
+
+function RejectionReasons({ reasons, onSave }: { reasons: RejectionReason[]; onSave: (reason: RejectionReason, isNew: boolean) => void }) {
+  const [query, setQuery] = useState("");
+  const [statusFilter, setStatusFilter] = useState("all");
+  const [sortKey, setSortKey] = useState<"reason" | "order">("order");
+  const [sortAsc, setSortAsc] = useState(true);
+  const [editing, setEditing] = useState<RejectionReason | null>(null);
+  const [dialogOpen, setDialogOpen] = useState(false);
+  const search = query.toLowerCase();
+  const rows = reasons
+    .filter((item) => (!search || item.reason.toLowerCase().includes(search)) && (statusFilter === "all" || (statusFilter === "active") === item.active))
+    .sort((a, b) => { const result = sortKey === "reason" ? a.reason.localeCompare(b.reason) : a.order - b.order; return sortAsc ? result : -result; });
+  const toggleSort = (key: "reason" | "order") => { if (sortKey === key) setSortAsc(!sortAsc); else { setSortKey(key); setSortAsc(true); } };
+  const openAdd = () => { setEditing(null); setDialogOpen(true); };
+  const openEdit = (item: RejectionReason) => { setEditing(item); setDialogOpen(true); };
+  return <>
+    <PageHeader title="Rejection Reasons" description="The whitelist resolve_online_conversion / approve_conversion_resolution validate a rejection reason against. Deactivate a reason instead of deleting it — historical conversions rejected under it keep displaying its text correctly either way." actions={<Button onClick={openAdd}><Plus />Add new</Button>} />
+    <div className="mb-5 flex flex-col gap-3 rounded-lg border border-border bg-card p-3 shadow-card sm:flex-row sm:items-center">
+      <div className="relative min-w-[280px] flex-1"><Search className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground" /><Input aria-label="Search reasons" className="w-full pl-9" value={query} onChange={(event) => setQuery(event.target.value)} placeholder="Search by reason text…" /></div>
+      <DropdownMenu><DropdownMenuTrigger asChild><Button variant="outline" className="shrink-0"><Filter className="mr-2 h-4 w-4 text-muted-foreground" />Status: {statusFilter === "all" ? "All" : statusFilter === "active" ? "Active" : "Inactive"}<ChevronDown className="ml-2 h-3.5 w-3.5 opacity-60" /></Button></DropdownMenuTrigger><DropdownMenuContent align="end" className="w-44 border-border bg-card">{["all", "active", "inactive"].map((item) => <DropdownMenuItem key={item} onSelect={() => setStatusFilter(item)}>Status: {item === "all" ? "All" : item === "active" ? "Active" : "Inactive"}</DropdownMenuItem>)}</DropdownMenuContent></DropdownMenu>
+      {(query || statusFilter !== "all") && <Button variant="ghost" size="sm" onClick={() => { setQuery(""); setStatusFilter("all"); }} className="shrink-0 text-muted-foreground hover:text-foreground"><RotateCcw className="mr-1 h-3.5 w-3.5" />Reset</Button>}
+    </div>
+    <div className="min-w-0 overflow-hidden rounded-lg border border-border bg-card shadow-card"><div className="table-scrollbar overflow-x-auto"><table className="w-full min-w-140 text-left text-sm"><thead className="text-[11px] uppercase text-muted-foreground"><tr><th className="sticky top-0 bg-muted/95 py-2"><Button variant="ghost" size="sm" className="-ml-3 h-7 text-[11px] uppercase" onClick={() => toggleSort("reason")}>Reason {sortKey === "reason" && (sortAsc ? <ArrowUp className="h-3.5 w-3.5" /> : <ArrowDown className="h-3.5 w-3.5" />)}</Button></th><th className="sticky top-0 bg-muted/95 py-2"><Button variant="ghost" size="sm" className="-ml-3 h-7 text-[11px] uppercase" onClick={() => toggleSort("order")}>Order {sortKey === "order" && (sortAsc ? <ArrowUp className="h-3.5 w-3.5" /> : <ArrowDown className="h-3.5 w-3.5" />)}</Button></th><th className="sticky top-0 bg-muted/95 py-2">Status</th><th className="sticky top-0 bg-muted/95 py-2 text-right">Actions</th></tr></thead><tbody>{rows.map((item) => <tr key={item.id} className="border-t border-border hover:bg-muted/50"><td className="font-semibold">{item.reason}</td><td className="text-muted-foreground">{item.order}</td><td><StatusBadge status={item.active ? "Active" : "Inactive"} /></td><td className="text-right"><IconButton className="h-7 w-7" label={`Edit ${item.reason}`} onClick={() => openEdit(item)}><Pencil className="h-3.5 w-3.5" /></IconButton></td></tr>)}</tbody></table>{!rows.length && <div className="px-6 py-14 text-center"><Flag className="mx-auto h-8 w-8 text-muted-foreground" /><h3 className="mt-3 font-heading font-semibold">No rejection reasons found</h3><p className="mt-1 text-sm text-muted-foreground">Try changing or resetting the current filters.</p></div>}</div></div>
+    <TransactionPagination count={rows.length} />
+    {dialogOpen && <RejectionReasonDialog reason={editing} nextOrder={reasons.reduce((max, item) => Math.max(max, item.order), 0) + 1} onClose={() => setDialogOpen(false)} onSave={(reason) => { onSave(reason, !editing); setDialogOpen(false); }} />}
+  </>;
+}
+
 export function AdminPlayground() {
   const [view, setView] = useState<View>("dashboard");
   const [sidebarOpen, setSidebarOpen] = useState(false);

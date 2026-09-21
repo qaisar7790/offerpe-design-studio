@@ -112,7 +112,7 @@ import {
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
 
-type View = "dashboard" | "merchants" | "reviews" | "merchant-onboarding-queue" | "trackier-queue" | "affiliate-networks" | "affiliate-network-new" | "affiliate-network-edit" | "merchant-edit" | "offers" | "offer-edit" | "promo-banners" | "promo-banner-edit" | "promo-banner-new" | "categories" | "category-mapping" | "category-edit" | "category-new" | "cashback-claims" | "transactions" | "clicks" | "withdrawals" | "rejection-reasons" | "communication-templates" | "communication-dispatches" | "users" | "roles" | "role-edit" | "conversions";
+type View = "dashboard" | "merchants" | "reviews" | "merchant-onboarding-queue" | "trackier-queue" | "affiliate-networks" | "affiliate-network-new" | "affiliate-network-edit" | "merchant-edit" | "offers" | "offer-edit" | "promo-banners" | "promo-banner-edit" | "promo-banner-new" | "categories" | "category-mapping" | "category-edit" | "category-new" | "cashback-claims" | "transactions" | "clicks" | "withdrawals" | "rejection-reasons" | "communication-templates" | "communication-dispatches" | "users" | "admin-users" | "roles" | "role-edit" | "conversions";
 type RawMapping = { raw: string; mappedTo: string };
 type ReviewStatus = "Pending" | "Approved" | "Rejected";
 type Review = { id: string; user: string; merchant: string; rating: number; comment: string; photos: string[]; submitted: string; status: ReviewStatus; reason: string; note: string };
@@ -133,7 +133,7 @@ const groups = [
   { label: "Operations", icon: Settings2, items: [{ label: "Merchant Onboarding Queue", icon: ClipboardCheck, view: "merchant-onboarding-queue" as View }, { label: "Trackier Import Queue", icon: DownloadCloud, view: "trackier-queue" as View }, { label: "Affiliate Networks", icon: Share2, view: "affiliate-networks" as View }, { label: "Online Conversions", icon: CircleDollarSign, view: "conversions" as View }, { label: "Category Mapping", icon: Tag, view: "category-mapping" as View }] },
   { label: "Financial", icon: WalletCards, items: [{ label: "Cashback Claims", icon: CircleDollarSign, view: "cashback-claims" as View }, { label: "Transactions", icon: ArrowDown, view: "transactions" as View }, { label: "Clicks", icon: MousePointerClick, view: "clicks" as View }, { label: "Withdrawals", icon: BadgeIndianRupee, view: "withdrawals" as View }, { label: "Rejection Reasons", icon: Flag, view: "rejection-reasons" as View }, { label: "Missing Claims", icon: FileSpreadsheet }] },
   { label: "Communication", icon: Megaphone, items: [{ label: "Templates", icon: MessageSquare, view: "communication-templates" as View }, { label: "Dispatches & Notifications", icon: Bell, view: "communication-dispatches" as View }] },
-  { label: "System", icon: SlidersHorizontal, items: [{ label: "Users", icon: Users, view: "users" as View }, { label: "Roles", icon: ShieldCheck, view: "roles" as View }, { label: "Settings", icon: Settings2 }] },
+  { label: "System", icon: SlidersHorizontal, items: [{ label: "Users", icon: Users, view: "users" as View }, { label: "Admins", icon: Mail, view: "admin-users" as View }, { label: "Roles", icon: ShieldCheck, view: "roles" as View }, { label: "Settings", icon: Settings2 }] },
 ];
 
 const merchants = [
@@ -455,6 +455,8 @@ type UserRecord = { id: string; name: string; phone: string; email: string; stat
 type PermissionGroupName = "Catalog" | "Operations" | "Financial" | "Communication" | "System";
 type Permission = { key: string; group: PermissionGroupName };
 type AdminRole = { id: string; name: string; description: string; permissions: string[]; admins: number; system: boolean; updated: string };
+type AdminUserStatus = "Active" | "Invited" | "Disabled";
+type AdminUser = { id: string; name: string; email: string; role: string; status: AdminUserStatus; lastActive: string; created: string };
 
 const onlineTransactions: OnlineTransaction[] = [
   { id: "TXN-94128", status: "Pending", userId: "USR-10294", orderValue: 4299, reported: 344, calculated: 322, rejection: "—", click: "clk_9f42ab7c", created: "21 Sep 2026, 09:18", updated: "21 Sep 2026, 09:22" },
@@ -576,6 +578,17 @@ const initialRoles: AdminRole[] = [
   { id: "ROLE-FINANCE", name: "Finance Manager", description: "Owns cashback claims, conversions, ledger review, withdrawals, and financial exports.", permissions: [...permissionCatalog.Financial.map((permission) => permission.key), "users.VIEW", "communication_dispatches.VIEW"], admins: 3, system: false, updated: "19 Sep 2026, 6:42 pm" },
   { id: "ROLE-OPS", name: "Operations Manager", description: "Handles merchant onboarding, Trackier imports, affiliate network hygiene, and catalog publishing checks.", permissions: [...permissionCatalog.Operations.map((permission) => permission.key), "merchants.VIEW", "offers.VIEW", "categories.VIEW", "promo_banners.VIEW"], admins: 4, system: false, updated: "18 Sep 2026, 11:20 am" },
   { id: "ROLE-SUPPORT", name: "Support Analyst", description: "Read-focused access for customer support with limited claim and review moderation actions.", permissions: ["users.VIEW", "cashback_claims.VIEW", "cashback_claims.EDIT", "clicks.VIEW", "online_conversions.VIEW", "ledger.VIEW", "communication_dispatches.VIEW", "notifications.VIEW", "merchant_reviews.VIEW", "merchant_reviews.EDIT"], admins: 9, system: false, updated: "17 Sep 2026, 3:04 pm" },
+];
+
+const initialAdminUsers: AdminUser[] = [
+  { id: "ADM-0001", name: "Qaisar Farooq", email: "qaisarfarooq0511@gmail.com", role: "Owner", status: "Active", lastActive: "21 Sep 2026, 10:14 am", created: "02 Jan 2026" },
+  { id: "ADM-0002", name: "Neha Pillai", email: "neha.pillai@offerpe.com", role: "Content Manager", status: "Active", lastActive: "21 Sep 2026, 9:38 am", created: "14 Feb 2026" },
+  { id: "ADM-0003", name: "Rahul Sharma", email: "rahul.sharma@offerpe.com", role: "Finance Manager", status: "Active", lastActive: "20 Sep 2026, 7:52 pm", created: "03 Mar 2026" },
+  { id: "ADM-0004", name: "Ananya Rao", email: "ananya.rao@offerpe.com", role: "Operations Manager", status: "Active", lastActive: "20 Sep 2026, 4:05 pm", created: "18 Mar 2026" },
+  { id: "ADM-0005", name: "Dev Kapoor", email: "dev.kapoor@offerpe.com", role: "Support Analyst", status: "Invited", lastActive: "—", created: "19 Sep 2026" },
+  { id: "ADM-0006", name: "Ishita Menon", email: "ishita.menon@offerpe.com", role: "Support Analyst", status: "Active", lastActive: "19 Sep 2026, 1:22 pm", created: "22 Apr 2026" },
+  { id: "ADM-0007", name: "Vikram Nair", email: "vikram.nair@offerpe.com", role: "Content Manager", status: "Disabled", lastActive: "02 Aug 2026, 11:47 am", created: "11 May 2026" },
+  { id: "ADM-0008", name: "Sana Qureshi", email: "sana.qureshi@offerpe.com", role: "Finance Manager", status: "Active", lastActive: "18 Sep 2026, 6:30 pm", created: "07 Jun 2026" },
 ];
 
 

@@ -450,6 +450,7 @@ export function AdminPlayground() {
   const [merchantRows, setMerchantRows] = useState<readonly (typeof merchants[number])[]>(merchants);
   const [editingMerchant, setEditingMerchant] = useState<typeof merchants[number] | null>(null);
   const [categoryRows, setCategoryRows] = useState<Category[]>(initialCategories);
+  const [mappingRows, setMappingRows] = useState<RawMapping[]>(initialMappings);
   const [editingCategory, setEditingCategory] = useState<Category | null>(null);
   const [offerRows, setOfferRows] = useState(initialOffers);
   const [editingOffer, setEditingOffer] = useState<Offer | null>(null);

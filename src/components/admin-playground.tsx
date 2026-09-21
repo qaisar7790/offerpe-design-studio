@@ -659,8 +659,9 @@ const inr = (value: number) => `₹${value.toLocaleString("en-IN")}`;
 
 function ClaimDetails({ claim }: { claim: Claim }) {
   return <div className="mt-3 grid gap-3 text-sm sm:grid-cols-2 lg:grid-cols-4">
-    <div><div className="text-xs font-semibold uppercase text-muted-foreground">Claimant</div><div className="mt-0.5 font-medium">{claim.user}</div><div className="text-muted-foreground">{claim.email}</div></div>
-    <div><div className="text-xs font-semibold uppercase text-muted-foreground">Order</div><div className="mt-0.5 font-mono text-xs">{claim.orderId}</div><div className="text-muted-foreground">{claim.orderDate}</div></div>
+    <div><div className="text-xs font-semibold uppercase text-muted-foreground">Customer</div><div className="mt-0.5 font-medium">{claim.user}</div><div className="font-mono text-xs text-muted-foreground">{claim.userId}</div></div>
+    <div><div className="text-xs font-semibold uppercase text-muted-foreground">Order</div><div className="mt-0.5 font-mono text-xs">{claim.orderId}</div><div className="text-muted-foreground">Ordered {claim.orderDate}</div></div>
+    <div><div className="text-xs font-semibold uppercase text-muted-foreground">Claim date</div><div className="mt-0.5">{claim.claimDate}</div><div className="text-muted-foreground">{claim.claimTime}</div></div>
     <div><div className="text-xs font-semibold uppercase text-muted-foreground">Click ID</div><div className="mt-0.5 font-mono text-xs">{claim.clickId || "—"}</div><div className="text-muted-foreground">{claim.clickId ? "Matched in click log" : "No click matched"}</div></div>
     <div><div className="text-xs font-semibold uppercase text-muted-foreground">Order value / expected cashback</div><div className="mt-0.5 font-heading text-lg font-bold">{inr(claim.orderValue)}</div><div className="font-semibold text-primary">{inr(claim.expectedCashback)} expected</div></div>
     <div className="sm:col-span-2 lg:col-span-4"><div className="text-xs font-semibold uppercase text-muted-foreground">Customer comment</div><p className="mt-0.5 leading-6">{claim.comment}</p><span className="mt-2 inline-flex items-center gap-1 rounded-full border border-border bg-muted px-2 py-0.5 text-xs font-medium"><ImageIcon className="h-3 w-3" />{claim.proof}</span></div>
@@ -688,12 +689,12 @@ function CashbackClaims({ claims, onApprove, onReject, onRevert, onDelete }: { c
   const reviewed = useMemo(() => {
     const parse = (value: string) => new Date(value.replace(",", "")).getTime();
     return claims.filter((claim) => claim.status !== "Pending")
-      .filter((claim) => !query || `${claim.orderId} ${claim.id} ${claim.user}`.toLowerCase().includes(query.toLowerCase()))
+      .filter((claim) => !query || `${claim.orderId} ${claim.id} ${claim.user} ${claim.userId}`.toLowerCase().includes(query.toLowerCase()))
       .filter((claim) => status === "all" || claim.status === status)
       .filter((claim) => merchant === "all" || claim.merchant === merchant)
-      .filter((claim) => !from || parse(claim.submitted) >= new Date(from).getTime())
-      .filter((claim) => !to || parse(claim.submitted) <= new Date(to).getTime() + 86_400_000)
-      .sort((a, b) => sort === "oldest" ? parse(a.submitted) - parse(b.submitted) : sort === "value-high" ? b.orderValue - a.orderValue : sort === "value-low" ? a.orderValue - b.orderValue : parse(b.submitted) - parse(a.submitted));
+      .filter((claim) => !from || parse(claim.claimDate) >= new Date(from).getTime())
+      .filter((claim) => !to || parse(claim.claimDate) <= new Date(to).getTime() + 86_400_000)
+      .sort((a, b) => sort === "oldest" ? parse(a.claimDate) - parse(b.claimDate) : sort === "value-high" ? b.orderValue - a.orderValue : sort === "value-low" ? a.orderValue - b.orderValue : parse(b.claimDate) - parse(a.claimDate));
   }, [claims, query, status, merchant, from, to, sort]);
   const pendingValue = pending.reduce((total, claim) => total + claim.expectedCashback, 0);
   return <><PageHeader title="Cashback Claims" description="Online missing-cashback claims raised by customers. Approving accepts a claim into the same online-conversion pipeline a real network webhook uses (source = CLAIM) — it does not itself credit the wallet. Resolve the resulting conversion from Online Conversions to actually credit it." actions={<DropdownMenu><DropdownMenuTrigger asChild><Button variant="outline"><UploadCloud />Import &amp; Export<ChevronDown /></Button></DropdownMenuTrigger><DropdownMenuContent align="end"><DropdownMenuItem><Download />Export claims CSV</DropdownMenuItem><DropdownMenuItem><UploadCloud />Import claim decisions</DropdownMenuItem></DropdownMenuContent></DropdownMenu>} />
@@ -710,17 +711,20 @@ function CashbackClaims({ claims, onApprove, onReject, onRevert, onDelete }: { c
       <TabsContent value="pending" className="mt-0">
         <section>
         {pending.length === 0 ? <p className="mt-2 text-sm text-muted-foreground">No claims waiting for review.</p>
-          : <div className="mt-3 overflow-hidden rounded-lg border border-border bg-card shadow-card"><div className="overflow-x-auto"><table className="w-full min-w-290 text-left text-sm"><thead className="bg-muted/70 text-[11px] uppercase text-muted-foreground"><tr><th>Claim</th><th>Customer</th><th>Merchant</th><th>Order ID</th><th>Click match</th><th>Order value</th><th>Cashback</th><th>Proof</th><th className="pr-4 text-right">Actions</th></tr></thead><tbody>{pending.map((claim) => <tr key={claim.id} className="border-t border-border hover:bg-muted/50">
-            <td className="px-4 py-2 font-mono text-xs">{claim.id}<div className="font-sans text-xs text-muted-foreground">{claim.submitted}</div></td>
-            <td><div className="font-medium">{claim.user}</div><div className="text-xs text-muted-foreground">{claim.email}</div></td>
+          : <div className="mt-3 overflow-hidden rounded-lg border border-border bg-card shadow-card"><div className="overflow-x-auto"><table className="w-full min-w-330 text-left text-sm"><thead className="bg-muted/70 text-[11px] uppercase text-muted-foreground"><tr><th>Claim ID</th><th>Claim Date</th><th>User ID</th><th>Customer</th><th>Merchant</th><th>Order ID</th><th>Order Date</th><th>Click match</th><th>Order value</th><th>Cashback</th><th>Proof</th><th className="pr-4 text-right">Actions</th></tr></thead><tbody>{pending.map((claim) => <tr key={claim.id} className="border-t border-border hover:bg-muted/50">
+            <td className="px-4 py-2 font-mono text-xs">{claim.id}</td>
+            <td className="whitespace-nowrap text-xs text-muted-foreground">{claim.claimDate}<div>{claim.claimTime}</div></td>
+            <td className="font-mono text-xs">{claim.userId}</td>
+            <td className="font-medium">{claim.user}</td>
             <td className="font-medium">{claim.merchant}</td>
-            <td className="font-mono text-xs">{claim.orderId}<div className="font-sans text-xs text-muted-foreground">{claim.orderDate}</div></td>
+            <td className="font-mono text-xs">{claim.orderId}</td>
+            <td className="whitespace-nowrap text-xs text-muted-foreground">{claim.orderDate}</td>
             <td>{claim.clickId ? <span className="inline-flex items-center gap-1 rounded-full bg-success-soft px-2 py-0.5 text-xs font-semibold text-success"><Check className="h-3 w-3" />Matched</span> : <span className="inline-flex items-center gap-1 rounded-full status-pending px-2 py-0.5 text-xs font-semibold"><X className="h-3 w-3" />No match</span>}</td>
             <td className="whitespace-nowrap font-semibold">{inr(claim.orderValue)}</td>
             <td className="whitespace-nowrap font-semibold text-primary">{inr(claim.expectedCashback)}</td>
             <td><span className="inline-flex items-center gap-1 rounded-full border border-border bg-muted px-2 py-0.5 text-xs font-medium"><ImageIcon className="h-3 w-3" />{claim.proof}</span></td>
             <td className="pr-3 text-right"><div className="flex justify-end gap-1">
-              <Dialog><DialogTrigger asChild><IconButton className="h-7 w-7" label={`View claim ${claim.id}`}><ExternalLink className="h-3.5 w-3.5" /></IconButton></DialogTrigger><DialogContent className="max-w-2xl bg-card"><DialogHeader><DialogTitle className="font-heading text-lg">{claim.merchant} · {claim.orderId}</DialogTitle><DialogDescription>Claim {claim.id} · submitted {claim.submitted}</DialogDescription></DialogHeader><ClaimDetails claim={claim} /></DialogContent></Dialog>
+              <Dialog><DialogTrigger asChild><IconButton className="h-7 w-7" label={`View claim ${claim.id}`}><ExternalLink className="h-3.5 w-3.5" /></IconButton></DialogTrigger><DialogContent className="max-w-2xl bg-card"><DialogHeader><DialogTitle className="font-heading text-lg">{claim.merchant} · {claim.orderId}</DialogTitle><DialogDescription>Claim {claim.id} · {claim.claimDate}, {claim.claimTime}</DialogDescription></DialogHeader><ClaimDetails claim={claim} /></DialogContent></Dialog>
               <Button size="sm" className="h-7 px-2.5 text-xs" onClick={() => onApprove(claim)}><Check />Approve</Button>
               <RejectClaimDialog claim={claim} onReject={onReject}><Button size="sm" variant="destructive" className="h-7 px-2.5 text-xs"><X />Reject</Button></RejectClaimDialog>
             </div></td>
@@ -738,16 +742,20 @@ function CashbackClaims({ claims, onApprove, onReject, onRevert, onDelete }: { c
           <label className="space-y-1.5 text-xs font-semibold uppercase text-muted-foreground xl:col-span-2">Sort by<Select value={sort} onValueChange={setSort}><SelectTrigger><SelectValue /></SelectTrigger><SelectContent><SelectItem value="newest">Newest submitted</SelectItem><SelectItem value="oldest">Oldest submitted</SelectItem><SelectItem value="value-high">Order value: High to Low</SelectItem><SelectItem value="value-low">Order value: Low to High</SelectItem></SelectContent></Select></label>
         </div>
         {reviewed.length === 0 ? <p className="mt-4 text-sm text-muted-foreground">Nothing reviewed yet.</p>
-          : <div className="mt-3 overflow-hidden rounded-lg border border-border bg-card shadow-card"><div className="overflow-x-auto"><table className="w-full min-w-250 text-left text-sm"><thead className="bg-muted/70 text-[11px] uppercase text-muted-foreground"><tr><th>Claim</th><th>Customer</th><th>Merchant</th><th>Order ID</th><th>Order value</th><th>Cashback</th><th>Status</th><th className="pr-4 text-right">Actions</th></tr></thead><tbody>{reviewed.map((claim) => <tr key={claim.id} className="border-t border-border align-top hover:bg-muted/50">
-            <td className="px-4 py-2 font-mono text-xs">{claim.id}<div className="font-sans text-xs text-muted-foreground">{claim.submitted}</div></td>
+          : <div className="mt-3 overflow-hidden rounded-lg border border-border bg-card shadow-card"><div className="overflow-x-auto"><table className="w-full min-w-330 text-left text-sm"><thead className="bg-muted/70 text-[11px] uppercase text-muted-foreground"><tr><th>Claim ID</th><th>Claim Date</th><th>User ID</th><th>Customer</th><th>Merchant</th><th>Order ID</th><th>Order Date</th><th>Order value</th><th>Cashback</th><th>Status</th><th>Comment</th><th className="pr-4 text-right">Actions</th></tr></thead><tbody>{reviewed.map((claim) => <tr key={claim.id} className="border-t border-border align-top hover:bg-muted/50">
+            <td className="px-4 py-2 font-mono text-xs">{claim.id}</td>
+            <td className="whitespace-nowrap text-xs text-muted-foreground">{claim.claimDate}<div>{claim.claimTime}</div></td>
+            <td className="font-mono text-xs">{claim.userId}</td>
             <td className="font-medium">{claim.user}</td>
             <td>{claim.merchant}</td>
             <td className="font-mono text-xs">{claim.orderId}</td>
+            <td className="whitespace-nowrap text-xs text-muted-foreground">{claim.orderDate}</td>
             <td className="font-semibold">{inr(claim.orderValue)}</td>
             <td className="font-semibold text-primary">{inr(claim.expectedCashback)}</td>
-            <td><span className={cn("inline-flex rounded-full px-2 py-0.5 text-xs font-semibold", claim.status === "Approved" ? "status-approved" : "status-rejected")}>{claim.status}</span>{claim.status === "Rejected" && <div className="mt-1 max-w-56 whitespace-normal text-xs text-destructive">{claim.reason}</div>}</td>
+            <td><span className={cn("inline-flex rounded-full px-2 py-0.5 text-xs font-semibold", claim.status === "Approved" ? "status-approved" : "status-rejected")}>{claim.status}</span></td>
+            <td className="max-w-48 text-xs text-muted-foreground">{claim.reason || "—"}</td>
             <td className="pr-3 text-right"><div className="flex justify-end gap-1">
-              <Dialog><DialogTrigger asChild><IconButton className="h-7 w-7" label={`View claim ${claim.id}`}><ExternalLink className="h-3.5 w-3.5" /></IconButton></DialogTrigger><DialogContent className="max-w-2xl bg-card"><DialogHeader><DialogTitle className="font-heading text-lg">{claim.merchant} · {claim.orderId}</DialogTitle><DialogDescription>Claim {claim.id} · submitted {claim.submitted}</DialogDescription></DialogHeader><ClaimDetails claim={claim} />{claim.status === "Rejected" && <p className="mt-3 text-sm font-semibold text-destructive">Reason: {claim.reason}{claim.note && <span className="font-normal text-muted-foreground"> — {claim.note}</span>}</p>}{claim.status === "Approved" && claim.note && <p className="mt-3 text-sm text-muted-foreground">{claim.note}</p>}</DialogContent></Dialog>
+              <Dialog><DialogTrigger asChild><IconButton className="h-7 w-7" label={`View claim ${claim.id}`}><ExternalLink className="h-3.5 w-3.5" /></IconButton></DialogTrigger><DialogContent className="max-w-2xl bg-card"><DialogHeader><DialogTitle className="font-heading text-lg">{claim.merchant} · {claim.orderId}</DialogTitle><DialogDescription>Claim {claim.id} · {claim.claimDate}, {claim.claimTime}</DialogDescription></DialogHeader><ClaimDetails claim={claim} />{claim.status === "Rejected" && <p className="mt-3 text-sm font-semibold text-destructive">Reason: {claim.reason}{claim.note && <span className="font-normal text-muted-foreground"> — {claim.note}</span>}</p>}{claim.status === "Approved" && claim.note && <p className="mt-3 text-sm text-muted-foreground">{claim.note}</p>}</DialogContent></Dialog>
               <IconButton className="h-7 w-7" label={`Re-evaluate claim ${claim.id}`} onClick={() => onRevert(claim)}><RotateCcw className="h-3.5 w-3.5" /></IconButton>
               <ConfirmDeleteDialog itemType="Claim" name={claim.id} onConfirm={() => onDelete(claim)}><Button variant="ghost" size="icon" className="h-7 w-7 text-destructive" aria-label={`Delete claim ${claim.id}`}><Trash2 className="h-3.5 w-3.5" /></Button></ConfirmDeleteDialog>
             </div></td>

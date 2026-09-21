@@ -22,6 +22,7 @@ import {
   FileSpreadsheet,
   FileText,
   Filter,
+  Flag,
   GripVertical,
   LayoutDashboard,
   Lock,
@@ -108,7 +109,7 @@ import {
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
 
-type View = "dashboard" | "merchants" | "reviews" | "merchant-onboarding-queue" | "trackier-queue" | "affiliate-networks" | "affiliate-network-new" | "affiliate-network-edit" | "merchant-edit" | "offers" | "offer-edit" | "promo-banners" | "promo-banner-edit" | "promo-banner-new" | "categories" | "category-mapping" | "category-edit" | "category-new" | "cashback-claims" | "transactions" | "clicks" | "withdrawals" | "conversions";
+type View = "dashboard" | "merchants" | "reviews" | "merchant-onboarding-queue" | "trackier-queue" | "affiliate-networks" | "affiliate-network-new" | "affiliate-network-edit" | "merchant-edit" | "offers" | "offer-edit" | "promo-banners" | "promo-banner-edit" | "promo-banner-new" | "categories" | "category-mapping" | "category-edit" | "category-new" | "cashback-claims" | "transactions" | "clicks" | "withdrawals" | "rejection-reasons" | "conversions";
 type RawMapping = { raw: string; mappedTo: string };
 type ReviewStatus = "Pending" | "Approved" | "Rejected";
 type Review = { id: string; user: string; merchant: string; rating: number; comment: string; photos: string[]; submitted: string; status: ReviewStatus; reason: string; note: string };
@@ -124,7 +125,7 @@ type OfferOrigin = { type: "merchant"; merchant: typeof merchants[number] } | { 
 const groups = [
   { label: "Catalog", icon: ShoppingBag, items: [{ label: "Merchants", icon: Store, view: "merchants" as View }, { label: "Cashback Offers", icon: Tag, view: "offers" as View }, { label: "Promo Banners", icon: Megaphone, view: "promo-banners" as View }, { label: "Merchant Reviews", icon: Star, view: "reviews" as View }, { label: "Categories", icon: Tag, view: "categories" as View }, { label: "Cities", icon: Building2 }] },
   { label: "Operations", icon: Settings2, items: [{ label: "Merchant Onboarding Queue", icon: ClipboardCheck, view: "merchant-onboarding-queue" as View }, { label: "Trackier Import Queue", icon: DownloadCloud, view: "trackier-queue" as View }, { label: "Affiliate Networks", icon: Share2, view: "affiliate-networks" as View }, { label: "Online Conversions", icon: CircleDollarSign, view: "conversions" as View }, { label: "Category Mapping", icon: Tag, view: "category-mapping" as View }, { label: "Users", icon: Users }] },
-  { label: "Financial", icon: WalletCards, items: [{ label: "Cashback Claims", icon: CircleDollarSign, view: "cashback-claims" as View }, { label: "Transactions", icon: ArrowDown, view: "transactions" as View }, { label: "Clicks", icon: MousePointerClick, view: "clicks" as View }, { label: "Withdrawals", icon: BadgeIndianRupee, view: "withdrawals" as View }, { label: "Missing Claims", icon: FileSpreadsheet }] },
+  { label: "Financial", icon: WalletCards, items: [{ label: "Cashback Claims", icon: CircleDollarSign, view: "cashback-claims" as View }, { label: "Transactions", icon: ArrowDown, view: "transactions" as View }, { label: "Clicks", icon: MousePointerClick, view: "clicks" as View }, { label: "Withdrawals", icon: BadgeIndianRupee, view: "withdrawals" as View }, { label: "Rejection Reasons", icon: Flag, view: "rejection-reasons" as View }, { label: "Missing Claims", icon: FileSpreadsheet }] },
   { label: "Communication", icon: Megaphone, items: [{ label: "Notifications", icon: Megaphone }] },
   { label: "System", icon: SlidersHorizontal, items: [{ label: "Admin Roles", icon: ShieldCheck }, { label: "Settings", icon: Settings2 }] },
 ];
@@ -206,6 +207,16 @@ const initialApplications: Application[] = [
 type Claim = { id: string; userId: string; user: string; merchant: string; orderId: string; clickId: string; claimDate: string; claimTime: string; orderDate: string; orderValue: number; expectedCashback: number; proof: string; comment: string; status: ReviewStatus; reason: string; note: string };
 
 const claimRejectionReasons = ["No matching click found", "Order placed outside OfferPe click window", "Order cancelled or returned", "Proof of purchase unreadable", "Duplicate claim for the same order", "Merchant category excluded from cashback"];
+
+type RejectionReason = { id: string; reason: string; order: number; active: boolean };
+
+const initialRejectionReasons: RejectionReason[] = [
+  { id: "RR-1", reason: "Order Cancelled", order: 1, active: true },
+  { id: "RR-2", reason: "Order Returned", order: 2, active: true },
+  { id: "RR-3", reason: "Fraud Suspected", order: 3, active: true },
+  { id: "RR-4", reason: "Network Rejected", order: 4, active: true },
+  { id: "RR-5", reason: "Other", order: 5, active: true },
+];
 
 const initialClaims: Claim[] = [
   { id: "CLM-5042", userId: "USR-88214", user: "Ananya Rao", merchant: "Myntra", orderId: "MYN-77120934", clickId: "clk_9f42ab7c", claimDate: "21 Sep 2026", claimTime: "09:12", orderDate: "14 Sep 2026", orderValue: 4299, expectedCashback: 344, proof: "order-confirmation.png", comment: "Cashback did not track even though I came through the OfferPe app.", status: "Pending", reason: "", note: "" },
@@ -1163,6 +1174,40 @@ function TrackierQueue({ campaigns, runs, categories, syncing, onSync, onChange,
   </>;
 }
 
+function RejectionReasonDialog({ reason, nextOrder, onClose, onSave }: { reason: RejectionReason | null; nextOrder: number; onClose: () => void; onSave: (reason: RejectionReason) => void }) {
+  const [text, setText] = useState(reason?.reason ?? "");
+  const [order, setOrder] = useState(reason?.order ?? nextOrder);
+  const [active, setActive] = useState(reason?.active ?? true);
+  return <Dialog open onOpenChange={(open) => !open && onClose()}><DialogContent className="max-w-lg bg-card"><DialogHeader><DialogTitle className="font-heading text-xl">{reason ? "Edit rejection reason" : "New rejection reason"}</DialogTitle><DialogDescription>{reason ? "Update the label, ordering, or deactivate this reason." : "Add a reason to the whitelist used when conversions are rejected."}</DialogDescription></DialogHeader><div className="grid gap-4 sm:grid-cols-2"><label className="space-y-1.5 text-sm font-medium">Reason <span className="text-destructive">*</span><Input aria-label="Reason" value={text} onChange={(event) => setText(event.target.value)} placeholder="e.g. Payment failed" /></label><label className="space-y-1.5 text-sm font-medium">Display order <span className="text-destructive">*</span><Input aria-label="Display order" type="number" min={0} value={order} onChange={(event) => setOrder(Math.max(0, Number(event.target.value)))} /></label><label className="flex items-center gap-2.5 text-sm font-medium sm:col-span-2"><Checkbox checked={active} onCheckedChange={(checked) => setActive(checked === true)} aria-label="Active" />Active<span className="text-xs font-normal text-muted-foreground">Inactive reasons stay on historical conversions but can't be newly assigned.</span></label></div><DialogFooter><Button variant="outline" onClick={onClose}>Cancel</Button><Button disabled={!text.trim()} onClick={() => onSave({ id: reason?.id ?? `RR-${Date.now()}`, reason: text.trim(), order, active })}><Check />Save</Button></DialogFooter></DialogContent></Dialog>;
+}
+
+function RejectionReasons({ reasons, onSave }: { reasons: RejectionReason[]; onSave: (reason: RejectionReason, isNew: boolean) => void }) {
+  const [query, setQuery] = useState("");
+  const [statusFilter, setStatusFilter] = useState("all");
+  const [sortKey, setSortKey] = useState<"reason" | "order">("order");
+  const [sortAsc, setSortAsc] = useState(true);
+  const [editing, setEditing] = useState<RejectionReason | null>(null);
+  const [dialogOpen, setDialogOpen] = useState(false);
+  const search = query.toLowerCase();
+  const rows = reasons
+    .filter((item) => (!search || item.reason.toLowerCase().includes(search)) && (statusFilter === "all" || (statusFilter === "active") === item.active))
+    .sort((a, b) => { const result = sortKey === "reason" ? a.reason.localeCompare(b.reason) : a.order - b.order; return sortAsc ? result : -result; });
+  const toggleSort = (key: "reason" | "order") => { if (sortKey === key) setSortAsc(!sortAsc); else { setSortKey(key); setSortAsc(true); } };
+  const openAdd = () => { setEditing(null); setDialogOpen(true); };
+  const openEdit = (item: RejectionReason) => { setEditing(item); setDialogOpen(true); };
+  return <>
+    <PageHeader title="Rejection Reasons" description="The whitelist resolve_online_conversion / approve_conversion_resolution validate a rejection reason against. Deactivate a reason instead of deleting it — historical conversions rejected under it keep displaying its text correctly either way." actions={<Button onClick={openAdd}><Plus />Add new</Button>} />
+    <div className="mb-5 flex flex-col gap-3 rounded-lg border border-border bg-card p-3 shadow-card sm:flex-row sm:items-center">
+      <div className="relative min-w-[280px] flex-1"><Search className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground" /><Input aria-label="Search reasons" className="w-full pl-9" value={query} onChange={(event) => setQuery(event.target.value)} placeholder="Search by reason text…" /></div>
+      <DropdownMenu><DropdownMenuTrigger asChild><Button variant="outline" className="shrink-0"><Filter className="mr-2 h-4 w-4 text-muted-foreground" />Status: {statusFilter === "all" ? "All" : statusFilter === "active" ? "Active" : "Inactive"}<ChevronDown className="ml-2 h-3.5 w-3.5 opacity-60" /></Button></DropdownMenuTrigger><DropdownMenuContent align="end" className="w-44 border-border bg-card">{["all", "active", "inactive"].map((item) => <DropdownMenuItem key={item} onSelect={() => setStatusFilter(item)}>Status: {item === "all" ? "All" : item === "active" ? "Active" : "Inactive"}</DropdownMenuItem>)}</DropdownMenuContent></DropdownMenu>
+      {(query || statusFilter !== "all") && <Button variant="ghost" size="sm" onClick={() => { setQuery(""); setStatusFilter("all"); }} className="shrink-0 text-muted-foreground hover:text-foreground"><RotateCcw className="mr-1 h-3.5 w-3.5" />Reset</Button>}
+    </div>
+    <div className="min-w-0 overflow-hidden rounded-lg border border-border bg-card shadow-card"><div className="table-scrollbar overflow-x-auto"><table className="w-full min-w-140 text-left text-sm"><thead className="text-[11px] uppercase text-muted-foreground"><tr><th className="sticky top-0 bg-muted/95 py-2"><Button variant="ghost" size="sm" className="-ml-3 h-7 text-[11px] uppercase" onClick={() => toggleSort("reason")}>Reason {sortKey === "reason" && (sortAsc ? <ArrowUp className="h-3.5 w-3.5" /> : <ArrowDown className="h-3.5 w-3.5" />)}</Button></th><th className="sticky top-0 bg-muted/95 py-2"><Button variant="ghost" size="sm" className="-ml-3 h-7 text-[11px] uppercase" onClick={() => toggleSort("order")}>Order {sortKey === "order" && (sortAsc ? <ArrowUp className="h-3.5 w-3.5" /> : <ArrowDown className="h-3.5 w-3.5" />)}</Button></th><th className="sticky top-0 bg-muted/95 py-2">Status</th><th className="sticky top-0 bg-muted/95 py-2 text-right">Actions</th></tr></thead><tbody>{rows.map((item) => <tr key={item.id} className="border-t border-border hover:bg-muted/50"><td className="font-semibold">{item.reason}</td><td className="text-muted-foreground">{item.order}</td><td><StatusBadge status={item.active ? "Active" : "Inactive"} /></td><td className="text-right"><IconButton className="h-7 w-7" label={`Edit ${item.reason}`} onClick={() => openEdit(item)}><Pencil className="h-3.5 w-3.5" /></IconButton></td></tr>)}</tbody></table>{!rows.length && <div className="px-6 py-14 text-center"><Flag className="mx-auto h-8 w-8 text-muted-foreground" /><h3 className="mt-3 font-heading font-semibold">No rejection reasons found</h3><p className="mt-1 text-sm text-muted-foreground">Try changing or resetting the current filters.</p></div>}</div></div>
+    <TransactionPagination count={rows.length} />
+    {dialogOpen && <RejectionReasonDialog reason={editing} nextOrder={reasons.reduce((max, item) => Math.max(max, item.order), 0) + 1} onClose={() => setDialogOpen(false)} onSave={(reason) => { onSave(reason, !editing); setDialogOpen(false); }} />}
+  </>;
+}
+
 export function AdminPlayground() {
   const [view, setView] = useState<View>("dashboard");
   const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -1174,6 +1219,7 @@ export function AdminPlayground() {
   const [syncRuns, setSyncRuns] = useState<SyncRun[]>(initialSyncRuns);
   const [syncing, setSyncing] = useState(false);
   const [affiliateNetworkRows, setAffiliateNetworkRows] = useState<AffiliateNetwork[]>(initialAffiliateNetworks);
+  const [rejectionReasonRows, setRejectionReasonRows] = useState<RejectionReason[]>(initialRejectionReasons);
   const [editingAffiliateNetwork, setEditingAffiliateNetwork] = useState<AffiliateNetwork | null>(null);
   const [editingMerchant, setEditingMerchant] = useState<typeof merchants[number] | null>(null);
   const [categoryRows, setCategoryRows] = useState<Category[]>(initialCategories);
@@ -1251,6 +1297,7 @@ export function AdminPlayground() {
     : view === "transactions" ? <Transactions />
     : view === "clicks" ? <Clicks />
     : view === "withdrawals" ? <Withdrawals />
+    : view === "rejection-reasons" ? <RejectionReasons reasons={rejectionReasonRows} onSave={(reason, isNew) => { setRejectionReasonRows((current) => current.some((item) => item.id === reason.id) ? current.map((item) => item.id === reason.id ? reason : item) : [reason, ...current]); toast.success(isNew ? "Rejection reason added" : "Rejection reason updated", { description: `${reason.reason} is now ${reason.active ? "active" : "inactive"} at display order ${reason.order}.` }); }} />
     : view === "merchant-edit" && editingMerchant ? <MerchantEditPage merchant={editingMerchant} offers={offerRows} reviews={reviewRows} onApproveReview={approveReview} onRejectReview={rejectReview} onRevertReview={revertReview} onDeleteReview={deleteReview} initialTab={merchantTab} onBack={backToMerchants} onDeleteMerchant={deleteMerchant} onEditOffer={(offer) => openOffer(offer, { type: "merchant", merchant: editingMerchant })} onCreateOffer={() => openOffer(null, { type: "merchant", merchant: editingMerchant })} onDeleteOffer={deleteOffer} />
     : view === "offers" ? <OffersPage offers={offerRows} onEdit={(offer) => openOffer(offer, { type: "listing" })} onCreate={() => openOffer(null, { type: "listing" })} onDelete={deleteOffer} />
     : view === "offer-edit" ? <OfferEditPage key={editingOffer?.id ?? "new"} offer={editingOffer} origin={offerOrigin} onCancel={returnFromOffer} onSave={saveOffer} onDelete={deleteOffer} />

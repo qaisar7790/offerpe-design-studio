@@ -37,6 +37,7 @@ import {
   RefreshCw,
   AlertTriangle,
   Search,
+  Share2,
   Settings2,
   ShieldCheck,
   ShoppingBag,
@@ -106,7 +107,7 @@ import {
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
 
-type View = "dashboard" | "merchants" | "reviews" | "merchant-onboarding-queue" | "trackier-queue" | "merchant-edit" | "offers" | "offer-edit" | "promo-banners" | "promo-banner-edit" | "promo-banner-new" | "categories" | "category-mapping" | "category-edit" | "category-new" | "conversions";
+type View = "dashboard" | "merchants" | "reviews" | "merchant-onboarding-queue" | "trackier-queue" | "affiliate-networks" | "affiliate-network-new" | "affiliate-network-edit" | "merchant-edit" | "offers" | "offer-edit" | "promo-banners" | "promo-banner-edit" | "promo-banner-new" | "categories" | "category-mapping" | "category-edit" | "category-new" | "conversions";
 type RawMapping = { raw: string; mappedTo: string };
 type ReviewStatus = "Pending" | "Approved" | "Rejected";
 type Review = { id: string; user: string; merchant: string; rating: number; comment: string; photos: string[]; submitted: string; status: ReviewStatus; reason: string; note: string };
@@ -116,11 +117,12 @@ type Banner = { id: string; title: string; placement: string; target: string; im
 type PromoSection = "HERO" | "PREMIUM DEALS" | "FLASH OFFERS" | "NEW ON PLATFORM";
 type PromoBanner = { id: string; section: PromoSection; headline: string; image: string; tag: string; ctaText: string; ctaTarget: string; order: number; start: string; end: string; active: boolean };
 type Category = { id: string; channel: "Online" | "Offline"; name: string; order: number; active: boolean; image: string; line1: string; line2: string };
+type AffiliateNetwork = { id: string; name: string; propertyId: string; storeTemplate: string; voucherTemplate: string; productTemplate: string; active: boolean };
 type OfferOrigin = { type: "merchant"; merchant: typeof merchants[number] } | { type: "listing" };
 
 const groups = [
   { label: "Catalog", icon: ShoppingBag, items: [{ label: "Merchants", icon: Store, view: "merchants" as View }, { label: "Cashback Offers", icon: Tag, view: "offers" as View }, { label: "Promo Banners", icon: Megaphone, view: "promo-banners" as View }, { label: "Merchant Reviews", icon: Star, view: "reviews" as View }, { label: "Categories", icon: Tag, view: "categories" as View }, { label: "Cities", icon: Building2 }] },
-  { label: "Operations", icon: Settings2, items: [{ label: "Merchant Onboarding Queue", icon: ClipboardCheck, view: "merchant-onboarding-queue" as View }, { label: "Trackier Import Queue", icon: DownloadCloud, view: "trackier-queue" as View }, { label: "Online Conversions", icon: CircleDollarSign, view: "conversions" as View }, { label: "Category Mapping", icon: Tag, view: "category-mapping" as View }, { label: "Users", icon: Users }] },
+  { label: "Operations", icon: Settings2, items: [{ label: "Merchant Onboarding Queue", icon: ClipboardCheck, view: "merchant-onboarding-queue" as View }, { label: "Trackier Import Queue", icon: DownloadCloud, view: "trackier-queue" as View }, { label: "Affiliate Networks", icon: Share2, view: "affiliate-networks" as View }, { label: "Online Conversions", icon: CircleDollarSign, view: "conversions" as View }, { label: "Category Mapping", icon: Tag, view: "category-mapping" as View }, { label: "Users", icon: Users }] },
   { label: "Financial", icon: WalletCards, items: [{ label: "Withdrawals", icon: BadgeIndianRupee }, { label: "Missing Claims", icon: FileSpreadsheet }] },
   { label: "Communication", icon: Megaphone, items: [{ label: "Notifications", icon: Megaphone }] },
   { label: "System", icon: SlidersHorizontal, items: [{ label: "Admin Roles", icon: ShieldCheck }, { label: "Settings", icon: Settings2 }] },
@@ -168,6 +170,12 @@ const initialMappings: RawMapping[] = [
   { raw: "food and grocery", mappedTo: "CAT-101" },
   { raw: "health and personal care", mappedTo: "" },
   { raw: "health and wellness", mappedTo: "" },
+];
+
+const initialAffiliateNetworks: AffiliateNetwork[] = [
+  { id: "NET-101", name: "Trackier", propertyId: "", storeTemplate: "{tracking_url}&source={click_id}", voucherTemplate: "{voucher_deeplink}&source={click_id}", productTemplate: "{product_deeplink}&source={click_id}", active: true },
+  { id: "NET-102", name: "Cuelinks", propertyId: "offerpe_in", storeTemplate: "https://linksredirect.com/?cid={property_id}&source={click_id}&url={deeplink_encoded}", voucherTemplate: "https://linksredirect.com/?cid={property_id}&source={click_id}&url={voucher_deeplink}", productTemplate: "https://linksredirect.com/?cid={property_id}&source={click_id}&url={product_deeplink}", active: true },
+  { id: "NET-103", name: "vCommission", propertyId: "VC-48291", storeTemplate: "https://tracking.vcommission.com/aff_c?offer_id={property_id}&aff_sub={click_id}&url={deeplink_encoded}", voucherTemplate: "", productTemplate: "", active: false },
 ];
 
 const initialPromoBanners: PromoBanner[] = [

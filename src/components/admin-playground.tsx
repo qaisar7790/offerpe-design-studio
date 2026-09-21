@@ -2191,6 +2191,9 @@ export function AdminPlayground() {
   const deleteAdminUser = (admin: AdminUser) => { setAdminUserRows((current) => current.filter((item) => item.id !== admin.id)); toast.success("Admin removed", { description: `${admin.name} no longer has portal access.` }); };
   const [editingAffiliateNetwork, setEditingAffiliateNetwork] = useState<AffiliateNetwork | null>(null);
   const [editingRole, setEditingRole] = useState<AdminRole | null>(null);
+  const [onboardingSlideRows, setOnboardingSlideRows] = useState<OnboardingSlide[]>(onboardingSlideSeeds);
+  const [onboardingApp, setOnboardingApp] = useState<OnboardingApp>("Consumer");
+  const [editingSlide, setEditingSlide] = useState<OnboardingSlide | null>(null);
   const [editingMerchant, setEditingMerchant] = useState<typeof merchants[number] | null>(null);
   const [categoryRows, setCategoryRows] = useState<Category[]>(initialCategories);
   const [mappingRows, setMappingRows] = useState<RawMapping[]>(initialMappings);

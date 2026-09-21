@@ -720,6 +720,28 @@ function SettingsCard({ title, description, children, footer }: { title: string;
   </section>;
 }
 
+function OnboardingAppCard({ app }: { app: string }) {
+  const [state, setState] = useState({ interval: "3", skip: true });
+  const [saved, setSaved] = useState({ interval: "3", skip: true });
+  const dirty = JSON.stringify(state) !== JSON.stringify(saved);
+  return <div className="rounded-lg border border-border bg-background p-4">
+    <h3 className="font-heading text-sm font-bold">{app}</h3>
+    <label className="mt-3 block space-y-1.5 text-sm font-medium">Auto-swipe interval (seconds) <span className="text-destructive">*</span>
+      <Input type="number" min="1" value={state.interval} onChange={(event) => setState((current) => ({ ...current, interval: event.target.value }))} />
+    </label>
+    <label className="mt-3 flex items-center gap-2 text-sm font-medium">
+      <Checkbox checked={state.skip} onCheckedChange={(checked) => setState((current) => ({ ...current, skip: checked === true }))} aria-label={`Show Skip button on ${app}`} />
+      Show Skip button
+    </label>
+    <div className="mt-4 flex items-center gap-2">
+      <ConfirmSaveDialog title={`Save ${app} onboarding settings?`} disabled={!dirty} summary={[{ label: "Auto-swipe interval", value: `${state.interval || "0"} sec` }, { label: "Skip button", value: state.skip ? "Shown" : "Hidden" }]} onConfirm={() => { setSaved(state); toast.success(`${app} onboarding saved`, { description: `Auto-swipe every ${state.interval}s · Skip ${state.skip ? "shown" : "hidden"}.` }); }}>
+        <Button disabled={!dirty}><Check />Save</Button>
+      </ConfirmSaveDialog>
+      <Button variant="destructiveSoft" disabled={!dirty} onClick={() => setState(saved)}>Cancel</Button>
+    </div>
+  </div>;
+}
+
 function SettingsPage() {
   const [withdrawal, setWithdrawal] = useState({ minimum: "100", saved: "100" });
   const [referral, setReferral] = useState({ referrer: "50", referred: "50", active: true });

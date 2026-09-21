@@ -56,6 +56,13 @@ import {
   Users,
   WalletCards,
   X,
+  Bold,
+  Italic,
+  Heading2,
+  List,
+  ListOrdered,
+  Undo2,
+  Redo2,
 } from "lucide-react";
 import {
   Bar,

@@ -20,6 +20,7 @@ import {
   Eye,
   EyeOff,
   FileSpreadsheet,
+  FileText,
   Filter,
   GripVertical,
   LayoutDashboard,

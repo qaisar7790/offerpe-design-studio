@@ -1219,6 +1219,7 @@ export function AdminPlayground() {
   const [syncRuns, setSyncRuns] = useState<SyncRun[]>(initialSyncRuns);
   const [syncing, setSyncing] = useState(false);
   const [affiliateNetworkRows, setAffiliateNetworkRows] = useState<AffiliateNetwork[]>(initialAffiliateNetworks);
+  const [rejectionReasonRows, setRejectionReasonRows] = useState<RejectionReason[]>(initialRejectionReasons);
   const [editingAffiliateNetwork, setEditingAffiliateNetwork] = useState<AffiliateNetwork | null>(null);
   const [editingMerchant, setEditingMerchant] = useState<typeof merchants[number] | null>(null);
   const [categoryRows, setCategoryRows] = useState<Category[]>(initialCategories);
@@ -1296,6 +1297,7 @@ export function AdminPlayground() {
     : view === "transactions" ? <Transactions />
     : view === "clicks" ? <Clicks />
     : view === "withdrawals" ? <Withdrawals />
+    : view === "rejection-reasons" ? <RejectionReasons reasons={rejectionReasonRows} onSave={(reason, isNew) => { setRejectionReasonRows((current) => current.some((item) => item.id === reason.id) ? current.map((item) => item.id === reason.id ? reason : item) : [reason, ...current]); toast.success(isNew ? "Rejection reason added" : "Rejection reason updated", { description: `${reason.reason} is now ${reason.active ? "active" : "inactive"} at display order ${reason.order}.` }); }} />
     : view === "merchant-edit" && editingMerchant ? <MerchantEditPage merchant={editingMerchant} offers={offerRows} reviews={reviewRows} onApproveReview={approveReview} onRejectReview={rejectReview} onRevertReview={revertReview} onDeleteReview={deleteReview} initialTab={merchantTab} onBack={backToMerchants} onDeleteMerchant={deleteMerchant} onEditOffer={(offer) => openOffer(offer, { type: "merchant", merchant: editingMerchant })} onCreateOffer={() => openOffer(null, { type: "merchant", merchant: editingMerchant })} onDeleteOffer={deleteOffer} />
     : view === "offers" ? <OffersPage offers={offerRows} onEdit={(offer) => openOffer(offer, { type: "listing" })} onCreate={() => openOffer(null, { type: "listing" })} onDelete={deleteOffer} />
     : view === "offer-edit" ? <OfferEditPage key={editingOffer?.id ?? "new"} offer={editingOffer} origin={offerOrigin} onCancel={returnFromOffer} onSave={saveOffer} onDelete={deleteOffer} />

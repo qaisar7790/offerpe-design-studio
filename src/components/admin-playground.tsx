@@ -33,6 +33,9 @@ import {
   Plus,
   RotateCcw,
   ClipboardCheck,
+  DownloadCloud,
+  RefreshCw,
+  AlertTriangle,
   Search,
   Settings2,
   ShieldCheck,
@@ -103,7 +106,7 @@ import {
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
 
-type View = "dashboard" | "merchants" | "reviews" | "merchant-onboarding-queue" | "merchant-edit" | "offers" | "offer-edit" | "promo-banners" | "promo-banner-edit" | "promo-banner-new" | "categories" | "category-mapping" | "category-edit" | "category-new" | "conversions";
+type View = "dashboard" | "merchants" | "reviews" | "merchant-onboarding-queue" | "trackier-queue" | "merchant-edit" | "offers" | "offer-edit" | "promo-banners" | "promo-banner-edit" | "promo-banner-new" | "categories" | "category-mapping" | "category-edit" | "category-new" | "conversions";
 type RawMapping = { raw: string; mappedTo: string };
 type ReviewStatus = "Pending" | "Approved" | "Rejected";
 type Review = { id: string; user: string; merchant: string; rating: number; comment: string; photos: string[]; submitted: string; status: ReviewStatus; reason: string; note: string };
@@ -117,7 +120,7 @@ type OfferOrigin = { type: "merchant"; merchant: typeof merchants[number] } | { 
 
 const groups = [
   { label: "Catalog", icon: ShoppingBag, items: [{ label: "Merchants", icon: Store, view: "merchants" as View }, { label: "Cashback Offers", icon: Tag, view: "offers" as View }, { label: "Promo Banners", icon: Megaphone, view: "promo-banners" as View }, { label: "Merchant Reviews", icon: Star, view: "reviews" as View }, { label: "Categories", icon: Tag, view: "categories" as View }, { label: "Cities", icon: Building2 }] },
-  { label: "Operations", icon: Settings2, items: [{ label: "Merchant Onboarding Queue", icon: ClipboardCheck, view: "merchant-onboarding-queue" as View }, { label: "Online Conversions", icon: CircleDollarSign, view: "conversions" as View }, { label: "Category Mapping", icon: Tag, view: "category-mapping" as View }, { label: "Users", icon: Users }] },
+  { label: "Operations", icon: Settings2, items: [{ label: "Merchant Onboarding Queue", icon: ClipboardCheck, view: "merchant-onboarding-queue" as View }, { label: "Trackier Import Queue", icon: DownloadCloud, view: "trackier-queue" as View }, { label: "Online Conversions", icon: CircleDollarSign, view: "conversions" as View }, { label: "Category Mapping", icon: Tag, view: "category-mapping" as View }, { label: "Users", icon: Users }] },
   { label: "Financial", icon: WalletCards, items: [{ label: "Withdrawals", icon: BadgeIndianRupee }, { label: "Missing Claims", icon: FileSpreadsheet }] },
   { label: "Communication", icon: Megaphone, items: [{ label: "Notifications", icon: Megaphone }] },
   { label: "System", icon: SlidersHorizontal, items: [{ label: "Admin Roles", icon: ShieldCheck }, { label: "Settings", icon: Settings2 }] },
@@ -189,6 +192,26 @@ const initialApplications: Application[] = [
   { id: "APP-3009", store: "Sunrise Kirana Mart", category: "Grocery", owner: "Rekha Patil", phone: "+91 90040 55871", email: "rekha@sunrisemart.example", address: "Kothrud", city: "Pune", commission: "4%", documents: ["GST registration"], submitted: "18 Sep 2026, 10:22", status: "Rejected", reason: "Commission rate below platform threshold", note: "Offered 4%, platform minimum for grocery is 6%." },
   { id: "APP-3008", store: "Glow Aesthetics Clinic", category: "Wellness", owner: "Dr. Ira Menon", phone: "+91 97400 31188", email: "ira@glowaesthetics.example", address: "Jubilee Hills", city: "Hyderabad", commission: "14%", documents: ["GST registration", "Storefront photo"], submitted: "17 Sep 2026, 15:48", status: "Approved", reason: "", note: "" },
   { id: "APP-3007", store: "Cafe Mocha Lane", category: "Cafes & Dining", owner: "Vikram Joshi", phone: "+91 98330 90210", email: "vikram@mochalane.example", address: "Salt Lake Sector V", city: "Kolkata", commission: "11%", documents: ["Storefront photo"], submitted: "16 Sep 2026, 09:31", status: "Rejected", reason: "Invalid GST/FSSAI documents", note: "GST certificate was illegible and FSSAI licence missing." },
+];
+
+
+type StagedOffer = { headline: string; terms: string; discountType: string; discountValue: string; commissionType: string; commissionValue: string };
+type StagedCampaign = { id: string; trackierId: string; name: string; categoryId: string; rawCategory: string; about: string; logo: string; website: string; trackingTime: string; approvalTime: string; displayOrder: string; attribution: string; trackingUrl: string; offers: StagedOffer[] };
+type SyncRun = { id: string; started: string; trigger: "MANUAL" | "SCHEDULED"; status: "SUCCEEDED" | "FAILED"; fetched: number; staged: number; updated: number; skips: number; errors: string[] };
+
+const campaignRejectionReasons = ["Duplicate merchant", "Inactive affiliate program", "Commission below platform threshold", "Category outside OfferPe scope", "Incomplete campaign data"];
+
+const initialCampaigns: StagedCampaign[] = [
+  { id: "TRK-1123", trackierId: "#1123", name: "Strch", categoryId: "CAT-102", rawCategory: "fashion", about: "Strch, India's first and softest activewear brand, crafts high-quality sportswear that feels as good as it looks. Our clothing is made with engineered Nylon Spandex fabric, designed to provide the perfect balance of comfort, flexibility, and durability. Brand Bidding/PPC/Meta ads, etc., are strictly prohibited.", logo: "https://static.vnative.co/images/6aa91555eb372.png", website: "https://strch.com", trackingTime: "5", approvalTime: "45", displayOrder: "3", attribution: "Web", trackingUrl: "https://track.techtrack.in/click?campaign_id=1123&pub_id=679", offers: [{ headline: "Strch", terms: "Do not visit the merchant's website through any other source before using our link. Try to complete your purchase within 30 minutes of clicking our tracking link. Use only coupon codes available on our platform. Third-party coupon codes may invalidate your cashback.", discountType: "%", discountValue: "19.2", commissionType: "%", commissionValue: "32" }] },
+  { id: "TRK-1125", trackierId: "#1125", name: "Bersache", categoryId: "", rawCategory: "Men's Footwear", about: "", logo: "", website: "https://bersache.com", trackingTime: "10", approvalTime: "60", displayOrder: "1", attribution: "Web", trackingUrl: "https://track.techtrack.in/click?campaign_id=1125&pub_id=679", offers: [{ headline: "Bersache", terms: "Complete the purchase in a single session after clicking the tracking link. Cashback is void on cancelled or returned orders.", discountType: "%", discountValue: "18", commissionType: "%", commissionValue: "30" }] },
+  { id: "TRK-1128", trackierId: "#1128", name: "Bombay Shaving Company", categoryId: "CAT-104", rawCategory: "health and personal care", about: "Bombay Shaving Company builds precision grooming products for men and women — razors, beard care, skincare and gifting ranges designed and manufactured in India.", logo: "https://static.vnative.co/images/9bd21a44ce118.png", website: "https://bombayshavingcompany.com", trackingTime: "8", approvalTime: "30", displayOrder: "2", attribution: "Web", trackingUrl: "https://track.techtrack.in/click?campaign_id=1128&pub_id=679", offers: [{ headline: "Bombay Shaving Company", terms: "Cashback applies on prepaid orders only. Combo and gift-card purchases are excluded from the cashback programme.", discountType: "%", discountValue: "12.5", commissionType: "%", commissionValue: "22" }] },
+];
+
+const initialSyncRuns: SyncRun[] = [
+  { id: "RUN-4019", started: "19 Sept 2026, 12:20 pm", trigger: "MANUAL", status: "SUCCEEDED", fetched: 61, staged: 2, updated: 57, skips: 1, errors: ["Campaign #1131: logo URL returned HTTP 404"] },
+  { id: "RUN-4018", started: "2 Sept 2026, 4:21 pm", trigger: "MANUAL", status: "SUCCEEDED", fetched: 64, staged: 19, updated: 44, skips: 1, errors: [] },
+  { id: "RUN-4017", started: "2 Sept 2026, 5:43 am", trigger: "MANUAL", status: "SUCCEEDED", fetched: 13, staged: 0, updated: 12, skips: 1, errors: [] },
+  { id: "RUN-4016", started: "2 Sept 2026, 5:36 am", trigger: "SCHEDULED", status: "SUCCEEDED", fetched: 13, staged: 0, updated: 12, skips: 1, errors: [] },
 ];
 
 const rejectionReasons = ["Profanity / abusive content", "Irrelevant / spam", "False or misleading claims", "Competitor promotion", "Personal identification information (PII)"];
@@ -710,12 +733,115 @@ function Conversions() {
   return <><PageHeader title="Online Conversions" description="Review conversion lifecycle, commission values, and settlement status." actions={<><Button variant="outline"><Download />Export CSV</Button><Button onClick={() => setImportOpen(true)}><UploadCloud />Import & Export</Button></>} /><FilterBar query={query} setQuery={setSearch} statuses={statuses} setStatuses={setStatusFilter} /><div className="min-w-0 max-w-full overflow-hidden rounded-lg border border-border bg-card shadow-card"><div className="table-scrollbar max-w-full overflow-x-auto"><table className="w-max min-w-520 border-separate border-spacing-0 text-left text-sm"><thead className="text-[11px] uppercase text-muted-foreground"><tr>{["Cashback ID", "Click ID", "Order ID", "Merchant", "Status", "Order Value", "Commission Reported", "Commission Calculated", "Order Date", "Date Created", "Date Approved/Rejected", "Rejection Reason", "Internal Notes", "Withdrawal ID", "Invoice Number"].map((label, index) => <th key={label} className={cn("sticky top-0 z-10 border-b border-border bg-muted/90 px-4 py-2 backdrop-blur", index === 0 && "left-0 z-30 shadow-sticky-left")}>{label}</th>)}<th className="sticky right-0 top-0 z-30 border-b border-border bg-muted/90 pr-4 text-right backdrop-blur shadow-sticky-right">Actions</th></tr></thead><tbody>{rows.map((r) => <tr key={r.cashback} className="group hover:bg-muted/50"><td className="sticky left-0 z-20 border-b border-border bg-card px-4 py-2 shadow-sticky-left group-hover:bg-muted"><span className="flex items-center gap-1 font-mono text-xs font-semibold">{r.cashback}<CopyButton value={r.cashback} /></span></td><td className="border-b border-border font-mono text-xs"><span className="flex items-center gap-1">{r.click ?? "—"}{r.click && <CopyButton value={r.click} />}</span></td><td className="border-b border-border font-mono text-xs"><span className="flex items-center gap-1">{r.order}<CopyButton value={r.order} /></span></td><td className="border-b border-border"><span className="inline-flex items-center gap-2 font-medium"><span className="flex h-5 w-5 items-center justify-center rounded bg-accent text-primary"><Store className="h-3 w-3" /></span>{r.merchant}</span></td><td className="border-b border-border"><StatusBadge status={r.status} /></td><td className="border-b border-border font-medium">{r.value}</td><td className="border-b border-border">{r.reported}</td><td className="border-b border-border font-semibold">{r.calculated}</td><td className="border-b border-border text-muted-foreground">{r.orderDate}</td><td className="border-b border-border text-muted-foreground">{r.created}</td><td className="border-b border-border text-muted-foreground">{r.resolved ?? "—"}</td><td className="border-b border-border">{r.rejection ?? "—"}</td><td className="max-w-52 truncate border-b border-border text-muted-foreground" title={r.notes}>{r.notes}</td><td className="border-b border-border font-mono text-xs">{r.withdrawal ?? "—"}</td><td className="border-b border-border font-mono text-xs">{r.invoice ?? "—"}</td><td className="sticky right-0 z-20 border-b border-border bg-card pr-3 text-right shadow-sticky-right group-hover:bg-muted"><span className="inline-flex items-center"><IconButton className="h-7 w-7" label={`Edit ${r.cashback}`} onClick={() => act(r, "edit")}><Pencil className="h-3.5 w-3.5" /></IconButton><CopyButton value={r.cashback} /><DropdownMenu><DropdownMenuTrigger asChild><Button variant="ghost" size="icon" className="h-7 w-7" aria-label={`More actions for ${r.cashback}`}><MoreHorizontal className="h-3.5 w-3.5" /></Button></DropdownMenuTrigger><DropdownMenuContent align="end"><DropdownMenuItem onSelect={() => act(r, "edit")}><Pencil />Edit details</DropdownMenuItem><DropdownMenuItem><ExternalLink />Open conversion</DropdownMenuItem>{!(["Requested", "Paid"] as Status[]).includes(r.status) && <><DropdownMenuSeparator /><DropdownMenuItem className="text-destructive focus:bg-destructive-soft focus:text-destructive" onSelect={() => act(r, "delete")}><Trash2 />Delete</DropdownMenuItem></>}</DropdownMenuContent></DropdownMenu></span></td></tr>)}</tbody></table></div></div><div className="mt-4 grid gap-4 rounded-lg border border-border bg-card p-3 text-sm text-muted-foreground lg:grid-cols-[minmax(0,1fr)_auto] lg:items-center"><div className="flex min-w-0 flex-wrap items-center gap-4"><span>Showing <strong className="text-foreground">{filtered.length ? start + 1 : 0}</strong> to <strong className="text-foreground">{Math.min(start + pageSize, filtered.length)}</strong> of <strong className="text-foreground">{filtered.length}</strong> results</span><div className="flex shrink-0 items-center gap-2"><span>Rows per page</span><Select value={String(pageSize)} onValueChange={(value) => { setPageSize(Number(value)); setPage(1); }}><SelectTrigger className="h-8 w-20"><SelectValue /></SelectTrigger><SelectContent>{[10, 25, 50, 100].map((size) => <SelectItem key={size} value={String(size)}>{size}</SelectItem>)}</SelectContent></Select></div></div><div className="flex min-w-0 items-center gap-1 overflow-x-auto pb-1 lg:justify-end"><Button variant="outline" size="sm" disabled={currentPage === 1} onClick={() => setPage(currentPage - 1)}><ChevronLeft />Previous</Button>{pageItems.map((item, index) => { const previous = pageItems[index - 1]; return <span key={item} className="contents">{previous !== undefined && item - previous > 1 && <span className="px-1">…</span>}<Button variant={item === currentPage ? "default" : "outline"} size="icon" className="h-8 w-8 shrink-0" onClick={() => setPage(item)} aria-current={item === currentPage ? "page" : undefined}>{item}</Button></span>; })}<Button variant="outline" size="sm" disabled={currentPage === pageCount} onClick={() => setPage(currentPage + 1)}>Next<ChevronRight /></Button></div></div><ImportModal open={importOpen} onOpenChange={setImportOpen} /><ConversionModal key={`${selected?.cashback ?? "none"}-${mode ?? "none"}`} row={selected} mode={mode} onSave={saveConversion} onDelete={deleteConversion} onClose={() => { setSelected(null); setMode(null); }} /></>;
 }
 
+function RejectCampaignDialog({ campaign, onReject, children }: { campaign: StagedCampaign; onReject: (campaign: StagedCampaign, reason: string, note: string) => void; children: React.ReactNode }) {
+  const [open, setOpen] = useState(false);
+  const [reason, setReason] = useState(campaignRejectionReasons[0] as string);
+  const [note, setNote] = useState("");
+  return <Dialog open={open} onOpenChange={setOpen}><DialogTrigger asChild>{children}</DialogTrigger><DialogContent className="max-w-lg bg-card"><DialogHeader><DialogTitle className="font-heading text-lg">Reject staged campaign</DialogTitle><DialogDescription>Campaign {campaign.trackierId} ({campaign.name}) will be removed from the import queue and will not be published to the catalog.</DialogDescription></DialogHeader><div className="space-y-4"><label className="block space-y-1.5 text-sm font-medium">Rejection reason <span className="text-destructive">*</span><Select value={reason} onValueChange={setReason}><SelectTrigger><SelectValue /></SelectTrigger><SelectContent>{campaignRejectionReasons.map((item) => <SelectItem key={item} value={item}>{item}</SelectItem>)}</SelectContent></Select></label><label className="block space-y-1.5 text-sm font-medium">Rejection note <span className="font-normal text-muted-foreground">(optional)</span><Textarea rows={3} value={note} onChange={(event) => setNote(event.target.value)} placeholder="Add internal context for this decision…" /></label></div><DialogFooter><Button variant="outline" onClick={() => setOpen(false)}>Cancel</Button><Button variant="destructive" onClick={() => { onReject(campaign, reason, note); setOpen(false); }}>Reject campaign</Button></DialogFooter></DialogContent></Dialog>;
+}
+
+function StagedField({ label, children }: { label: string; children: React.ReactNode }) {
+  return <label className="block space-y-1.5 text-xs font-semibold uppercase text-muted-foreground">{label}<div className="font-sans text-sm normal-case">{children}</div></label>;
+}
+
+function CampaignCard({ campaign, categories, onChange, onApprove, onReject }: { campaign: StagedCampaign; categories: Category[]; onChange: (campaign: StagedCampaign) => void; onApprove: (campaign: StagedCampaign) => void; onReject: (campaign: StagedCampaign, reason: string, note: string) => void }) {
+  const set = <K extends keyof StagedCampaign>(key: K, value: StagedCampaign[K]) => onChange({ ...campaign, [key]: value });
+  const mapped = Boolean(campaign.categoryId);
+  return <article className="rounded-lg border border-border bg-card p-4 shadow-card">
+    <div className="flex flex-col gap-2 border-b border-border pb-3 sm:flex-row sm:items-center sm:justify-between">
+      <div className="flex flex-wrap items-center gap-2">
+        {campaign.logo ? <img src={campaign.logo} alt="" className="h-8 w-8 rounded border border-border bg-muted object-contain" /> : <span className="flex h-8 w-8 items-center justify-center rounded border border-border bg-muted text-muted-foreground"><Store className="h-4 w-4" /></span>}
+        <span className="font-heading text-base font-bold">{campaign.name}</span>
+        <span className="font-mono text-xs text-muted-foreground">Trackier {campaign.trackierId}</span>
+      </div>
+      {!mapped && <span className="inline-flex w-fit items-center gap-1.5 rounded-full px-2 py-0.5 text-xs font-semibold status-pending"><AlertTriangle className="h-3 w-3" />Category unmapped — raw: {campaign.rawCategory}</span>}
+    </div>
+    <div className="mt-4 grid gap-4 md:grid-cols-2">
+      <StagedField label="Name"><Input value={campaign.name} onChange={(event) => set("name", event.target.value)} /></StagedField>
+      <StagedField label="Category"><Select value={campaign.categoryId || "none"} onValueChange={(value) => set("categoryId", value === "none" ? "" : value)}><SelectTrigger><SelectValue placeholder="Select a category…" /></SelectTrigger><SelectContent><SelectItem value="none">Select a category…</SelectItem>{categories.map((category) => <SelectItem key={category.id} value={category.id}>{category.name} ({category.channel.toUpperCase()})</SelectItem>)}</SelectContent></Select></StagedField>
+      <div className="md:col-span-2"><StagedField label="About (cleaned from Trackier's description)"><Textarea rows={3} value={campaign.about} onChange={(event) => set("about", event.target.value)} /></StagedField></div>
+      <StagedField label="Logo URL"><Input value={campaign.logo} onChange={(event) => set("logo", event.target.value)} /></StagedField>
+      <StagedField label="Website URL"><Input value={campaign.website} onChange={(event) => set("website", event.target.value)} /></StagedField>
+      <StagedField label="Tracking time (minutes)"><Input value={campaign.trackingTime} onChange={(event) => set("trackingTime", event.target.value)} /></StagedField>
+      <StagedField label="Approval time (days)"><Input value={campaign.approvalTime} onChange={(event) => set("approvalTime", event.target.value)} /></StagedField>
+      <StagedField label="Display order (from Trackier Priority)"><Input value={campaign.displayOrder} onChange={(event) => set("displayOrder", event.target.value)} /></StagedField>
+      <StagedField label="Attribution"><Select value={campaign.attribution} onValueChange={(value) => set("attribution", value)}><SelectTrigger><SelectValue /></SelectTrigger><SelectContent>{["Web", "App", "Web & App"].map((item) => <SelectItem key={item} value={item}>{item}</SelectItem>)}</SelectContent></Select></StagedField>
+    </div>
+    <p className="mt-4 flex flex-wrap items-center gap-1.5 text-xs text-muted-foreground"><Lock className="h-3 w-3" />Network tracking URL (verbatim, not editable): <span className="font-mono text-foreground">{campaign.trackingUrl}</span></p>
+    <div className="mt-4">
+      <h3 className="text-[11px] font-bold uppercase text-muted-foreground">Offers ({campaign.offers.length})</h3>
+      <div className="mt-2 space-y-3">{campaign.offers.map((offer, index) => <div key={index} className="rounded-lg border border-border bg-muted/40 p-3">
+        <div className="grid gap-3 md:grid-cols-2">
+          <div className="md:col-span-2"><StagedField label="Headline"><Input readOnly value={offer.headline} className="bg-card" /></StagedField></div>
+          <div className="md:col-span-2"><StagedField label="Terms (cleaned from Trackier's kpi)"><Textarea readOnly rows={3} value={offer.terms} className="bg-card" /></StagedField></div>
+          <StagedField label="Discount"><div className="flex items-center gap-2"><span className="rounded border border-border bg-card px-2 py-1 text-xs font-semibold">{offer.discountType}</span><span className="font-heading text-base font-bold">{offer.discountValue}</span></div></StagedField>
+          <StagedField label="Commission (informational)"><div className="flex items-center gap-2"><span className="rounded border border-border bg-card px-2 py-1 text-xs font-semibold">{offer.commissionType}</span><span className="font-heading text-base font-bold">{offer.commissionValue}</span></div></StagedField>
+        </div>
+      </div>)}</div>
+    </div>
+    <div className="mt-4 flex flex-wrap gap-2 border-t border-border pt-3">
+      <Button size="sm" onClick={() => onApprove(campaign)}><Check />Approve</Button>
+      <RejectCampaignDialog campaign={campaign} onReject={onReject}><Button size="sm" variant="destructive"><X />Reject</Button></RejectCampaignDialog>
+    </div>
+  </article>;
+}
+
+function SyncRunsTable({ runs }: { runs: SyncRun[] }) {
+  const [status, setStatus] = useState("all");
+  const [trigger, setTrigger] = useState("all");
+  const rows = runs.filter((run) => (status === "all" || run.status === status) && (trigger === "all" || run.trigger === trigger));
+  return <div>
+    <div className="mb-5 flex flex-col gap-3 rounded-lg border border-border bg-card p-3 shadow-card sm:flex-row">
+      <label className="flex-1 space-y-1.5 text-xs font-semibold uppercase text-muted-foreground sm:max-w-52">Status<Select value={status} onValueChange={setStatus}><SelectTrigger><SelectValue /></SelectTrigger><SelectContent><SelectItem value="all">All</SelectItem><SelectItem value="SUCCEEDED">Succeeded</SelectItem><SelectItem value="FAILED">Failed</SelectItem></SelectContent></Select></label>
+      <label className="flex-1 space-y-1.5 text-xs font-semibold uppercase text-muted-foreground sm:max-w-52">Triggered by<Select value={trigger} onValueChange={setTrigger}><SelectTrigger><SelectValue /></SelectTrigger><SelectContent><SelectItem value="all">All</SelectItem><SelectItem value="MANUAL">Manual</SelectItem><SelectItem value="SCHEDULED">Scheduled</SelectItem></SelectContent></Select></label>
+    </div>
+    <div className="overflow-hidden rounded-lg border border-border bg-card shadow-card"><div className="table-scrollbar overflow-x-auto"><table className="w-full min-w-215 text-left text-sm">
+      <thead className="bg-muted/70 text-[11px] uppercase text-muted-foreground"><tr><th>Started</th><th>Triggered by</th><th>Status</th><th>Fetched</th><th>New staged</th><th>Updated</th><th>Field-locked skips</th><th>Errors</th></tr></thead>
+      <tbody>{rows.map((run) => <tr key={run.id} className="border-t border-border hover:bg-muted/50">
+        <td className="font-medium">{run.started}</td>
+        <td><span className={cn("inline-flex rounded-full px-2 py-0.5 text-xs font-semibold", run.trigger === "MANUAL" ? "bg-muted text-muted-foreground" : "status-requested")}>{run.trigger}</span></td>
+        <td><span className={cn("inline-flex rounded-full px-2 py-0.5 text-xs font-semibold", run.status === "SUCCEEDED" ? "status-approved" : "status-rejected")}>{run.status}</span></td>
+        <td>{run.fetched}</td><td>{run.staged}</td><td>{run.updated}</td><td>{run.skips}</td>
+        <td>{run.errors.length === 0 ? <span className="text-muted-foreground">—</span> : <Dialog><DialogTrigger asChild><button className="rounded-full bg-destructive-soft px-2 py-0.5 text-xs font-semibold text-destructive">{run.errors.length} error(s)</button></DialogTrigger><DialogContent className="max-w-lg bg-card"><DialogHeader><DialogTitle className="font-heading text-lg">Sync errors</DialogTitle><DialogDescription>{run.started} · {run.trigger.toLowerCase()} run</DialogDescription></DialogHeader><ul className="space-y-2 text-sm">{run.errors.map((error) => <li key={error} className="rounded-md border border-destructive-border bg-destructive-soft p-2 text-destructive">{error}</li>)}</ul></DialogContent></Dialog>}</td>
+      </tr>)}</tbody>
+    </table></div></div>
+    {rows.length === 0 && <p className="mt-4 text-sm text-muted-foreground">No sync runs match these filters.</p>}
+  </div>;
+}
+
+function TrackierQueue({ campaigns, runs, categories, syncing, onSync, onChange, onApprove, onReject }: { campaigns: StagedCampaign[]; runs: SyncRun[]; categories: Category[]; syncing: boolean; onSync: () => void; onChange: (campaign: StagedCampaign) => void; onApprove: (campaign: StagedCampaign) => void; onReject: (campaign: StagedCampaign, reason: string, note: string) => void }) {
+  const [tab, setTab] = useState("pending");
+  const [query, setQuery] = useState("");
+  const [mapping, setMapping] = useState("all");
+  const categoryLabel = (campaign: StagedCampaign) => categories.find((category) => category.id === campaign.categoryId)?.name ?? campaign.rawCategory;
+  const pending = campaigns
+    .filter((campaign) => !query || `${campaign.name} ${campaign.trackierId} ${categoryLabel(campaign)}`.toLowerCase().includes(query.toLowerCase()))
+    .filter((campaign) => mapping === "all" || (mapping === "mapped" ? Boolean(campaign.categoryId) : !campaign.categoryId));
+  return <><PageHeader title="Trackier Import Queue" description="Review and approve affiliate campaigns fetched from Trackier API before publishing them to the live catalog." actions={<Button onClick={onSync} disabled={syncing}><RefreshCw className={cn(syncing && "animate-spin")} />{syncing ? "Syncing…" : "Sync Now"}</Button>} />
+    <Tabs value={tab} onValueChange={setTab}>
+      <TabsList className="mb-5 h-auto w-full justify-start gap-6 rounded-none border-b border-border bg-transparent p-0"><TabsTrigger value="pending" className={tabTriggerClass}>Pending Review ({campaigns.length})</TabsTrigger><TabsTrigger value="runs" className={tabTriggerClass}>Recent Sync Runs ({runs.length})</TabsTrigger></TabsList>
+      <TabsContent value="pending" className="mt-0">
+        <div className="mb-5 flex flex-col gap-3 rounded-lg border border-border bg-card p-3 shadow-card lg:flex-row">
+          <div className="relative flex-1"><Search className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground" /><Input className="pl-9" value={query} onChange={(event) => setQuery(event.target.value)} placeholder="Search by campaign name, Trackier ID, or category…" /></div>
+          <Select value={mapping} onValueChange={setMapping}><SelectTrigger className="lg:w-56"><SelectValue /></SelectTrigger><SelectContent><SelectItem value="all">All</SelectItem><SelectItem value="mapped">Mapped only</SelectItem><SelectItem value="unmapped">Unmapped warning</SelectItem></SelectContent></Select>
+        </div>
+        {pending.length === 0 ? <p className="text-sm text-muted-foreground">No staged campaigns waiting for review.</p>
+          : <div className="space-y-4">{pending.map((campaign) => <CampaignCard key={campaign.id} campaign={campaign} categories={categories} onChange={onChange} onApprove={onApprove} onReject={onReject} />)}</div>}
+      </TabsContent>
+      <TabsContent value="runs" className="mt-0"><SyncRunsTable runs={runs} /></TabsContent>
+    </Tabs>
+  </>;
+}
+
 export function AdminPlayground() {
   const [view, setView] = useState<View>("dashboard");
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [merchantRows, setMerchantRows] = useState<readonly (typeof merchants[number])[]>(merchants);
   const [reviewRows, setReviewRows] = useState<Review[]>(initialReviews);
   const [applicationRows, setApplicationRows] = useState<Application[]>(initialApplications);
+  const [campaignRows, setCampaignRows] = useState<StagedCampaign[]>(initialCampaigns);
+  const [syncRuns, setSyncRuns] = useState<SyncRun[]>(initialSyncRuns);
+  const [syncing, setSyncing] = useState(false);
   const [editingMerchant, setEditingMerchant] = useState<typeof merchants[number] | null>(null);
   const [categoryRows, setCategoryRows] = useState<Category[]>(initialCategories);
   const [mappingRows, setMappingRows] = useState<RawMapping[]>(initialMappings);
@@ -737,6 +863,28 @@ export function AdminPlayground() {
   const rejectApplication = (application: Application, reason: string, note: string) => { setApplicationStatus(application, "Rejected", reason, note); toast.success("Application rejected", { description: `${application.store} was rejected: ${reason}.` }); };
   const revertApplication = (application: Application) => { setApplicationStatus(application, "Pending"); toast.success("Application moved back to pending", { description: `${application.store} awaits review again.` }); };
   const deleteApplication = (application: Application) => { setApplicationRows((current) => current.filter((item) => item.id !== application.id)); toast.success("Application deleted", { description: `${application.store} was removed from the queue.` }); };
+  const runSync = () => {
+    setSyncing(true);
+    window.setTimeout(() => {
+      const run: SyncRun = { id: `RUN-${Math.floor(Math.random() * 9000) + 1000}`, started: "21 Sept 2026, 08:26 am", trigger: "MANUAL", status: "SUCCEEDED", fetched: 62, staged: 2, updated: 59, skips: 1, errors: [] };
+      setSyncRuns((current) => [run, ...current]);
+      setSyncing(false);
+      toast.success("Sync complete: 62 fetched, 2 new staged, 1 field-locked skip");
+    }, 1400);
+  };
+  const changeCampaign = (updated: StagedCampaign) => setCampaignRows((current) => current.map((item) => item.id === updated.id ? updated : item));
+  const approveCampaign = (campaign: StagedCampaign) => {
+    if (!campaign.categoryId) { toast.error("Map a category first", { description: `Campaign ${campaign.trackierId} (${campaign.name}) has an unmapped category.` }); return; }
+    const category = categoryRows.find((item) => item.id === campaign.categoryId);
+    setCampaignRows((current) => current.filter((item) => item.id !== campaign.id));
+    setMerchantRows((current) => [[campaign.name, "Online", category?.name ?? "", Number(campaign.displayOrder) || 0, "Active", campaign.offers.length, `${campaign.offers[0]?.commissionValue ?? 0}%`, ["Pan-India"]] as unknown as typeof merchants[number], ...current]);
+    setOfferRows((current) => [...campaign.offers.map((offer, index) => ({ id: `OFF-${campaign.trackierId.replace("#", "")}${index}`, merchant: campaign.name, headline: offer.headline, subtext: "", details: campaign.about, terms: offer.terms, discountType: "Percentage" as const, discountValue: Number(offer.discountValue) || 0, commissionType: "Percentage" as const, commissionValue: Number(offer.commissionValue) || 0, start: "2026-09-21T00:00", end: "", minBill: 0, sortOrder: Number(campaign.displayOrder) || 0, discountCap: 0, commissionCap: 0, redirectUrl: campaign.trackingUrl, voucherLink: "", productLink: "", affiliate: "Trackier", featured: false, active: true })), ...current]);
+    toast.success(`Campaign ${campaign.trackierId} (${campaign.name}) approved and published to catalog`);
+  };
+  const rejectCampaign = (campaign: StagedCampaign, reason: string, note: string) => {
+    setCampaignRows((current) => current.filter((item) => item.id !== campaign.id));
+    toast.success(`Campaign ${campaign.trackierId} (${campaign.name}) rejected`, { description: note ? `${reason} — ${note}` : reason });
+  };
   const backToMerchants = () => { setEditingMerchant(null); setView("merchants"); };
   const deleteMerchant = () => { if (!editingMerchant) return; setMerchantRows((current) => current.filter((item) => item[0] !== editingMerchant[0])); toast.success("Merchant deleted", { description: `${editingMerchant[0]} was removed.` }); backToMerchants(); };
   const editCategory = (category: Category) => { setEditingCategory(category); setView("category-edit"); };
@@ -753,6 +901,7 @@ export function AdminPlayground() {
   const content = view === "dashboard" ? <Dashboard />
     : view === "merchants" ? <Merchants rows={merchantRows} onEdit={editMerchant} />
     : view === "reviews" ? <ReviewsPage reviews={reviewRows} merchantNames={merchantRows.map((row) => row[0])} onApprove={approveReview} onReject={rejectReview} onRevert={revertReview} onDelete={deleteReview} />
+    : view === "trackier-queue" ? <TrackierQueue campaigns={campaignRows} runs={syncRuns} categories={categoryRows} syncing={syncing} onSync={runSync} onChange={changeCampaign} onApprove={approveCampaign} onReject={rejectCampaign} />
     : view === "merchant-onboarding-queue" ? <OnboardingQueue applications={applicationRows} onApprove={approveApplication} onReject={rejectApplication} onRevert={revertApplication} onDelete={deleteApplication} />
     : view === "merchant-edit" && editingMerchant ? <MerchantEditPage merchant={editingMerchant} offers={offerRows} reviews={reviewRows} onApproveReview={approveReview} onRejectReview={rejectReview} onRevertReview={revertReview} onDeleteReview={deleteReview} initialTab={merchantTab} onBack={backToMerchants} onDeleteMerchant={deleteMerchant} onEditOffer={(offer) => openOffer(offer, { type: "merchant", merchant: editingMerchant })} onCreateOffer={() => openOffer(null, { type: "merchant", merchant: editingMerchant })} onDeleteOffer={deleteOffer} />
     : view === "offers" ? <OffersPage offers={offerRows} onEdit={(offer) => openOffer(offer, { type: "listing" })} onCreate={() => openOffer(null, { type: "listing" })} onDelete={deleteOffer} />

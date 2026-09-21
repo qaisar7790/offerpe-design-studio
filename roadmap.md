@@ -6,3 +6,5 @@
 - [x] Add Online Conversions listing with filters, status treatments, and row actions
 - [x] Add the Import Offline Report upload modal
 - [x] Add page metadata and verify desktop/mobile interaction flows
+- [x] Expand Online Conversions to 16 columns with isolated horizontal scrolling
+- [x] Add interactive enterprise pagination with page-size controls

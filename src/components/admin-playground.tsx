@@ -288,34 +288,34 @@ const conversions: Conversion[] = Array.from({ length: 148 }, (_, index) => {
 });
 
 type TransactionStatus = "Pending" | "Approved" | "Rejected" | "Pending Bill";
-type OnlineTransaction = { id: string; status: TransactionStatus; orderValue: number; reported: number; calculated: number; rejection: string; click: string; created: string; updated: string };
-type OfflineTransaction = { id: string; status: TransactionStatus; billAmount: number | null; discount: number | null; payable: number | null; commission: number | null; confirmedBy: string; merchant: string; user: string; occurred: string };
-type LedgerEntry = { id: string; type: "OFFLINE_REDEMPTION" | "ONLINE_PENDING"; amount: number; user: string; merchant: string; offer: string; resolution: string; occurred: string };
+type OnlineTransaction = { id: string; status: TransactionStatus; userId: string; orderValue: number; reported: number; calculated: number; rejection: string; click: string; created: string; updated: string };
+type OfflineTransaction = { id: string; status: TransactionStatus; userId: string; billAmount: number | null; discount: number | null; payable: number | null; commission: number | null; confirmedBy: string; merchant: string; occurred: string };
+type LedgerEntry = { id: string; type: "OFFLINE_REDEMPTION" | "ONLINE_PENDING"; userId: string; amount: number; merchant: string; offer: string; resolution: string; occurred: string };
 
 const onlineTransactions: OnlineTransaction[] = [
-  { id: "TXN-94128", status: "Pending", orderValue: 4299, reported: 344, calculated: 322, rejection: "—", click: "clk_9f42ab7c", created: "21 Sep 2026, 09:18", updated: "21 Sep 2026, 09:22" },
-  { id: "TXN-94127", status: "Approved", orderValue: 1890, reported: 151, calculated: 151, rejection: "—", click: "clk_2b71de09", created: "20 Sep 2026, 18:44", updated: "21 Sep 2026, 08:10" },
-  { id: "TXN-94125", status: "Rejected", orderValue: 7499, reported: 375, calculated: 0, rejection: "No matching click found", click: "—", created: "20 Sep 2026, 11:05", updated: "20 Sep 2026, 16:34" },
-  { id: "TXN-94122", status: "Pending", orderValue: 2150, reported: 215, calculated: 204, rejection: "—", click: "clk_77c1a4e2", created: "19 Sep 2026, 17:26", updated: "19 Sep 2026, 17:26" },
-  { id: "TXN-94119", status: "Approved", orderValue: 28990, reported: 1449, calculated: 1377, rejection: "—", click: "clk_51ba0d33", created: "19 Sep 2026, 10:02", updated: "20 Sep 2026, 09:41" },
+  { id: "TXN-94128", status: "Pending", userId: "USR-10294", orderValue: 4299, reported: 344, calculated: 322, rejection: "—", click: "clk_9f42ab7c", created: "21 Sep 2026, 09:18", updated: "21 Sep 2026, 09:22" },
+  { id: "TXN-94127", status: "Approved", userId: "USR-08471", orderValue: 1890, reported: 151, calculated: 151, rejection: "—", click: "clk_2b71de09", created: "20 Sep 2026, 18:44", updated: "21 Sep 2026, 08:10" },
+  { id: "TXN-94125", status: "Rejected", userId: "USR-06322", orderValue: 7499, reported: 375, calculated: 0, rejection: "No matching click found", click: "—", created: "20 Sep 2026, 11:05", updated: "20 Sep 2026, 16:34" },
+  { id: "TXN-94122", status: "Pending", userId: "USR-11806", orderValue: 2150, reported: 215, calculated: 204, rejection: "—", click: "clk_77c1a4e2", created: "19 Sep 2026, 17:26", updated: "19 Sep 2026, 17:26" },
+  { id: "TXN-94119", status: "Approved", userId: "USR-04519", orderValue: 28990, reported: 1449, calculated: 1377, rejection: "—", click: "clk_51ba0d33", created: "19 Sep 2026, 10:02", updated: "20 Sep 2026, 09:41" },
 ];
 
 const offlineTransactions: OfflineTransaction[] = [
-  { id: "OFF-78321", status: "Pending Bill", billAmount: null, discount: null, payable: null, commission: null, confirmedBy: "—", merchant: "Absolute Barbecues", user: "+91 ••••••••74", occurred: "19 Sep 2026, 06:08" },
-  { id: "OFF-78318", status: "Approved", billAmount: 2380, discount: 238, payable: 2142, commission: 286, confirmedBy: "Rahul S.", merchant: "Theobroma", user: "+91 ••••••••53", occurred: "18 Sep 2026, 20:14" },
-  { id: "OFF-78312", status: "Approved", billAmount: 1650, discount: 165, payable: 1485, commission: 198, confirmedBy: "Neha P.", merchant: "Blue Tokai Coffee", user: "+91 ••••••••29", occurred: "18 Sep 2026, 17:42" },
-  { id: "OFF-78304", status: "Rejected", billAmount: 899, discount: null, payable: null, commission: null, confirmedBy: "—", merchant: "Croma", user: "+91 ••••••••91", occurred: "17 Sep 2026, 13:09" },
+  { id: "OFF-78321", status: "Pending Bill", userId: "USR-09734", billAmount: null, discount: null, payable: null, commission: null, confirmedBy: "—", merchant: "Absolute Barbecues", occurred: "19 Sep 2026, 06:08" },
+  { id: "OFF-78318", status: "Approved", userId: "USR-08152", billAmount: 2380, discount: 238, payable: 2142, commission: 286, confirmedBy: "Rahul S.", merchant: "Theobroma", occurred: "18 Sep 2026, 20:14" },
+  { id: "OFF-78312", status: "Approved", userId: "USR-06290", billAmount: 1650, discount: 165, payable: 1485, commission: 198, confirmedBy: "Neha P.", merchant: "Blue Tokai Coffee", occurred: "18 Sep 2026, 17:42" },
+  { id: "OFF-78304", status: "Rejected", userId: "USR-11045", billAmount: 899, discount: null, payable: null, commission: null, confirmedBy: "—", merchant: "Croma", occurred: "17 Sep 2026, 13:09" },
 ];
 
 const ledgerEntries: LedgerEntry[] = [
-  { id: "LED-6201", type: "OFFLINE_REDEMPTION", amount: 250, user: "+97 778 ••••••••53", merchant: "—", offer: "—", resolution: "—", occurred: "19 Sep 2026, 11:50" },
-  { id: "LED-6202", type: "OFFLINE_REDEMPTION", amount: 250, user: "+91 2721 ••••••••65", merchant: "—", offer: "—", resolution: "—", occurred: "19 Sep 2026, 14:36" },
-  { id: "LED-6203", type: "OFFLINE_REDEMPTION", amount: 250, user: "+94 325 ••••••••98", merchant: "—", offer: "—", resolution: "—", occurred: "19 Sep 2026, 16:06" },
-  { id: "LED-6204", type: "ONLINE_PENDING", amount: 60, user: "+91 ••••••••45", merchant: "Croma", offer: "Up to 4% cashback", resolution: "Still pending", occurred: "19 Sep 2026, 19:17" },
-  { id: "LED-6205", type: "ONLINE_PENDING", amount: 60, user: "+91 ••••••••45", merchant: "Croma", offer: "Up to 4% cashback", resolution: "Still pending", occurred: "19 Sep 2026, 19:18" },
-  { id: "LED-6206", type: "ONLINE_PENDING", amount: 20, user: "+91 ••••••••45", merchant: "Croma", offer: "Up to 4% cashback", resolution: "Still pending", occurred: "19 Sep 2026, 19:20" },
-  { id: "LED-6207", type: "OFFLINE_REDEMPTION", amount: 250, user: "+97 611 ••••••••78", merchant: "—", offer: "—", resolution: "—", occurred: "19 Sep 2026, 19:21" },
-  { id: "LED-6208", type: "ONLINE_PENDING", amount: 60, user: "+91 ••••••••45", merchant: "Croma", offer: "Up to 4% cashback", resolution: "Still pending", occurred: "20 Sep 2026, 04:07" },
+  { id: "LED-6201", type: "OFFLINE_REDEMPTION", userId: "USR-07853", amount: 250, merchant: "—", offer: "—", resolution: "—", occurred: "19 Sep 2026, 11:50" },
+  { id: "LED-6202", type: "OFFLINE_REDEMPTION", userId: "USR-09127", amount: 250, merchant: "—", offer: "—", resolution: "—", occurred: "19 Sep 2026, 14:36" },
+  { id: "LED-6203", type: "OFFLINE_REDEMPTION", userId: "USR-06418", amount: 250, merchant: "—", offer: "—", resolution: "—", occurred: "19 Sep 2026, 16:06" },
+  { id: "LED-6204", type: "ONLINE_PENDING", userId: "USR-10294", amount: 60, merchant: "Croma", offer: "Up to 4% cashback", resolution: "Still pending", occurred: "19 Sep 2026, 19:17" },
+  { id: "LED-6205", type: "ONLINE_PENDING", userId: "USR-10294", amount: 60, merchant: "Croma", offer: "Up to 4% cashback", resolution: "Still pending", occurred: "19 Sep 2026, 19:18" },
+  { id: "LED-6206", type: "ONLINE_PENDING", userId: "USR-10294", amount: 20, merchant: "Croma", offer: "Up to 4% cashback", resolution: "Still pending", occurred: "19 Sep 2026, 19:20" },
+  { id: "LED-6207", type: "OFFLINE_REDEMPTION", userId: "USR-08836", amount: 250, merchant: "—", offer: "—", resolution: "—", occurred: "19 Sep 2026, 19:21" },
+  { id: "LED-6208", type: "ONLINE_PENDING", userId: "USR-10294", amount: 60, merchant: "Croma", offer: "Up to 4% cashback", resolution: "Still pending", occurred: "20 Sep 2026, 04:07" },
 ];
 
 const chartData = {

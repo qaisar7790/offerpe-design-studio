@@ -792,6 +792,17 @@ function SettingsPage() {
           <Switch checked={sync.enabled} onCheckedChange={(checked) => setSync((current) => ({ ...current, enabled: checked }))} aria-label="Scheduled sync enabled" />
         </div>
       </SettingsCard>
+
+      <section className="rounded-lg border border-border bg-card shadow-card">
+        <div className="border-b border-border px-5 py-4">
+          <h2 className="font-heading text-base font-bold">Onboarding Settings</h2>
+          <p className="mt-1 max-w-2xl text-sm leading-6 text-muted-foreground">Per-app auto-swipe timing and whether the Skip button is offered on the onboarding carousel.</p>
+        </div>
+        <div className="grid gap-4 p-5 sm:grid-cols-2">
+          <OnboardingAppCard app="Consumer App" />
+          <OnboardingAppCard app="Merchant App" />
+        </div>
+      </section>
     </div>
   </>;
 }

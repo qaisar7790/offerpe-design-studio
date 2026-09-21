@@ -145,6 +145,19 @@ const initialCategories: Category[] = [
   { id: "CAT-106", channel: "Online", name: "Travel", order: 6, active: true, image: "", line1: "Go farther for less.", line2: "Rewards on flights and stays." },
 ];
 
+const initialMappings: RawMapping[] = [
+  { raw: "baby and kids", mappedTo: "" },
+  { raw: "beauty", mappedTo: "CAT-104" },
+  { raw: "departmental", mappedTo: "CAT-105" },
+  { raw: "education", mappedTo: "" },
+  { raw: "electronics", mappedTo: "CAT-103" },
+  { raw: "fashion", mappedTo: "CAT-102" },
+  { raw: "flowers and gifting", mappedTo: "" },
+  { raw: "food and grocery", mappedTo: "CAT-101" },
+  { raw: "health and personal care", mappedTo: "" },
+  { raw: "health and wellness", mappedTo: "" },
+];
+
 function createBlankOffer(merchant: string): Offer {
   return { id: `OFF-${Date.now()}`, merchant, headline: "", subtext: "", details: "", terms: "", discountType: "Percentage", discountValue: 10, commissionType: "Percentage", commissionValue: 5, start: "2026-09-21T09:00", end: "", minBill: 0, sortOrder: 1, discountCap: 0, commissionCap: 0, redirectUrl: "", voucherLink: "", productLink: "", affiliate: "None", featured: false, active: true };
 }

@@ -1633,22 +1633,25 @@ function OnboardingQueue({ applications, onApprove, onReject, onRevert, onDelete
       <TabsContent value="pending" className="mt-4">
         {pending.length === 0 ? <p className="text-sm text-muted-foreground">No submissions waiting for review.</p>
           : layout === "list" ? queueTable(pending, "pending")
-          : <div className="space-y-3">{pending.map((application) => <article key={application.id} className="rounded-lg border border-border bg-card p-4 shadow-card">
-            <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+          : <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">{pending.map((application) => <article key={application.id} className="flex min-h-80 flex-col overflow-hidden rounded-lg border border-border bg-card shadow-card">
+            <div className="flex h-32 items-center justify-center border-b border-border bg-muted/40"><MerchantLogo name={application.store} /></div>
+            <div className="flex flex-1 flex-col p-4"><div className="flex flex-col gap-3">
               <ApplicationHeadline application={application} />
-              <div className="flex shrink-0 gap-2">
+              <div className="mt-auto flex shrink-0 gap-2 pt-3">
                 <Button size="sm" onClick={() => onApprove(application)}><Check />Approve</Button>
                 <RejectApplicationDialog application={application} onReject={onReject}><Button size="sm" variant="destructive"><X />Reject</Button></RejectApplicationDialog>
               </div>
             </div>
             <ApplicationDetails application={application} />
+            </div>
           </article>)}</div>}
       </TabsContent>
       <TabsContent value="reviewed" className="mt-4">
         {reviewed.length === 0 ? <p className="text-sm text-muted-foreground">Nothing reviewed yet.</p>
           : layout === "list" ? queueTable(reviewed, "reviewed")
-          : <div className="space-y-3">{reviewed.map((application) => <article key={application.id} className="rounded-lg border border-border bg-card p-4 shadow-card">
-            <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+          : <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">{reviewed.map((application) => <article key={application.id} className="flex min-h-80 flex-col overflow-hidden rounded-lg border border-border bg-card shadow-card">
+            <div className="flex h-32 items-center justify-center border-b border-border bg-muted/40"><MerchantLogo name={application.store} /></div>
+            <div className="flex flex-1 flex-col p-4"><div className="flex flex-col gap-3">
               <div className="min-w-0">
                 <ApplicationHeadline application={application} />
                 <div className="mt-1.5 flex flex-wrap items-center gap-2 text-sm">
@@ -1656,13 +1659,14 @@ function OnboardingQueue({ applications, onApprove, onReject, onRevert, onDelete
                   <span className="text-muted-foreground">{application.owner} · {application.city}</span>
                 </div>
               </div>
-              <div className="flex shrink-0 gap-2">
+              <div className="flex shrink-0 flex-wrap gap-2">
                 <Dialog><DialogTrigger asChild><Button size="sm" variant="outline"><ExternalLink />View details</Button></DialogTrigger><DialogContent className="max-w-2xl bg-card"><DialogHeader><DialogTitle className="font-heading text-lg">{application.store}</DialogTitle><DialogDescription>Application {application.id} · submitted {application.submitted}</DialogDescription></DialogHeader><ApplicationDetails application={application} />{application.status === "Rejected" && <p className="mt-3 text-sm font-semibold text-destructive">Reason: {application.reason}{application.note && <span className="font-normal text-muted-foreground"> — {application.note}</span>}</p>}</DialogContent></Dialog>
                 <Button size="sm" variant="outline" onClick={() => onRevert(application)}><RotateCcw />Re-evaluate</Button>
                 <ConfirmDeleteDialog itemType="Application" name={application.store} onConfirm={() => onDelete(application)}><Button size="sm" variant="ghost" className="text-destructive" aria-label={`Delete application ${application.id}`}><Trash2 /></Button></ConfirmDeleteDialog>
               </div>
             </div>
             {application.status === "Rejected" && <p className="mt-2 text-xs font-semibold text-destructive">Reason: {application.reason}{application.note && <span className="font-normal text-muted-foreground"> — {application.note}</span>}</p>}
+            </div>
           </article>)}</div>}
       </TabsContent>
     </Tabs>

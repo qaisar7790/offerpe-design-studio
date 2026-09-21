@@ -15,3 +15,5 @@
 - [x] Add the Dashboard admin welcome and operational health banner
 - [x] Enforce single-group accordion behavior in the sidebar navigation
 - [x] Replace the merchant edit dialog with a dedicated tabbed enterprise edit page
+- [x] Add full-page offer create/edit flows and merchant-scoped offer management
+- [x] Add the Catalog Cashback Offers listing with filters and pagination

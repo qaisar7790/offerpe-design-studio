@@ -1175,6 +1175,13 @@ function LayoutToggle({ value, onChange }: { value: LayoutMode; onChange: (mode:
   </div>;
 }
 
+function MerchantLogo({ name, compact = false }: { name: string; compact?: boolean }) {
+  const initials = name.split(/\s+/).filter(Boolean).slice(0, 2).map((word) => word[0]).join("").toUpperCase();
+  return <div aria-label={`${name} logo`} className={cn("flex shrink-0 items-center justify-center rounded-lg border border-border bg-card font-heading font-bold text-primary shadow-card", compact ? "h-11 w-11 text-sm" : "h-20 w-20 text-2xl")}>
+    {initials || <Store className={compact ? "h-4 w-4" : "h-7 w-7"} />}
+  </div>;
+}
+
 function OnboardingSlidesPage({ slides, app, onAppChange, onCreate, onEdit, onToggle, onMove, onDelete }: { slides: OnboardingSlide[]; app: OnboardingApp; onAppChange: (app: OnboardingApp) => void; onCreate: () => void; onEdit: (slide: OnboardingSlide) => void; onToggle: (slide: OnboardingSlide) => void; onMove: (slide: OnboardingSlide, direction: -1 | 1) => void; onDelete: (slide: OnboardingSlide) => void }) {
   const rows = slides.filter((slide) => slide.app === app);
   const [layout, setLayout] = useState<LayoutMode>("list");
@@ -1183,10 +1190,10 @@ function OnboardingSlidesPage({ slides, app, onAppChange, onCreate, onEdit, onTo
     <Tabs value={app} onValueChange={(value) => onAppChange(value as OnboardingApp)}>
       <TabsList className="mb-5 h-auto w-full justify-start gap-6 rounded-none border-b border-border bg-transparent p-0"><TabsTrigger value="Consumer" className={tabTriggerClass}>Consumer</TabsTrigger><TabsTrigger value="Merchant" className={tabTriggerClass}>Merchant</TabsTrigger></TabsList>
       <TabsContent value={app} className="mt-0">
-        {layout === "grid" && <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
+        {layout === "grid" && <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
           {rows.map((slide, index) => <article key={slide.id} className="flex flex-col overflow-hidden rounded-lg border border-border bg-card shadow-card">
-            <div className="relative h-36 w-full bg-muted">{slide.image ? <img src={slide.image} alt="" className="h-full w-full object-cover" /> : <span className="flex h-full w-full items-center justify-center"><ImageIcon className="h-6 w-6 text-muted-foreground" /></span>}<span className="absolute left-2 top-2 flex h-6 w-6 items-center justify-center rounded-md bg-card font-heading text-xs font-bold text-primary shadow-card">{index + 1}</span></div>
-            <div className="flex flex-1 flex-col gap-2 p-3">
+            <div className="relative h-40 w-full border-b border-border bg-muted/40">{slide.image ? <img src={slide.image} alt="" className="h-full w-full object-cover" /> : <span className="flex h-full w-full items-center justify-center"><ImageIcon className="h-6 w-6 text-muted-foreground" /></span>}<span className="absolute left-3 top-3 flex h-7 w-7 items-center justify-center rounded-md bg-card font-heading text-xs font-bold text-primary shadow-card">{index + 1}</span></div>
+            <div className="flex min-h-44 flex-1 flex-col gap-2 p-4">
               <div className="flex items-start justify-between gap-2"><span className="font-heading text-sm font-bold">{slide.title}</span><StatusBadge status={slide.active ? "Active" : "Inactive"} /></div>
               <p className="line-clamp-3 text-xs text-muted-foreground">{slide.body}</p>
               <div className="mt-auto flex flex-wrap items-center gap-1 pt-1">

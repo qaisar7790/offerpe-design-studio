@@ -33,3 +33,4 @@
 - [x] Cashback Claims module under Financial: high-density pending claims list table with approve/reject reasons, summary chips, filtered reviewed table
 - [x] Cashback Claims: Pending Review and Reviewed split into two separate tabs (Pending Review default)
 - [x] Build Transactions with dense Online Conversions, Offline Conversions, and Ledger tabs
+- [x] Build Financial Clicks with user and merchant filters, readable pricing, and CSV export

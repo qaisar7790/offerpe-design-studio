@@ -29,6 +29,7 @@ import {
   Megaphone,
   Menu,
   MoreHorizontal,
+  MousePointerClick,
   Pencil,
   Plus,
   RotateCcw,
@@ -107,7 +108,7 @@ import {
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
 
-type View = "dashboard" | "merchants" | "reviews" | "merchant-onboarding-queue" | "trackier-queue" | "affiliate-networks" | "affiliate-network-new" | "affiliate-network-edit" | "merchant-edit" | "offers" | "offer-edit" | "promo-banners" | "promo-banner-edit" | "promo-banner-new" | "categories" | "category-mapping" | "category-edit" | "category-new" | "cashback-claims" | "transactions" | "conversions";
+type View = "dashboard" | "merchants" | "reviews" | "merchant-onboarding-queue" | "trackier-queue" | "affiliate-networks" | "affiliate-network-new" | "affiliate-network-edit" | "merchant-edit" | "offers" | "offer-edit" | "promo-banners" | "promo-banner-edit" | "promo-banner-new" | "categories" | "category-mapping" | "category-edit" | "category-new" | "cashback-claims" | "transactions" | "clicks" | "conversions";
 type RawMapping = { raw: string; mappedTo: string };
 type ReviewStatus = "Pending" | "Approved" | "Rejected";
 type Review = { id: string; user: string; merchant: string; rating: number; comment: string; photos: string[]; submitted: string; status: ReviewStatus; reason: string; note: string };
@@ -123,7 +124,7 @@ type OfferOrigin = { type: "merchant"; merchant: typeof merchants[number] } | { 
 const groups = [
   { label: "Catalog", icon: ShoppingBag, items: [{ label: "Merchants", icon: Store, view: "merchants" as View }, { label: "Cashback Offers", icon: Tag, view: "offers" as View }, { label: "Promo Banners", icon: Megaphone, view: "promo-banners" as View }, { label: "Merchant Reviews", icon: Star, view: "reviews" as View }, { label: "Categories", icon: Tag, view: "categories" as View }, { label: "Cities", icon: Building2 }] },
   { label: "Operations", icon: Settings2, items: [{ label: "Merchant Onboarding Queue", icon: ClipboardCheck, view: "merchant-onboarding-queue" as View }, { label: "Trackier Import Queue", icon: DownloadCloud, view: "trackier-queue" as View }, { label: "Affiliate Networks", icon: Share2, view: "affiliate-networks" as View }, { label: "Online Conversions", icon: CircleDollarSign, view: "conversions" as View }, { label: "Category Mapping", icon: Tag, view: "category-mapping" as View }, { label: "Users", icon: Users }] },
-  { label: "Financial", icon: WalletCards, items: [{ label: "Cashback Claims", icon: CircleDollarSign, view: "cashback-claims" as View }, { label: "Transactions", icon: ArrowDown, view: "transactions" as View }, { label: "Withdrawals", icon: BadgeIndianRupee }, { label: "Missing Claims", icon: FileSpreadsheet }] },
+  { label: "Financial", icon: WalletCards, items: [{ label: "Cashback Claims", icon: CircleDollarSign, view: "cashback-claims" as View }, { label: "Transactions", icon: ArrowDown, view: "transactions" as View }, { label: "Clicks", icon: MousePointerClick, view: "clicks" as View }, { label: "Withdrawals", icon: BadgeIndianRupee }, { label: "Missing Claims", icon: FileSpreadsheet }] },
   { label: "Communication", icon: Megaphone, items: [{ label: "Notifications", icon: Megaphone }] },
   { label: "System", icon: SlidersHorizontal, items: [{ label: "Admin Roles", icon: ShieldCheck }, { label: "Settings", icon: Settings2 }] },
 ];
@@ -291,6 +292,7 @@ type TransactionStatus = "Pending" | "Approved" | "Rejected" | "Pending Bill";
 type OnlineTransaction = { id: string; status: TransactionStatus; userId: string; orderValue: number; reported: number; calculated: number; rejection: string; click: string; created: string; updated: string };
 type OfflineTransaction = { id: string; status: TransactionStatus; userId: string; billAmount: number | null; discount: number | null; payable: number | null; commission: number | null; confirmedBy: string; merchant: string; occurred: string };
 type LedgerEntry = { id: string; type: "OFFLINE_REDEMPTION" | "ONLINE_PENDING"; userId: string; amount: number; merchant: string; offer: string; resolution: string; occurred: string };
+type ClickRecord = { token: string; occurred: string; date: string; userId: string; merchant: string; offer: string; discountType: "Percentage" | "Flat amount"; discountValue: number; commissionType: "Percentage" | "Flat amount" | null; commissionValue: number | null; minBill: number | null; discountCap: number | null; commissionCap: number | null };
 
 const onlineTransactions: OnlineTransaction[] = [
   { id: "TXN-94128", status: "Pending", userId: "USR-10294", orderValue: 4299, reported: 344, calculated: 322, rejection: "—", click: "clk_9f42ab7c", created: "21 Sep 2026, 09:18", updated: "21 Sep 2026, 09:22" },
@@ -316,6 +318,15 @@ const ledgerEntries: LedgerEntry[] = [
   { id: "LED-6206", type: "ONLINE_PENDING", userId: "USR-10294", amount: 20, merchant: "Croma", offer: "Up to 4% cashback", resolution: "Still pending", occurred: "19 Sep 2026, 19:20" },
   { id: "LED-6207", type: "OFFLINE_REDEMPTION", userId: "USR-08836", amount: 250, merchant: "—", offer: "—", resolution: "—", occurred: "19 Sep 2026, 19:21" },
   { id: "LED-6208", type: "ONLINE_PENDING", userId: "USR-10294", amount: 60, merchant: "Croma", offer: "Up to 4% cashback", resolution: "Still pending", occurred: "20 Sep 2026, 04:07" },
+];
+
+const clickRecords: ClickRecord[] = [
+  { token: "5a63726b883505650248e9c6", occurred: "21 Sep 2026, 12:18 pm", date: "2026-09-21", userId: "USR-10294", merchant: "MakeMyTrip", offer: "Up to 8% cashback", discountType: "Percentage", discountValue: 8, commissionType: null, commissionValue: null, minBill: null, discountCap: null, commissionCap: null },
+  { token: "7c81bd24917a4e0f962d315b", occurred: "21 Sep 2026, 11:42 am", date: "2026-09-21", userId: "USR-08471", merchant: "Nykaa", offer: "Beauty essentials cashback", discountType: "Percentage", discountValue: 8, commissionType: "Percentage", commissionValue: 11, minBill: 799, discountCap: 500, commissionCap: 650 },
+  { token: "21ef748a53c890db77bc422d", occurred: "21 Sep 2026, 10:16 am", date: "2026-09-21", userId: "USR-06322", merchant: "Croma", offer: "Electronics weekend cashback", discountType: "Percentage", discountValue: 4, commissionType: "Percentage", commissionValue: 6, minBill: 4999, discountCap: 1500, commissionCap: 2000 },
+  { token: "af902d77c0124a15b15d0bc8", occurred: "20 Sep 2026, 8:37 pm", date: "2026-09-20", userId: "USR-11806", merchant: "Myntra", offer: "Fashion season offer", discountType: "Percentage", discountValue: 6, commissionType: "Percentage", commissionValue: 9, minBill: 999, discountCap: 400, commissionCap: 600 },
+  { token: "b6392c50a43f449aa5da182e", occurred: "20 Sep 2026, 6:04 pm", date: "2026-09-20", userId: "USR-04519", merchant: "Theobroma", offer: "Flat 10% cashback", discountType: "Percentage", discountValue: 10, commissionType: "Percentage", commissionValue: 5, minBill: 299, discountCap: 100, commissionCap: 50 },
+  { token: "cf401958299744b8a696f5d4", occurred: "20 Sep 2026, 2:51 pm", date: "2026-09-20", userId: "USR-09734", merchant: "Absolute Barbecues", offer: "Weekend dining rewards", discountType: "Flat amount", discountValue: 250, commissionType: "Percentage", commissionValue: 8, minBill: 1999, discountCap: 250, commissionCap: 350 },
 ];
 
 const chartData = {
@@ -920,6 +931,41 @@ function Transactions() {
   </>;
 }
 
+function Clicks() {
+  const [userId, setUserId] = useState("");
+  const [selectedMerchants, setSelectedMerchants] = useState<string[]>([]);
+  const [from, setFrom] = useState("");
+  const [to, setTo] = useState("");
+  const [sortDesc, setSortDesc] = useState(true);
+  const merchantOptions = Array.from(new Set(clickRecords.map((row) => row.merchant))).sort();
+  const rows = clickRecords
+    .filter((row) => (!userId || row.userId.toLowerCase().includes(userId.toLowerCase())) && (!selectedMerchants.length || selectedMerchants.includes(row.merchant)) && (!from || row.date >= from) && (!to || row.date <= to))
+    .sort((a, b) => sortDesc ? b.date.localeCompare(a.date) : a.date.localeCompare(b.date));
+  const hasFilters = Boolean(userId || selectedMerchants.length || from || to);
+  const reset = () => { setUserId(""); setSelectedMerchants([]); setFrom(""); setTo(""); };
+  const toggleMerchant = (merchant: string) => setSelectedMerchants((current) => current.includes(merchant) ? current.filter((item) => item !== merchant) : [...current, merchant]);
+  const rate = (type: ClickRecord["discountType"] | ClickRecord["commissionType"], value: number | null) => value === null || !type ? "Not set" : type === "Percentage" ? `${value}%` : inr(value);
+  const exportRows = () => {
+    const headings = ["Click Token", "Occurred", "User ID", "Merchant", "Offer", "Cashback", "Commission", "Minimum Bill", "Cashback Cap", "Commission Cap"];
+    const values = rows.map((row) => [row.token, row.occurred, row.userId, row.merchant, row.offer, rate(row.discountType, row.discountValue), rate(row.commissionType, row.commissionValue), row.minBill === null ? "" : row.minBill, row.discountCap === null ? "" : row.discountCap, row.commissionCap === null ? "" : row.commissionCap]);
+    const csv = [headings, ...values].map((line) => line.map((cell) => `"${String(cell).replaceAll('"', '""')}"`).join(",")).join("\n");
+    const url = URL.createObjectURL(new Blob([csv], { type: "text/csv;charset=utf-8" }));
+    const anchor = document.createElement("a"); anchor.href = url; anchor.download = "offerpe-clicks.csv"; anchor.click(); URL.revokeObjectURL(url);
+    toast.success("Clicks exported", { description: `${rows.length} filtered records downloaded as CSV.` });
+  };
+  return <><PageHeader title="Clicks" description="Track customer click-through activity and the exact offer pricing captured at click time." actions={<Button variant="outline" onClick={exportRows}><Download />Export CSV</Button>} />
+    <div className="mb-5 flex flex-col gap-3 rounded-lg border border-border bg-card p-3 shadow-card lg:flex-row lg:items-center">
+      <div className="relative min-w-[280px] flex-1"><Search className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground" /><Input aria-label="Filter by User ID" className="w-full pl-9" value={userId} onChange={(event) => setUserId(event.target.value)} placeholder="Filter by User ID…" /></div>
+      <DropdownMenu><DropdownMenuTrigger asChild><Button variant="outline" className="shrink-0"><Store className="mr-2 h-4 w-4 text-muted-foreground" />Merchants{selectedMerchants.length ? ` (${selectedMerchants.length})` : ": All"}<ChevronDown className="ml-2 h-3.5 w-3.5 opacity-60" /></Button></DropdownMenuTrigger><DropdownMenuContent align="end" className="w-64 border-border bg-card"><DropdownMenuCheckboxItem checked={!selectedMerchants.length} onCheckedChange={() => setSelectedMerchants([])}>All merchants</DropdownMenuCheckboxItem><DropdownMenuSeparator />{merchantOptions.map((merchant) => <DropdownMenuCheckboxItem key={merchant} checked={selectedMerchants.includes(merchant)} onSelect={(event) => event.preventDefault()} onCheckedChange={() => toggleMerchant(merchant)}>{merchant}</DropdownMenuCheckboxItem>)}</DropdownMenuContent></DropdownMenu>
+      <Input aria-label="From date" title="From date" type="date" value={from} onChange={(event) => setFrom(event.target.value)} className="w-full shrink-0 lg:w-38" />
+      <Input aria-label="To date" title="To date" type="date" value={to} onChange={(event) => setTo(event.target.value)} className="w-full shrink-0 lg:w-38" />
+      {hasFilters && <Button variant="ghost" size="sm" onClick={reset} className="shrink-0 text-muted-foreground hover:text-foreground"><RotateCcw className="mr-1 h-3.5 w-3.5" />Reset</Button>}
+    </div>
+    <div className="min-w-0 overflow-hidden rounded-lg border border-border bg-card shadow-card"><div className="table-scrollbar overflow-x-auto"><table className="w-full min-w-360 text-left text-sm"><thead className="text-[11px] uppercase text-muted-foreground"><tr><th className="sticky left-0 top-0 z-30 bg-muted/95 shadow-sticky-left">Click Token</th><th className="sticky top-0 bg-muted/95"><Button variant="ghost" size="sm" className="-ml-3 h-7 text-[11px] uppercase" onClick={() => setSortDesc(!sortDesc)}>Occurred {sortDesc ? <ArrowDown className="h-3.5 w-3.5" /> : <ArrowUp className="h-3.5 w-3.5" />}</Button></th><th className="sticky top-0 bg-muted/95">User ID</th><th className="sticky top-0 bg-muted/95">Merchant</th><th className="sticky top-0 bg-muted/95">Offer</th><th className="sticky top-0 bg-muted/95">Pricing Snapshot</th></tr></thead><tbody>{rows.map((row) => <tr key={row.token} className="group border-t border-border hover:bg-muted/50"><td className="sticky left-0 z-20 bg-card font-mono text-xs font-semibold shadow-sticky-left group-hover:bg-muted"><span className="flex items-center gap-1.5">{row.token}<CopyButton value={row.token} /></span></td><td className="whitespace-nowrap text-xs font-medium">{row.occurred}</td><td className="font-mono text-xs text-muted-foreground">{row.userId}</td><td className="font-semibold">{row.merchant}</td><td>{row.offer}</td><td><div className="grid min-w-150 grid-cols-5 gap-2 py-1"><div><span className="block text-[10px] font-semibold uppercase text-muted-foreground">Cashback</span><strong className="text-primary">{rate(row.discountType, row.discountValue)}</strong></div><div><span className="block text-[10px] font-semibold uppercase text-muted-foreground">Commission</span><strong>{rate(row.commissionType, row.commissionValue)}</strong></div><div><span className="block text-[10px] font-semibold uppercase text-muted-foreground">Min. bill</span><strong>{row.minBill === null ? "Not set" : inr(row.minBill)}</strong></div><div><span className="block text-[10px] font-semibold uppercase text-muted-foreground">Cashback cap</span><strong>{row.discountCap === null ? "No cap" : inr(row.discountCap)}</strong></div><div><span className="block text-[10px] font-semibold uppercase text-muted-foreground">Commission cap</span><strong>{row.commissionCap === null ? "No cap" : inr(row.commissionCap)}</strong></div></div></td></tr>)}</tbody></table>{!rows.length && <div className="px-6 py-14 text-center"><MousePointerClick className="mx-auto h-8 w-8 text-muted-foreground" /><h3 className="mt-3 font-heading font-semibold">No clicks found</h3><p className="mt-1 text-sm text-muted-foreground">Try changing or resetting the current filters.</p></div>}</div></div>
+    <TransactionPagination count={rows.length} />
+  </>;
+}
+
 function Conversions() {
   const [conversionRows, setConversionRows] = useState(conversions); const [query, setQuery] = useState(""); const [statuses, setStatuses] = useState<Status[]>([]); const [importOpen, setImportOpen] = useState(false); const [selected, setSelected] = useState<Conversion | null>(null); const [mode, setMode] = useState<"edit" | "delete" | null>(null); const [page, setPage] = useState(1); const [pageSize, setPageSize] = useState(10);
   const filtered = conversionRows.filter((r) => (!query || Object.values(r).join(" ").toLowerCase().includes(query.toLowerCase())) && (!statuses.length || statuses.includes(r.status)));
@@ -1152,6 +1198,7 @@ export function AdminPlayground() {
     : view === "merchant-onboarding-queue" ? <OnboardingQueue applications={applicationRows} onApprove={approveApplication} onReject={rejectApplication} onRevert={revertApplication} onDelete={deleteApplication} />
     : view === "cashback-claims" ? <CashbackClaims claims={claimRows} onApprove={approveClaim} onReject={rejectClaim} onRevert={revertClaim} onDelete={deleteClaim} />
     : view === "transactions" ? <Transactions />
+    : view === "clicks" ? <Clicks />
     : view === "merchant-edit" && editingMerchant ? <MerchantEditPage merchant={editingMerchant} offers={offerRows} reviews={reviewRows} onApproveReview={approveReview} onRejectReview={rejectReview} onRevertReview={revertReview} onDeleteReview={deleteReview} initialTab={merchantTab} onBack={backToMerchants} onDeleteMerchant={deleteMerchant} onEditOffer={(offer) => openOffer(offer, { type: "merchant", merchant: editingMerchant })} onCreateOffer={() => openOffer(null, { type: "merchant", merchant: editingMerchant })} onDeleteOffer={deleteOffer} />
     : view === "offers" ? <OffersPage offers={offerRows} onEdit={(offer) => openOffer(offer, { type: "listing" })} onCreate={() => openOffer(null, { type: "listing" })} onDelete={deleteOffer} />
     : view === "offer-edit" ? <OfferEditPage key={editingOffer?.id ?? "new"} offer={editingOffer} origin={offerOrigin} onCancel={returnFromOffer} onSave={saveOffer} onDelete={deleteOffer} />

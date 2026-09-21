@@ -809,6 +809,10 @@ function SyncRunsTable({ runs }: { runs: SyncRun[] }) {
   </div>;
 }
 
+function SyncConfirmDialog({ syncing, onSync, children }: { syncing: boolean; onSync: () => void; children: React.ReactNode }) {
+  return <AlertDialog><AlertDialogTrigger asChild>{children}</AlertDialogTrigger><AlertDialogContent className="border-border bg-card"><AlertDialogHeader><AlertDialogTitle className="font-heading">Trigger Trackier campaign sync?</AlertDialogTitle><AlertDialogDescription>This will query the Trackier API for newly active and updated campaigns. Staged campaigns and pending reviews will be updated. Do you want to proceed?</AlertDialogDescription></AlertDialogHeader><AlertDialogFooter><AlertDialogCancel>Cancel</AlertDialogCancel><AlertDialogAction className="bg-teal-600 text-white hover:bg-teal-700" onClick={onSync}><RefreshCw className={cn("h-4 w-4", syncing && "animate-spin")} />Confirm &amp; Sync</AlertDialogAction></AlertDialogFooter></AlertDialogContent></AlertDialog>;
+}
+
 function TrackierQueue({ campaigns, runs, categories, syncing, onSync, onChange, onApprove, onReject }: { campaigns: StagedCampaign[]; runs: SyncRun[]; categories: Category[]; syncing: boolean; onSync: () => void; onChange: (campaign: StagedCampaign) => void; onApprove: (campaign: StagedCampaign) => void; onReject: (campaign: StagedCampaign, reason: string, note: string) => void }) {
   const [tab, setTab] = useState("pending");
   const [query, setQuery] = useState("");
@@ -817,13 +821,13 @@ function TrackierQueue({ campaigns, runs, categories, syncing, onSync, onChange,
   const pending = campaigns
     .filter((campaign) => !query || `${campaign.name} ${campaign.trackierId} ${categoryLabel(campaign)}`.toLowerCase().includes(query.toLowerCase()))
     .filter((campaign) => mapping === "all" || (mapping === "mapped" ? Boolean(campaign.categoryId) : !campaign.categoryId));
-  return <><PageHeader title="Trackier Import Queue" description="Review and approve affiliate campaigns fetched from Trackier API before publishing them to the live catalog." actions={<Button onClick={onSync} disabled={syncing}><RefreshCw className={cn(syncing && "animate-spin")} />{syncing ? "Syncing…" : "Sync Now"}</Button>} />
+  return <><PageHeader title="Trackier Import Queue" description="Review and approve affiliate campaigns fetched from Trackier API before publishing them to the live catalog." actions={<SyncConfirmDialog syncing={syncing} onSync={onSync}><Button disabled={syncing}><RefreshCw className={cn(syncing && "animate-spin")} />{syncing ? "Syncing…" : "Sync Now"}</Button></SyncConfirmDialog>} />
     <Tabs value={tab} onValueChange={setTab}>
       <TabsList className="mb-5 h-auto w-full justify-start gap-6 rounded-none border-b border-border bg-transparent p-0"><TabsTrigger value="pending" className={tabTriggerClass}>Pending Review ({campaigns.length})</TabsTrigger><TabsTrigger value="runs" className={tabTriggerClass}>Recent Sync Runs ({runs.length})</TabsTrigger></TabsList>
       <TabsContent value="pending" className="mt-0">
         <div className="mb-5 flex flex-col gap-3 rounded-lg border border-border bg-card p-3 shadow-card lg:flex-row">
-          <div className="relative flex-1"><Search className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground" /><Input className="pl-9" value={query} onChange={(event) => setQuery(event.target.value)} placeholder="Search by campaign name, Trackier ID, or category…" /></div>
-          <Select value={mapping} onValueChange={setMapping}><SelectTrigger className="lg:w-56"><SelectValue /></SelectTrigger><SelectContent><SelectItem value="all">All</SelectItem><SelectItem value="mapped">Mapped only</SelectItem><SelectItem value="unmapped">Unmapped warning</SelectItem></SelectContent></Select>
+          <div className="relative w-full flex-1 min-w-[280px]"><Search className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground" /><Input className="pl-9" value={query} onChange={(event) => setQuery(event.target.value)} placeholder="Search by campaign name, Trackier ID, or category…" /></div>
+          <Select value={mapping} onValueChange={setMapping}><SelectTrigger className="w-full shrink-0 sm:w-56"><SelectValue /></SelectTrigger><SelectContent><SelectItem value="all">All</SelectItem><SelectItem value="mapped">Mapped only</SelectItem><SelectItem value="unmapped">Unmapped warning</SelectItem></SelectContent></Select>
         </div>
         {pending.length === 0 ? <p className="text-sm text-muted-foreground">No staged campaigns waiting for review.</p>
           : <div className="space-y-4">{pending.map((campaign) => <CampaignCard key={campaign.id} campaign={campaign} categories={categories} onChange={onChange} onApprove={onApprove} onReject={onReject} />)}</div>}

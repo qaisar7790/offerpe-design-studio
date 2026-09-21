@@ -47,6 +47,7 @@ import {
   ShieldCheck,
   ShoppingBag,
   SlidersHorizontal,
+  Smartphone,
   Star,
   Store,
   Tag,
@@ -112,7 +113,7 @@ import {
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
 
-type View = "dashboard" | "merchants" | "reviews" | "merchant-onboarding-queue" | "trackier-queue" | "affiliate-networks" | "affiliate-network-new" | "affiliate-network-edit" | "merchant-edit" | "offers" | "offer-edit" | "promo-banners" | "promo-banner-edit" | "promo-banner-new" | "categories" | "category-mapping" | "category-edit" | "category-new" | "cashback-claims" | "transactions" | "clicks" | "withdrawals" | "rejection-reasons" | "communication-templates" | "communication-dispatches" | "users" | "admin-users" | "roles" | "role-edit" | "conversions";
+type View = "dashboard" | "merchants" | "reviews" | "merchant-onboarding-queue" | "trackier-queue" | "affiliate-networks" | "affiliate-network-new" | "affiliate-network-edit" | "merchant-edit" | "offers" | "offer-edit" | "promo-banners" | "promo-banner-edit" | "promo-banner-new" | "categories" | "category-mapping" | "category-edit" | "category-new" | "cashback-claims" | "transactions" | "clicks" | "withdrawals" | "rejection-reasons" | "communication-templates" | "communication-dispatches" | "users" | "app-versions" | "admin-users" | "roles" | "role-edit" | "conversions";
 type RawMapping = { raw: string; mappedTo: string };
 type ReviewStatus = "Pending" | "Approved" | "Rejected";
 type Review = { id: string; user: string; merchant: string; rating: number; comment: string; photos: string[]; submitted: string; status: ReviewStatus; reason: string; note: string };
@@ -133,7 +134,7 @@ const groups = [
   { label: "Operations", icon: Settings2, items: [{ label: "Merchant Onboarding Queue", icon: ClipboardCheck, view: "merchant-onboarding-queue" as View }, { label: "Trackier Import Queue", icon: DownloadCloud, view: "trackier-queue" as View }, { label: "Affiliate Networks", icon: Share2, view: "affiliate-networks" as View }, { label: "Online Conversions", icon: CircleDollarSign, view: "conversions" as View }, { label: "Category Mapping", icon: Tag, view: "category-mapping" as View }] },
   { label: "Financial", icon: WalletCards, items: [{ label: "Cashback Claims", icon: CircleDollarSign, view: "cashback-claims" as View }, { label: "Transactions", icon: ArrowDown, view: "transactions" as View }, { label: "Clicks", icon: MousePointerClick, view: "clicks" as View }, { label: "Withdrawals", icon: BadgeIndianRupee, view: "withdrawals" as View }, { label: "Rejection Reasons", icon: Flag, view: "rejection-reasons" as View }, { label: "Missing Claims", icon: FileSpreadsheet }] },
   { label: "Communication", icon: Megaphone, items: [{ label: "Templates", icon: MessageSquare, view: "communication-templates" as View }, { label: "Dispatches & Notifications", icon: Bell, view: "communication-dispatches" as View }] },
-  { label: "System", icon: SlidersHorizontal, items: [{ label: "Users", icon: Users, view: "users" as View }, { label: "Admins", icon: Mail, view: "admin-users" as View }, { label: "Roles", icon: ShieldCheck, view: "roles" as View }, { label: "Settings", icon: Settings2 }] },
+  { label: "System", icon: SlidersHorizontal, items: [{ label: "Users", icon: Users, view: "users" as View }, { label: "App Versions", icon: Smartphone, view: "app-versions" as View }, { label: "Admins", icon: Mail, view: "admin-users" as View }, { label: "Roles", icon: ShieldCheck, view: "roles" as View }, { label: "Settings", icon: Settings2 }] },
 ];
 
 const merchants = [
@@ -1671,6 +1672,109 @@ function CommunicationTemplates({ templates, onChange }: { templates: Communicat
   </>;
 }
 
+type AppBuild = { id: string; app: "Consumer" | "Merchant"; platform: "iOS" | "Android"; minVersion: string; latestVersion: string; message: string; storeUrl: string; forceUpdate: boolean; updatedAt: string; updatedBy: string };
+
+const initialAppBuilds: AppBuild[] = [
+  { id: "consumer-ios", app: "Consumer", platform: "iOS", minVersion: "3.4.0", latestVersion: "3.6.2", message: "A new OfferPe update is ready with faster cashback tracking. Please update to continue.", storeUrl: "https://apps.apple.com/in/app/offerpe/id6478123456", forceUpdate: true, updatedAt: "18 Sep 2026, 11:42 AM", updatedBy: "Qaisar Farooq" },
+  { id: "consumer-android", app: "Consumer", platform: "Android", minVersion: "3.4.0", latestVersion: "3.6.1", message: "Update OfferPe to keep earning cashback without interruptions.", storeUrl: "https://play.google.com/store/apps/details?id=com.offerpe.consumer", forceUpdate: true, updatedAt: "18 Sep 2026, 11:44 AM", updatedBy: "Qaisar Farooq" },
+  { id: "merchant-ios", app: "Merchant", platform: "iOS", minVersion: "2.1.0", latestVersion: "2.3.0", message: "New billing and settlement screens are available in this release.", storeUrl: "", forceUpdate: false, updatedAt: "02 Sep 2026, 04:10 PM", updatedBy: "Test Admin" },
+  { id: "merchant-android", app: "Merchant", platform: "Android", minVersion: "2.1.0", latestVersion: "2.3.0", message: "New billing and settlement screens are available in this release.", storeUrl: "https://play.google.com/store/apps/details?id=com.offerpe.merchant", forceUpdate: false, updatedAt: "02 Sep 2026, 04:12 PM", updatedBy: "Test Admin" },
+];
+
+const semverPattern = /^\d+\.\d+\.\d+$/;
+function compareVersions(a: string, b: string) {
+  const left = a.split(".").map(Number); const right = b.split(".").map(Number);
+  for (let index = 0; index < 3; index += 1) { const diff = (left[index] ?? 0) - (right[index] ?? 0); if (diff !== 0) return diff; }
+  return 0;
+}
+
+function AppVersionCard({ build, onSave }: { build: AppBuild; onSave: (build: AppBuild) => void }) {
+  const [draft, setDraft] = useState(build);
+  const dirty = JSON.stringify(draft) !== JSON.stringify(build);
+  const update = <K extends keyof AppBuild>(key: K, value: AppBuild[K]) => setDraft((current) => ({ ...current, [key]: value }));
+  const minValid = semverPattern.test(draft.minVersion);
+  const latestValid = semverPattern.test(draft.latestVersion);
+  const orderValid = !minValid || !latestValid || compareVersions(draft.minVersion, draft.latestVersion) <= 0;
+  const canSave = dirty && minValid && latestValid && orderValid;
+  const blocking = draft.forceUpdate && minValid && latestValid;
+
+  return <section className="flex flex-col rounded-lg border border-border bg-card shadow-card">
+    <div className="flex items-start justify-between gap-3 border-b border-border px-5 py-4">
+      <div className="flex items-center gap-3">
+        <span className="flex h-9 w-9 items-center justify-center rounded-md bg-accent text-primary"><Smartphone className="h-4 w-4" /></span>
+        <div>
+          <h2 className="font-heading text-sm font-bold uppercase tracking-wide">{build.app} — {build.platform}</h2>
+          <p className="mt-0.5 text-xs text-muted-foreground">Live: v{build.latestVersion} · minimum v{build.minVersion}</p>
+        </div>
+      </div>
+      <span className={`rounded-full px-2.5 py-1 text-xs font-semibold ${blocking ? "status-rejected" : "status-active"}`}>{blocking ? "Force update" : "Soft prompt"}</span>
+    </div>
+    <div className="grid gap-4 p-5 sm:grid-cols-2">
+      <label className="space-y-1.5 text-sm font-medium">Minimum supported version <span className="text-destructive">*</span>
+        <Input value={draft.minVersion} onChange={(event) => update("minVersion", event.target.value)} placeholder="1.0.0" aria-invalid={!minValid} />
+        {!minValid && <span className="block text-xs font-normal text-destructive">Use a semantic version like 3.4.0</span>}
+      </label>
+      <label className="space-y-1.5 text-sm font-medium">Latest version <span className="text-destructive">*</span>
+        <Input value={draft.latestVersion} onChange={(event) => update("latestVersion", event.target.value)} placeholder="1.0.0" aria-invalid={!latestValid} />
+        {!latestValid && <span className="block text-xs font-normal text-destructive">Use a semantic version like 3.6.2</span>}
+      </label>
+      {!orderValid && <p className="sm:col-span-2 flex items-center gap-2 rounded-md border border-destructive/30 bg-destructive/5 px-3 py-2 text-xs text-destructive"><AlertTriangle className="h-3.5 w-3.5" />Minimum version cannot be higher than the latest version.</p>}
+      <label className="space-y-1.5 text-sm font-medium sm:col-span-2">Update message (shown to the user)
+        <Textarea className="min-h-24 leading-6" maxLength={240} value={draft.message} onChange={(event) => update("message", event.target.value)} placeholder="Tell users why they should update…" />
+        <span className="block text-right text-xs font-normal text-muted-foreground">{draft.message.length}/240</span>
+      </label>
+      <label className="space-y-1.5 text-sm font-medium sm:col-span-2">Store URL <span className="font-normal text-muted-foreground">(leave blank until a real store listing exists)</span>
+        <Input value={draft.storeUrl} onChange={(event) => update("storeUrl", event.target.value)} placeholder="https://…" />
+      </label>
+      <div className="flex items-center justify-between gap-3 rounded-md border border-border bg-muted/30 px-3 py-2.5 sm:col-span-2">
+        <div>
+          <p className="text-sm font-semibold">Block older builds</p>
+          <p className="text-xs text-muted-foreground">Users below v{draft.minVersion || "—"} see a full-screen prompt they cannot dismiss.</p>
+        </div>
+        <Switch checked={draft.forceUpdate} onCheckedChange={(checked) => update("forceUpdate", checked)} aria-label={`Block older ${build.app} ${build.platform} builds`} />
+      </div>
+      <div className="sm:col-span-2 rounded-lg border border-border bg-muted/40 p-4">
+        <div className="mb-2 text-xs font-bold uppercase text-muted-foreground">In-app preview</div>
+        <p className="font-heading text-sm font-bold">{blocking ? "Update required" : "Update available"}</p>
+        <p className="mt-1 text-sm leading-6 text-foreground">{draft.message || "No update message set."}</p>
+        <div className="mt-3 flex gap-2">
+          <span className="rounded-md bg-primary px-3 py-1.5 text-xs font-semibold text-primary-foreground">Update now</span>
+          {!blocking && <span className="rounded-md border border-border px-3 py-1.5 text-xs font-semibold text-muted-foreground">Later</span>}
+        </div>
+      </div>
+    </div>
+    <div className="mt-auto flex flex-col gap-2 border-t border-border px-5 py-3.5 sm:flex-row sm:items-center sm:justify-between">
+      <p className="text-xs text-muted-foreground">Last updated {build.updatedAt} by {build.updatedBy}</p>
+      <div className="flex gap-2">
+        <Button variant="destructiveSoft" disabled={!dirty} onClick={() => setDraft(build)}>Cancel</Button>
+        <Button disabled={!canSave} onClick={() => { onSave({ ...draft, updatedAt: "21 Sep 2026, 07:47 PM", updatedBy: "Qaisar Farooq" }); toast.success(`${build.app} ${build.platform} versions saved`, { description: `Minimum v${draft.minVersion} · latest v${draft.latestVersion}.` }); }}><Check />Save</Button>
+      </div>
+    </div>
+  </section>;
+}
+
+function AppVersionsPage({ builds, onSave }: { builds: AppBuild[]; onSave: (build: AppBuild) => void }) {
+  const blockingCount = builds.filter((build) => build.forceUpdate).length;
+  const missingStore = builds.filter((build) => !build.storeUrl).length;
+  return <>
+    <PageHeader title="App Versions" description="Checked by both apps at boot, before login. A minimum supported version above a user's installed build shows a full-screen prompt they cannot dismiss. A latest version above their build shows a dismissible banner instead." />
+    <div className="mb-6 grid gap-3 sm:grid-cols-3">
+      {[
+        { label: "Build targets", value: `${builds.length}`, hint: "Consumer and Merchant apps across iOS and Android" },
+        { label: "Forcing update", value: `${blockingCount}`, hint: "Older builds blocked at boot" },
+        { label: "Store URL pending", value: `${missingStore}`, hint: "Update prompt has no store link yet" },
+      ].map((stat) => <div key={stat.label} className="rounded-lg border border-border bg-card p-4 shadow-card">
+        <p className="text-xs font-bold uppercase tracking-wide text-muted-foreground">{stat.label}</p>
+        <p className="mt-1 font-heading text-2xl font-bold">{stat.value}</p>
+        <p className="mt-1 text-xs text-muted-foreground">{stat.hint}</p>
+      </div>)}
+    </div>
+    <div className="grid gap-5 xl:grid-cols-2">
+      {builds.map((build) => <AppVersionCard key={build.id + build.updatedAt} build={build} onSave={onSave} />)}
+    </div>
+  </>;
+}
+
 function AdminUserDialog({ open, onOpenChange, admin, roles, onSave }: { open: boolean; onOpenChange: (v: boolean) => void; admin: AdminUser | null; roles: AdminRole[]; onSave: (admin: AdminUser, isNew: boolean) => void }) {
   const isNew = !admin;
   const [name, setName] = useState("");
@@ -1754,6 +1858,8 @@ export function AdminPlayground() {
   const [rejectionReasonRows, setRejectionReasonRows] = useState<RejectionReason[]>(initialRejectionReasons);
   const [communicationTemplateRows, setCommunicationTemplateRows] = useState<CommunicationTemplate[]>(initialCommunicationTemplates);
   const [roleRows, setRoleRows] = useState<AdminRole[]>(initialRoles);
+  const [appBuildRows, setAppBuildRows] = useState(initialAppBuilds);
+  const saveAppBuild = (build: AppBuild) => setAppBuildRows((current) => current.map((item) => item.id === build.id ? build : item));
   const [adminUserRows, setAdminUserRows] = useState<AdminUser[]>(initialAdminUsers);
   const saveAdminUser = (admin: AdminUser, isNew: boolean) => {
     setAdminUserRows((current) => isNew ? [admin, ...current] : current.map((item) => item.id === admin.id ? admin : item));
@@ -1846,6 +1952,7 @@ export function AdminPlayground() {
     : view === "communication-templates" ? <CommunicationTemplates templates={communicationTemplateRows} onChange={(template) => setCommunicationTemplateRows((current) => current.map((item) => item.id === template.id ? template : item))} />
     : view === "communication-dispatches" ? <CommunicationLogs />
     : view === "users" ? <UsersPage />
+    : view === "app-versions" ? <AppVersionsPage builds={appBuildRows} onSave={saveAppBuild} />
     : view === "admin-users" ? <AdminUsersPage admins={adminUserRows} roles={roleRows} onSave={saveAdminUser} onDelete={deleteAdminUser} />
     : view === "roles" ? <RolesPage roles={roleRows} onCreate={createRole} onEdit={(role) => { setEditingRole(role); setView("role-edit"); }} onDelete={deleteRole} />
     : view === "role-edit" && editingRole ? <RoleEditPage key={editingRole.id} role={editingRole} onCancel={backToRoles} onSave={saveRole} onDelete={deleteRole} />

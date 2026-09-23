@@ -325,7 +325,7 @@ export function SyncRunsTable({ runs }: { runs: SyncRun[] }) {
   );
   return (
     <div>
-      <div className="mb-5 flex flex-col gap-3 rounded-lg border border-border bg-card p-3 shadow-card sm:flex-row">
+      <div className="filter-bar mb-5 flex flex-col gap-3 rounded-lg border border-border bg-card p-3 shadow-card lg:flex-row lg:flex-wrap lg:items-center">
         <label className="flex-1 space-y-1.5 text-xs font-semibold uppercase text-muted-foreground sm:max-w-52">
           Status
           <Select value={status} onValueChange={setStatus}>
@@ -540,7 +540,7 @@ export function TrackierQueue({
           </TabsTrigger>
         </TabsList>
         <TabsContent value="pending" className="mt-0">
-          <div className="mb-5 flex flex-col gap-3 rounded-lg border border-border bg-card p-3 shadow-card sm:flex-row sm:items-center">
+          <div className="filter-bar mb-5 flex flex-col gap-3 rounded-lg border border-border bg-card p-3 shadow-card lg:flex-row lg:flex-wrap lg:items-center">
             <div className="relative min-w-[280px] flex-1">
               <Search className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground" />
               <Input

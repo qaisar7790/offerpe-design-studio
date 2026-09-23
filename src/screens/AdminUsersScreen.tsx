@@ -7,14 +7,13 @@ import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, D
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { allPermissionKeys } from "@/data/mockData";
 import { cn } from "@/lib/utils";
 import type { AdminRole, AdminUser, AdminUserStatus } from "@/types/admin";
 import { ArrowDown, ArrowUp, Check, ChevronDown, Filter, Mail, Pencil, Plus, RotateCcw, Search, ShieldCheck, Trash2, Users } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
 
-export function AdminUserDialog({ open, onOpenChange, admin, roles, onSave }: { open: boolean; onOpenChange: (v: boolean) => void; admin: AdminUser | null; roles: AdminRole[]; onSave: (admin: AdminUser, isNew: boolean) => void }) {
+export function AdminUserDialog({ open, onOpenChange, admin, roles, onSave, allPermissionKeys }: { open: boolean; onOpenChange: (v: boolean) => void; admin: AdminUser | null; roles: AdminRole[]; onSave: (admin: AdminUser, isNew: boolean) => void; readonly allPermissionKeys: string[] }) {
   const isNew = !admin;
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
@@ -38,7 +37,7 @@ export function AdminUserDialog({ open, onOpenChange, admin, roles, onSave }: { 
   </DialogContent></Dialog>;
 }
 
-export function AdminUsersPage({ admins, roles, onSave, onDelete }: { admins: AdminUser[]; roles: AdminRole[]; onSave: (admin: AdminUser, isNew: boolean) => void; onDelete: (admin: AdminUser) => void }) {
+export function AdminUsersPage({ admins, roles, onSave, onDelete, allPermissionKeys }: { admins: AdminUser[]; roles: AdminRole[]; onSave: (admin: AdminUser, isNew: boolean) => void; onDelete: (admin: AdminUser) => void; readonly allPermissionKeys: string[] }) {
   const [query, setQuery] = useState("");
   const [role, setRole] = useState("all");
   const [status, setStatus] = useState<AdminUserStatus | "all">("all");
@@ -79,6 +78,6 @@ export function AdminUsersPage({ admins, roles, onSave, onDelete }: { admins: Ad
       </span></td>
     </tr>)}</tbody></table>{!rows.length && <div className="px-6 py-14 text-center"><Users className="mx-auto h-8 w-8 text-muted-foreground" /><h3 className="mt-3 font-heading font-semibold">No admins found</h3><p className="mt-1 text-sm text-muted-foreground">Try changing or resetting the current filters.</p></div>}</div></div>
     <p className="mt-4 text-sm text-muted-foreground">Showing <strong className="text-foreground">{rows.length}</strong> of <strong className="text-foreground">{admins.length}</strong> admins</p>
-    <AdminUserDialog open={dialogOpen} onOpenChange={setDialogOpen} admin={editing} roles={roles} onSave={onSave} />
+    <AdminUserDialog open={dialogOpen} onOpenChange={setDialogOpen} admin={editing} roles={roles} onSave={onSave} allPermissionKeys={allPermissionKeys} />
   </>;
 }

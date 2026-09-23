@@ -7,7 +7,6 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigge
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
-import { allPermissionKeys } from "@/data/mockData";
 import { cn } from "@/lib/utils";
 import type { AdminRole } from "@/types/admin";
 import { ChevronDown, ChevronLeft, ChevronRight, Pencil, Plus, RotateCcw, Search, ShieldCheck, Trash2 } from "lucide-react";
@@ -20,7 +19,7 @@ export function AddRoleDialog({ open, onOpenChange, onCreate }: { open: boolean;
   return <Dialog open={open} onOpenChange={close}><DialogContent className="max-w-xl bg-card"><DialogHeader><DialogTitle className="font-heading text-xl">Create role</DialogTitle><DialogDescription>Create the role first, then assign permissions on the full edit screen.</DialogDescription></DialogHeader><div className="grid gap-5"><label className="space-y-1.5 text-sm font-medium">Name <span className="text-destructive">*</span><Input aria-label="Role name" value={name} onChange={(event) => setName(event.target.value)} placeholder="e.g. Finance Reviewer" /></label><label className="space-y-1.5 text-sm font-medium">Description<Textarea aria-label="Role description" rows={3} value={description} onChange={(event) => setDescription(event.target.value)} placeholder="Briefly describe who should receive this role…" /></label></div><DialogFooter><Button variant="destructiveSoft" onClick={() => close(false)}>Cancel</Button><Button disabled={!name.trim()} onClick={() => { onCreate({ id: `ROLE-${Date.now()}`, name: name.trim(), description: description.trim() || "Custom admin role. Configure permissions before assigning admins.", permissions: [], admins: 0, system: false, updated: "21 Sep 2026, 7:06 pm" }); close(false); }}><Plus />Create role</Button></DialogFooter></DialogContent></Dialog>;
 }
 
-export function RolesPage({ roles, onCreate, onEdit, onDelete }: { roles: AdminRole[]; onCreate: (role: AdminRole) => void; onEdit: (role: AdminRole) => void; onDelete: (role: AdminRole) => void }) {
+export function RolesPage({ roles, onCreate, onEdit, onDelete, allPermissionKeys }: { roles: AdminRole[]; onCreate: (role: AdminRole) => void; onEdit: (role: AdminRole) => void; onDelete: (role: AdminRole) => void; readonly allPermissionKeys: string[] }) {
   const [query, setQuery] = useState("");
   const [scope, setScope] = useState<"all" | "system" | "custom">("all");
   const [page, setPage] = useState(1);

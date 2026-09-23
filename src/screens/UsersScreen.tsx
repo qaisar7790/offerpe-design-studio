@@ -7,7 +7,6 @@ import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, D
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { initialUsers } from "@/data/mockData";
 import { downloadCsv, inr } from "@/lib/admin-utils";
 import { cn } from "@/lib/utils";
 import type { DeletedFilter, UserDateField, UserRecord, UserStatus } from "@/types/admin";
@@ -22,7 +21,7 @@ export function UserImportDialog({ open, onOpenChange, onImport }: { open: boole
   return <Dialog open={open} onOpenChange={close}><DialogContent className="max-w-xl bg-card"><DialogHeader><DialogTitle className="font-heading text-xl">Import users via CSV</DialogTitle><DialogDescription>Stage customer user records from a CSV. Duplicate phone numbers are rejected row-by-row and valid rows continue.</DialogDescription></DialogHeader><div className="rounded-md bg-muted p-3 text-sm leading-6 text-muted-foreground"><span className="mr-2 inline-flex rounded bg-info-soft px-2 py-0.5 text-xs font-semibold text-info">Required columns</span><code>phone_number</code><span className="mx-2 text-muted-foreground">Optional:</span><code>user_id, full_name, email, city, status</code></div><button type="button" onClick={() => inputRef.current?.click()} onDragOver={(event) => event.preventDefault()} onDrop={(event) => { event.preventDefault(); setFile(event.dataTransfer.files[0] ?? null); }} className="flex min-h-40 w-full flex-col items-center justify-center rounded-lg border border-dashed border-strong bg-muted/40 px-6 text-center hover:border-primary hover:bg-accent"><UploadCloud className="mb-3 h-8 w-8 text-primary" /><span className="font-semibold text-primary">{file ? file.name : "Choose a CSV file"}</span><span className="mt-1 text-sm text-muted-foreground">or drag and drop the users CSV here</span><input ref={inputRef} className="hidden" type="file" accept=".csv,text/csv" onChange={(event) => setFile(event.target.files?.[0] ?? null)} /></button><DialogFooter><Button variant="destructiveSoft" onClick={() => close(false)}>Cancel</Button><Button disabled={!file} onClick={() => { if (file) onImport(file.name); close(false); }}><UploadCloud />Upload &amp; import</Button></DialogFooter></DialogContent></Dialog>;
 }
 
-export function UsersPage() {
+export function UsersPage({ initialUsers }: { readonly initialUsers: UserRecord[] }) {
   const [query, setQuery] = useState("");
   const [status, setStatus] = useState<UserStatus | "all">("all");
   const [deleted, setDeleted] = useState<DeletedFilter>("all");

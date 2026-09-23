@@ -1,4 +1,4 @@
-import type { AdminRole, AdminUser, AffiliateNetwork, AnalyticsEvent, AppBuild, Application, Category, CityRecord, Claim, ClickRecord, CommunicationDispatch, CommunicationTemplate, Conversion, LedgerEntry, LegalPage, MerchantStaff, NotificationLog, Offer, OfflineTransaction, OnboardingSlide, OnlineTransaction, Permission, PermissionGroupName, PromoBanner, PromoSection, RawMapping, RejectionCategory, RejectionReason, ResolutionQueueItem, Review, StagedCampaign, SyncRun, TemplateChannel, UserRecord, View, Withdrawal } from "@/types/admin";
+import type { AdminRole, Merchant, AdminUser, AffiliateNetwork, AnalyticsEvent, AppBuild, Application, Category, CityRecord, Claim, ClickRecord, CommunicationDispatch, CommunicationTemplate, Conversion, LedgerEntry, LegalPage, MerchantStaff, NotificationLog, Offer, OfflineTransaction, OnboardingSlide, OnlineTransaction, Permission, PermissionGroupName, PromoBanner, PromoSection, RawMapping, RejectionCategory, RejectionReason, ResolutionQueueItem, Review, StagedCampaign, SyncRun, TemplateChannel, UserRecord, View, Withdrawal } from "@/types/admin";
 import { ArrowDown, BadgeIndianRupee, Bell, Building2, CircleDollarSign, ClipboardCheck, DownloadCloud, FileText, Flag, Image as ImageIcon, Mail, Megaphone, MessageSquare, MousePointerClick, RotateCcw, Settings2, Share2, ShieldCheck, ShoppingBag, SlidersHorizontal, Smartphone, Star, Store, Tag, Users, WalletCards } from "lucide-react";
 
 export const groups = [
@@ -9,7 +9,7 @@ export const groups = [
   { label: "System", icon: SlidersHorizontal, items: [{ label: "Users", icon: Users, view: "users" as View }, { label: "Cities", icon: Building2, view: "cities" as View }, { label: "App Versions", icon: Smartphone, view: "app-versions" as View }, { label: "Onboarding Screens", icon: ImageIcon, view: "onboarding-screens" as View }, { label: "Merchant Staff", icon: Store, view: "merchant-staff" as View }, { label: "Legal Pages", icon: FileText, view: "legal-pages" as View }, { label: "Admins", icon: Mail, view: "admin-users" as View }, { label: "Roles", icon: ShieldCheck, view: "roles" as View }, { label: "Settings", icon: Settings2, view: "settings" as View }] },
 ];
 
-export const merchants = [
+export const merchants: readonly Merchant[] = [
   ["Theobroma", "Offline", "Premium Bakeries", 0, "Active", 3, "Up to 12%", ["Mumbai", "Bengaluru", "Delhi", "Pune", "Hyderabad"]],
   ["Absolute Barbecues", "Offline", "Restaurants", 0, "Active", 2, "8% default", ["Mumbai", "Bengaluru", "Hyderabad", "Chennai"]],
   ["Croma", "Online", "Electronics", 0, "Active", 5, "Up to 10%", ["Pan-India"]],
@@ -20,7 +20,7 @@ export const merchants = [
   ["Big Bazaar", "Offline", "Department Stores", 2, "Inactive", 0, "6% default", ["Mumbai", "Pune", "Ahmedabad", "Surat"]],
   ["Hummel", "Online", "Fashion", 2, "Active", 2, "8% default", ["Mumbai", "Delhi", "Bengaluru"]],
   ["Nippon Paint FX10", "Online", "Home & Living", 3, "Active", 1, "Up to 7%", ["Mumbai", "Pune", "Nagpur", "Nashik", "Thane"]],
-] as const;
+];
 
 export const initialOffers: Offer[] = [
   { id: "OFF-1042", merchant: "Theobroma", headline: "Flat 10% cashback", subtext: "On all bakery items", details: "Get 10% of your bill amount credited as OfferPe wallet balance.", terms: "Valid on in-store purchases only.", discountType: "Percentage", discountValue: 10, commissionType: "Percentage", commissionValue: 5, start: "2026-08-29T06:53", end: "2026-09-30T23:59", minBill: 299, sortOrder: 1, discountCap: 100, commissionCap: 50, redirectUrl: "https://offerpe.link/r/theobroma-bakery", voucherLink: "offerpe://voucher/{id}", productLink: "offerpe://product/{slug}", affiliate: "None", featured: true, active: true },
@@ -83,7 +83,7 @@ export const initialApplications: Application[] = [
 
 export const claimRejectionReasons = ["No matching click found", "Order placed outside OfferPe click window", "Order cancelled or returned", "Proof of purchase unreadable", "Duplicate claim for the same order", "Merchant category excluded from cashback"];
 
-export const rejectionCategories = ["Transaction Rejection Reason", "Retailer Onboarding Rejection Reason", "Review Rejection Reason", "Cashback Claims Rejection Reason", "Withdrawal Rejection Reason"] as const;
+export const rejectionCategories: readonly RejectionCategory[] = ["Transaction Rejection Reason", "Retailer Onboarding Rejection Reason", "Review Rejection Reason", "Cashback Claims Rejection Reason", "Withdrawal Rejection Reason"];
 
 export const rejectionCategoryShort: Record<RejectionCategory, string> = { "Transaction Rejection Reason": "Transaction", "Retailer Onboarding Rejection Reason": "Retailer Onboarding", "Review Rejection Reason": "Review", "Cashback Claims Rejection Reason": "Cashback Claims", "Withdrawal Rejection Reason": "Withdrawal" };
 

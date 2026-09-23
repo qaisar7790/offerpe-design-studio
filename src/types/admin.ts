@@ -1,6 +1,4 @@
-import { merchants, rejectionCategories } from "@/data/mockData";
-
-export type Merchant = (typeof merchants)[number];
+export type Merchant = readonly [string, "Online" | "Offline", string, number, "Active" | "Inactive", number, string, readonly string[]];
 
 export type View = "conversion-resolutions" | "dashboard" | "merchants" | "reviews" | "merchant-onboarding-queue" | "trackier-queue" | "affiliate-networks" | "affiliate-network-new" | "affiliate-network-edit" | "merchant-edit" | "offers" | "offer-edit" | "promo-banners" | "promo-banner-edit" | "promo-banner-new" | "categories" | "category-mapping" | "category-edit" | "category-new" | "cashback-claims" | "transactions" | "clicks" | "withdrawals" | "rejection-reasons" | "communication-templates" | "communication-dispatches" | "users" | "app-versions" | "settings" | "cities" | "onboarding-screens" | "onboarding-slide-edit" | "onboarding-slide-new" | "legal-pages" | "merchant-staff" | "admin-users" | "roles" | "role-edit" | "conversions";
 
@@ -36,7 +34,7 @@ export type Application = { id: string; store: string; category: string; owner: 
 
 export type Claim = { id: string; userId: string; user: string; merchant: string; orderId: string; clickId: string; claimDate: string; claimTime: string; orderDate: string; orderValue: number; expectedCashback: number; proof: string; comment: string; status: ReviewStatus; reason: string; note: string };
 
-export type RejectionCategory = (typeof rejectionCategories)[number];
+export type RejectionCategory = "Transaction Rejection Reason" | "Retailer Onboarding Rejection Reason" | "Review Rejection Reason" | "Cashback Claims Rejection Reason" | "Withdrawal Rejection Reason";
 
 export type RejectionReason = { id: string; reason: string; category: RejectionCategory; order: number; active: boolean };
 

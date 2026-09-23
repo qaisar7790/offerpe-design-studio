@@ -1,4 +1,6 @@
-import { conversions, merchants, rejectionCategories } from "@/data/mockData";
+import { merchants, rejectionCategories } from "@/data/mockData";
+
+export type Merchant = (typeof merchants)[number];
 
 export type View = "conversion-resolutions" | "dashboard" | "merchants" | "reviews" | "merchant-onboarding-queue" | "trackier-queue" | "affiliate-networks" | "affiliate-network-new" | "affiliate-network-edit" | "merchant-edit" | "offers" | "offer-edit" | "promo-banners" | "promo-banner-edit" | "promo-banner-new" | "categories" | "category-mapping" | "category-edit" | "category-new" | "cashback-claims" | "transactions" | "clicks" | "withdrawals" | "rejection-reasons" | "communication-templates" | "communication-dispatches" | "users" | "app-versions" | "settings" | "cities" | "onboarding-screens" | "onboarding-slide-edit" | "onboarding-slide-new" | "legal-pages" | "merchant-staff" | "admin-users" | "roles" | "role-edit" | "conversions";
 

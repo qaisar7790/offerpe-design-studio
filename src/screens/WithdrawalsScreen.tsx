@@ -1,19 +1,12 @@
-import { CopyButton } from "@/components/admin/CopyButton";
-import { ImportModal } from "@/components/admin/ImportModal";
-import { PageHeader } from "@/components/admin/PageHeader";
-import { TransactionPagination } from "@/components/admin/TransactionPagination";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { initialWithdrawals } from "@/data/mockData";
 import { inr } from "@/lib/admin-utils";
-import { cn } from "@/lib/utils";
-import type { Review, Status, Withdrawal, WithdrawalStatus } from "@/types/admin";
-import { ArrowDown, ArrowUp, BadgeIndianRupee, Check, ChevronDown, Download, Filter, RotateCcw, Search, UploadCloud, WalletCards, X } from "lucide-react";
+import type { Review, Withdrawal, WithdrawalStatus } from "@/types/admin";
+import { Check, Search, X } from "lucide-react";
 import { useState } from "react";
-import { toast } from "sonner";
 
 export function WithdrawalDecisionDialog({ withdrawal, mode, onClose, onSave }: { withdrawal: Withdrawal | null; mode: "paid" | "failed" | null; onClose: () => void; onSave: (withdrawal: Withdrawal, status: WithdrawalStatus, utr: string, notes: string) => void }) {
   const [utr, setUtr] = useState("");

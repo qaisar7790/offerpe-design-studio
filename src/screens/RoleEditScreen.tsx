@@ -9,7 +9,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { allPermissionKeys, permissionCatalog } from "@/data/mockData";
 import { permissionDescription, tabTriggerClass } from "@/lib/admin-utils";
 import { cn } from "@/lib/utils";
-import type { AdminRole, Permission, PermissionGroupName, View } from "@/types/admin";
+import type { AdminRole, Permission, PermissionGroupName } from "@/types/admin";
 import { Check, ChevronRight, Lock, RotateCcw, Search, ShieldCheck, Trash2, X } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";

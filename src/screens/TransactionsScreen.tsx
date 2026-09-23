@@ -4,11 +4,11 @@ import { Button } from "@/components/ui/button";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { Input } from "@/components/ui/input";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { conversions, ledgerEntries, offlineTransactions, onlineTransactions } from "@/data/mockData";
+import { ledgerEntries, offlineTransactions, onlineTransactions } from "@/data/mockData";
 import { downloadCsv, inr, tabTriggerClass } from "@/lib/admin-utils";
 import { cn } from "@/lib/utils";
 import { Conversions } from "@/screens/OnlineConversionsScreen";
-import type { Merchant, Offer, Review, Status, TransactionStatus } from "@/types/admin";
+import type { Merchant, Offer, Status, TransactionStatus } from "@/types/admin";
 import { ArrowDown, ArrowUp, ChevronDown, Download, Filter, RotateCcw, Search } from "lucide-react";
 import { useState } from "react";
 

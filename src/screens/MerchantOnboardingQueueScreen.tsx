@@ -1,8 +1,6 @@
 import { ConfirmDeleteDialog } from "@/components/admin/ConfirmDeleteDialog";
-import { IconButton } from "@/components/admin/IconButton";
 import { LayoutToggle } from "@/components/admin/LayoutToggle";
 import { MerchantLogo } from "@/components/admin/MerchantLogo";
-import { PageHeader } from "@/components/admin/PageHeader";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
@@ -12,10 +10,9 @@ import { Textarea } from "@/components/ui/textarea";
 import { onboardingRejectionReasons } from "@/data/mockData";
 import { tabTriggerClass } from "@/lib/admin-utils";
 import { cn } from "@/lib/utils";
-import type { Application, Category, LayoutMode, Merchant, Review, Status, View } from "@/types/admin";
+import type { Application, Category, Merchant, Review, Status, View } from "@/types/admin";
 import { Check, Download, ExternalLink, FileText, RotateCcw, Search, Store, Tag, Trash2, X } from "lucide-react";
 import { useMemo, useState } from "react";
-import { toast } from "sonner";
 
 export function ApplicationDetails({ application }: { application: Application }) {
   return <div className="mt-3 grid gap-3 text-sm sm:grid-cols-2 lg:grid-cols-3">

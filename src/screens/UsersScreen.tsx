@@ -1,19 +1,9 @@
-import { CopyButton } from "@/components/admin/CopyButton";
-import { IconButton } from "@/components/admin/IconButton";
-import { PageHeader } from "@/components/admin/PageHeader";
-import { StatusBadge } from "@/components/admin/StatusBadge";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
-import { Input } from "@/components/ui/input";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { initialUsers } from "@/data/mockData";
-import { downloadCsv, inr } from "@/lib/admin-utils";
-import { cn } from "@/lib/utils";
-import type { DeletedFilter, Status, UserDateField, UserRecord, UserStatus, View } from "@/types/admin";
-import { ArrowDown, ArrowUp, CalendarDays, ChevronDown, ChevronLeft, ChevronRight, Download, Eye, FileText, Filter, MoreHorizontal, MousePointerClick, RotateCcw, Search, ShieldCheck, Trash2, UploadCloud, Users } from "lucide-react";
+import type { DeletedFilter, Status, UserDateField, UserRecord, UserStatus } from "@/types/admin";
+import { ChevronRight, Search, UploadCloud, Users } from "lucide-react";
 import { useRef, useState } from "react";
-import { toast } from "sonner";
 
 export function UserImportDialog({ open, onOpenChange, onImport }: { open: boolean; onOpenChange: (v: boolean) => void; onImport: (fileName: string) => void }) {
   const [file, setFile] = useState<File | null>(null);

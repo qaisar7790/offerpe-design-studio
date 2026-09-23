@@ -1,17 +1,10 @@
-import { PageHeader } from "@/components/admin/PageHeader";
-import { TransactionPagination } from "@/components/admin/TransactionPagination";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
-import { Input } from "@/components/ui/input";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { analyticsEvents, communicationDispatches, notificationLogs, templateChannels } from "@/data/mockData";
-import { tabTriggerClass } from "@/lib/admin-utils";
+import { analyticsEvents, communicationDispatches, notificationLogs } from "@/data/mockData";
 import { cn } from "@/lib/utils";
 import type { CommunicationTab, DispatchDelivery, TemplateChannel, View } from "@/types/admin";
-import { ArrowDown, ArrowUp, Bell, ChevronDown, Download, Filter, MessageSquare, RotateCcw, Search } from "lucide-react";
+import { Search } from "lucide-react";
 import { useState } from "react";
-import { toast } from "sonner";
 
 export function DeliveryBadge({ delivery }: { delivery: DispatchDelivery }) {
   return <span className={cn("inline-flex rounded-full px-2 py-0.5 text-[11px] font-bold", delivery === "DELIVERED" || delivery === "SENT" ? "status-approved" : delivery === "FAILED" ? "status-rejected" : "status-pending")}>{delivery}</span>;

@@ -7,7 +7,7 @@ import { merchants } from "@/data/mockData";
 import { affiliateMacroNote } from "@/lib/admin-utils";
 import { Dashboard } from "@/screens/DashboardScreen";
 import type { AffiliateNetwork } from "@/types/admin";
-import { ChevronRight, Store, Trash2 } from "lucide-react";
+import { ChevronRight, Trash2 } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
 

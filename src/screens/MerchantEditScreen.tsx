@@ -11,13 +11,12 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Switch } from "@/components/ui/switch";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Textarea } from "@/components/ui/textarea";
-import { merchants } from "@/data/mockData";
 import { tabTriggerClass } from "@/lib/admin-utils";
 import { cn } from "@/lib/utils";
 import { Dashboard } from "@/screens/DashboardScreen";
 import { Merchants } from "@/screens/MerchantsScreen";
 import type { Banner, Category, Merchant, Offer, Review } from "@/types/admin";
-import { ArrowDown, ArrowUp, ChevronLeft, ChevronRight, Eye, EyeOff, GripVertical, Image as ImageIcon, Pencil, Plus, Store, Trash2, UploadCloud, X } from "lucide-react";
+import { ArrowDown, ArrowUp, ChevronLeft, ChevronRight, Eye, EyeOff, GripVertical, Image as ImageIcon, Pencil, Plus, Trash2, UploadCloud, X } from "lucide-react";
 import { useRef, useState } from "react";
 import { toast } from "sonner";
 

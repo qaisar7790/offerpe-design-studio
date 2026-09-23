@@ -11,8 +11,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { claimRejectionReasons, merchants } from "@/data/mockData";
 import { downloadCsv, inr, tabTriggerClass } from "@/lib/admin-utils";
 import { cn } from "@/lib/utils";
-import { Conversions } from "@/screens/OnlineConversionsScreen";
-import type { Claim, Merchant, Review, Status, View } from "@/types/admin";
+import type { Claim, Merchant, Review, Status } from "@/types/admin";
 import { Check, Download, ExternalLink, Image as ImageIcon, RotateCcw, Search, Trash2, UploadCloud, X } from "lucide-react";
 import { useMemo, useState } from "react";
 

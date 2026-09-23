@@ -1,21 +1,13 @@
-import { CopyButton } from "@/components/admin/CopyButton";
-import { PageHeader } from "@/components/admin/PageHeader";
-import { TransactionPagination } from "@/components/admin/TransactionPagination";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Textarea } from "@/components/ui/textarea";
 import { resolutionQueueSeeds } from "@/data/mockData";
-import { inr, tabTriggerClass } from "@/lib/admin-utils";
 import { cn } from "@/lib/utils";
-import type { Conversion, Merchant, RejectionReason, ResolutionOutcome, ResolutionQueueItem, Review, Status } from "@/types/admin";
-import { format } from "date-fns";
-import { Check, ChevronDown, Download, FileSpreadsheet, Filter, RotateCcw, Search, ShieldCheck, Store, UploadCloud, X } from "lucide-react";
+import type { Conversion, RejectionReason, ResolutionOutcome, ResolutionQueueItem } from "@/types/admin";
+import { Check, Search, X } from "lucide-react";
 import { useRef, useState } from "react";
-import { toast } from "sonner";
 
 export function ResolutionOutcomeBadge({ outcome }: { outcome: ResolutionOutcome | null }) {
   if (!outcome) return <span className="inline-flex rounded-full border border-dashed border-border px-2 py-0.5 text-[11px] font-semibold text-muted-foreground">Unmapped</span>;

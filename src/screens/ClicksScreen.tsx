@@ -1,16 +1,9 @@
-import { CopyButton } from "@/components/admin/CopyButton";
-import { PageHeader } from "@/components/admin/PageHeader";
 import { TransactionPagination } from "@/components/admin/TransactionPagination";
-import { Button } from "@/components/ui/button";
-import { DropdownMenu, DropdownMenuCheckboxItem, DropdownMenuContent, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
-import { Input } from "@/components/ui/input";
-import { clickRecords, merchants } from "@/data/mockData";
+import { clickRecords } from "@/data/mockData";
 import { inr } from "@/lib/admin-utils";
-import { Merchants } from "@/screens/MerchantsScreen";
-import type { ClickRecord, Merchant, Offer } from "@/types/admin";
-import { ArrowDown, ArrowUp, ChevronDown, Download, Filter, MousePointerClick, RotateCcw, Search, Store } from "lucide-react";
+import type { ClickRecord } from "@/types/admin";
+import { Filter } from "lucide-react";
 import { useState } from "react";
-import { toast } from "sonner";
 
 export function Clicks() {
   const [userId, setUserId] = useState("");

@@ -53,6 +53,7 @@
 - [x] Standardize Import and Export CSV placement inside screen and tab filter bars
 - [x] Replace Withdrawals inline CSV controls with the shared Import Report dialog
 - [x] Standardize Cashback Claims Reviewed filters to the Merchant Onboarding compact pattern
+- [x] Standardize filter fills, control heights, action buttons, spacing, and two-field date ranges across admin screens
 
 ## Architecture refactor (data as props)
 - [x] One component per file: 34 screen files in `src/screens/`, 21 shared pieces in `src/components/admin/`, shell in `src/components/AdminPlayground.tsx`

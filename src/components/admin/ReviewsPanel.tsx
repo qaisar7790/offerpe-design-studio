@@ -200,7 +200,7 @@ export function ReviewsPanel({
           Reviewed ({reviewed.length})
         </TabsTrigger>
       </TabsList>
-      <div className="mt-4 flex flex-col gap-3 rounded-lg border border-border bg-card p-3 shadow-card lg:flex-row lg:flex-wrap lg:items-center">
+      <div className="filter-bar mt-4 flex flex-col gap-3 rounded-lg border border-border bg-card p-3 shadow-card lg:flex-row lg:flex-wrap lg:items-center">
         {tab === "reviewed" && (
           <Select value={status} onValueChange={setStatus}>
             <SelectTrigger className="lg:w-40">

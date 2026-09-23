@@ -135,6 +135,22 @@
 @utility shadow-sticky-left { box-shadow: var(--shadow-sticky-left); }
 @utility shadow-sticky-right { box-shadow: var(--shadow-sticky-right); }
 
+/* Shared dense-list filter treatment: search stays white; filters and actions use muted fill. */
+.filter-bar .border-input,
+.filter-bar input[type="date"] {
+  height: 2.25rem;
+  background-color: var(--muted);
+}
+
+.filter-bar input:not([type="date"]) {
+  height: 2.25rem;
+  background-color: var(--card);
+}
+
+.filter-bar button.border-input {
+  height: 2.25rem;
+}
+
 .table-scrollbar {
   scrollbar-width: thin;
   scrollbar-color: var(--border-strong) var(--muted);

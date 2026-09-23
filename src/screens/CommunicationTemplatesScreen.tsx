@@ -6,7 +6,6 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Switch } from "@/components/ui/switch";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Textarea } from "@/components/ui/textarea";
-import { templateChannels } from "@/data/mockData";
 import { tabTriggerClass } from "@/lib/admin-utils";
 import { cn } from "@/lib/utils";
 import type { CommunicationTemplate, TemplateChannel, TemplateCopy } from "@/types/admin";
@@ -14,7 +13,7 @@ import { Bell, Check, Download, Mail, MessageSquare } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
 
-export function CommunicationTemplates({ templates, onChange }: { templates: CommunicationTemplate[]; onChange: (template: CommunicationTemplate) => void }) {
+export function CommunicationTemplates({ templates, onChange, templateChannels }: { templates: CommunicationTemplate[]; onChange: (template: CommunicationTemplate) => void; templateChannels: TemplateChannel[] }) {
   const [selectedId, setSelectedId] = useState(templates[0]?.id ?? "");
   const [channel, setChannel] = useState<TemplateChannel>("Email");
   const selected = templates.find((template) => template.id === selectedId) ?? templates[0];

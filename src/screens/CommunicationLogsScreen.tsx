@@ -5,10 +5,9 @@ import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, Di
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { Input } from "@/components/ui/input";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { analyticsEvents, communicationDispatches, notificationLogs, templateChannels } from "@/data/mockData";
 import { tabTriggerClass } from "@/lib/admin-utils";
 import { cn } from "@/lib/utils";
-import type { CommunicationTab, DispatchDelivery, TemplateChannel } from "@/types/admin";
+import type { AnalyticsEvent, CommunicationDispatch, CommunicationTab, DispatchDelivery, NotificationLog, TemplateChannel } from "@/types/admin";
 import { ArrowDown, ArrowUp, Bell, ChevronDown, Download, Filter, MessageSquare, RotateCcw, Search } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
@@ -21,7 +20,7 @@ export function JsonPropertiesDialog({ title, properties }: { title: string; pro
   return <Dialog><DialogTrigger asChild><Button variant="link" size="sm" className="h-auto p-0 font-semibold text-info">View JSON</Button></DialogTrigger><DialogContent className="max-w-lg bg-card"><DialogHeader><DialogTitle className="font-heading text-lg">{title}</DialogTitle><DialogDescription>Recorded event properties for this row.</DialogDescription></DialogHeader><pre className="max-h-80 overflow-auto rounded-lg border border-border bg-muted p-4 font-mono text-xs leading-5 text-foreground">{JSON.stringify(properties, null, 2)}</pre></DialogContent></Dialog>;
 }
 
-export function CommunicationLogs() {
+export function CommunicationLogs({ analyticsEvents, communicationDispatches, notificationLogs, templateChannels }: { analyticsEvents: AnalyticsEvent[]; communicationDispatches: CommunicationDispatch[]; notificationLogs: NotificationLog[]; templateChannels: TemplateChannel[] }) {
   const [tab, setTab] = useState<CommunicationTab>("analytics");
   const [query, setQuery] = useState("");
   const [eventGroup, setEventGroup] = useState("all");

@@ -4,14 +4,13 @@ import { TransactionPagination } from "@/components/admin/TransactionPagination"
 import { Button } from "@/components/ui/button";
 import { DropdownMenu, DropdownMenuCheckboxItem, DropdownMenuContent, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { Input } from "@/components/ui/input";
-import { clickRecords } from "@/data/mockData";
 import { inr } from "@/lib/admin-utils";
 import type { ClickRecord } from "@/types/admin";
 import { ArrowDown, ArrowUp, ChevronDown, Download, MousePointerClick, RotateCcw, Search, Store } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
 
-export function Clicks() {
+export function Clicks({ clickRecords }: { clickRecords: ClickRecord[] }) {
   const [userId, setUserId] = useState("");
   const [selectedMerchants, setSelectedMerchants] = useState<string[]>([]);
   const [from, setFrom] = useState("");

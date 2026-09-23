@@ -4,10 +4,9 @@ import { Button } from "@/components/ui/button";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { Input } from "@/components/ui/input";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { ledgerEntries, offlineTransactions, onlineTransactions } from "@/data/mockData";
 import { downloadCsv, inr, tabTriggerClass } from "@/lib/admin-utils";
 import { cn } from "@/lib/utils";
-import type { TransactionStatus } from "@/types/admin";
+import type { LedgerEntry, OfflineTransaction, OnlineTransaction, TransactionStatus } from "@/types/admin";
 import { ArrowDown, ArrowUp, ChevronDown, Download, Filter, RotateCcw, Search } from "lucide-react";
 import { useState } from "react";
 
@@ -15,7 +14,7 @@ export function TransactionBadge({ status }: { status: TransactionStatus }) {
   return <span className={cn("inline-flex rounded-full px-2 py-0.5 text-[11px] font-semibold", status === "Approved" ? "status-approved" : status === "Rejected" ? "status-rejected" : "status-pending")}>{status}</span>;
 }
 
-export function Transactions() {
+export function Transactions({ ledgerEntries, offlineTransactions, onlineTransactions }: { ledgerEntries: LedgerEntry[]; offlineTransactions: OfflineTransaction[]; onlineTransactions: OnlineTransaction[] }) {
   const [tab, setTab] = useState<"online" | "offline" | "ledger">("online");
   const [query, setQuery] = useState("");
   const [status, setStatus] = useState("all");

@@ -7,7 +7,6 @@ import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, D
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { initialWithdrawals } from "@/data/mockData";
 import { inr } from "@/lib/admin-utils";
 import { cn } from "@/lib/utils";
 import type { Withdrawal, WithdrawalStatus } from "@/types/admin";
@@ -23,7 +22,7 @@ export function WithdrawalDecisionDialog({ withdrawal, mode, onClose, onSave }: 
   return <Dialog open onOpenChange={(open) => !open && onClose()}><DialogContent className="max-w-lg bg-card"><DialogHeader><DialogTitle className="font-heading text-xl">{paid ? "Mark withdrawal as paid" : "Mark withdrawal as failed"}</DialogTitle><DialogDescription>{paid ? `Record the payout reference for ${withdrawal.id}.` : `Record why ${withdrawal.id} could not be processed.`}</DialogDescription></DialogHeader><div className="rounded-lg border border-border bg-muted/60 p-3 text-sm"><div className="flex justify-between gap-4"><span className="text-muted-foreground">User ID</span><span className="font-mono font-semibold">{withdrawal.userId}</span></div><div className="mt-2 flex justify-between gap-4"><span className="text-muted-foreground">Amount</span><strong>{inr(withdrawal.amount)}</strong></div></div><div className="space-y-4">{paid && <label className="block space-y-1.5 text-sm font-medium">UTR / reference number <span className="text-destructive">*</span><Input aria-label="UTR / reference number" value={utr} onChange={(event) => setUtr(event.target.value)} placeholder="Enter bank or payment reference" /></label>}<label className="block space-y-1.5 text-sm font-medium">Notes {paid && <span className="font-normal text-muted-foreground">(optional)</span>}<Textarea aria-label="Processing notes" rows={3} value={notes} onChange={(event) => setNotes(event.target.value)} placeholder={paid ? "Add processing context…" : "Explain why the payout failed…"} /></label></div><DialogFooter><Button variant="outline" onClick={onClose}>Cancel</Button><Button variant={paid ? "default" : "destructive"} disabled={paid ? !utr.trim() : !notes.trim()} onClick={() => onSave(withdrawal, paid ? "Paid" : "Failed", utr.trim(), notes.trim())}>{paid ? <Check /> : <X />}{paid ? "Confirm paid" : "Mark failed"}</Button></DialogFooter></DialogContent></Dialog>;
 }
 
-export function Withdrawals() {
+export function Withdrawals({ initialWithdrawals }: { initialWithdrawals: Withdrawal[] }) {
   const [rows, setRows] = useState(initialWithdrawals);
   const [query, setQuery] = useState("");
   const [status, setStatus] = useState<WithdrawalStatus | "all">("all");

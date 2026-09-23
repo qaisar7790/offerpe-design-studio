@@ -8,7 +8,6 @@ import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Textarea } from "@/components/ui/textarea";
-import { resolutionQueueSeeds } from "@/data/mockData";
 import { inr, tabTriggerClass } from "@/lib/admin-utils";
 import { cn } from "@/lib/utils";
 import type { RejectionReason, ResolutionOutcome, ResolutionQueueItem } from "@/types/admin";
@@ -43,7 +42,7 @@ export function ResolveQueueDialog({ item, mode, reasons, onClose, onSave }: { i
   </DialogContent></Dialog>;
 }
 
-export function ConversionResolutions({ reasons }: { reasons: RejectionReason[] }) {
+export function ConversionResolutions({ reasons, resolutionQueueSeeds }: { reasons: RejectionReason[]; resolutionQueueSeeds: ResolutionQueueItem[] }) {
   const [rows, setRows] = useState<ResolutionQueueItem[]>(resolutionQueueSeeds);
   const [tab, setTab] = useState<"pending" | "reviewed">("pending");
   const [query, setQuery] = useState("");

@@ -120,7 +120,7 @@ export function LegalPagesPage({
         description="One editable document per page type — Privacy Policy and Terms of Service are fetched live on the public marketing site (apps/web); Merchant Agreement is linked from both Merchant Onboarding forms' terms checkbox. Unpublished changes are invisible to the public site until Published is checked."
       />
 
-      <div className="flex flex-col gap-3 rounded-lg border border-border bg-card p-3 shadow-card sm:flex-row sm:items-center">
+      <div className="filter-bar flex flex-col gap-3 rounded-lg border border-border bg-card p-3 shadow-card lg:flex-row lg:flex-wrap lg:items-center">
         <div className="flex items-center gap-2">
           <FileText className="h-4 w-4 text-muted-foreground" />
           <span className="text-sm font-medium">Page</span>

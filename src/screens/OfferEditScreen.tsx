@@ -5,14 +5,13 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
-import { merchants } from "@/data/mockData";
 import { createBlankOffer } from "@/lib/admin-utils";
-import type { Offer, OfferOrigin } from "@/types/admin";
+import type { Merchant, Offer, OfferOrigin } from "@/types/admin";
 import { CalendarDays, ChevronLeft, ChevronRight, Trash2 } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
 
-export function OfferEditPage({ offer, origin, onCancel, onSave, onDelete }: { offer: Offer | null; origin: OfferOrigin; onCancel: () => void; onSave: (offer: Offer) => void; onDelete: (offer: Offer) => void }) {
+export function OfferEditPage({ offer, origin, onCancel, onSave, onDelete, merchants }: { offer: Offer | null; origin: OfferOrigin; onCancel: () => void; onSave: (offer: Offer) => void; onDelete: (offer: Offer) => void; merchants: readonly Merchant[] }) {
   const isCreate = !offer;
   const fallbackMerchant = origin.type === "merchant" ? origin.merchant[0] : "Theobroma";
   const [form, setForm] = useState<Offer>(() => offer ?? createBlankOffer(fallbackMerchant));

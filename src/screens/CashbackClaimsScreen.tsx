@@ -8,7 +8,6 @@ import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Textarea } from "@/components/ui/textarea";
-import { claimRejectionReasons } from "@/data/mockData";
 import { downloadCsv, inr, tabTriggerClass } from "@/lib/admin-utils";
 import { cn } from "@/lib/utils";
 import type { Claim } from "@/types/admin";
@@ -26,14 +25,14 @@ export function ClaimDetails({ claim }: { claim: Claim }) {
   </div>;
 }
 
-export function RejectClaimDialog({ claim, onReject, children }: { claim: Claim; onReject: (claim: Claim, reason: string, note: string) => void; children: React.ReactNode }) {
+export function RejectClaimDialog({ claim, onReject, children, claimRejectionReasons }: { claim: Claim; onReject: (claim: Claim, reason: string, note: string) => void; children: React.ReactNode; claimRejectionReasons: readonly string[] }) {
   const [open, setOpen] = useState(false);
   const [reason, setReason] = useState(claimRejectionReasons[0] as string);
   const [note, setNote] = useState("");
   return <Dialog open={open} onOpenChange={setOpen}><DialogTrigger asChild>{children}</DialogTrigger><DialogContent className="max-w-lg bg-card"><DialogHeader><DialogTitle className="font-heading text-lg">Reject claim</DialogTitle><DialogDescription>{claim.user}&apos;s claim on order {claim.orderId} will be declined. A reason from the Rejection Reasons list is required and is shown to the customer.</DialogDescription></DialogHeader><div className="space-y-4"><label className="block space-y-1.5 text-sm font-medium">Rejection reason <span className="text-destructive">*</span><Select value={reason} onValueChange={setReason}><SelectTrigger><SelectValue /></SelectTrigger><SelectContent>{claimRejectionReasons.map((item) => <SelectItem key={item} value={item}>{item}</SelectItem>)}</SelectContent></Select></label><label className="block space-y-1.5 text-sm font-medium">Admin remarks <span className="font-normal text-muted-foreground">(optional)</span><Textarea rows={3} value={note} onChange={(event) => setNote(event.target.value)} placeholder="Add internal context for this decision…" /></label></div><DialogFooter><Button variant="outline" onClick={() => setOpen(false)}>Cancel</Button><Button variant="destructive" onClick={() => { onReject(claim, reason, note); setOpen(false); }}>Reject claim</Button></DialogFooter></DialogContent></Dialog>;
 }
 
-export function CashbackClaims({ claims, onApprove, onReject, onRevert, onDelete }: { claims: Claim[]; onApprove: (claim: Claim) => void; onReject: (claim: Claim, reason: string, note: string) => void; onRevert: (claim: Claim) => void; onDelete: (claim: Claim) => void }) {
+export function CashbackClaims({ claims, onApprove, onReject, onRevert, onDelete, claimRejectionReasons }: { claims: Claim[]; onApprove: (claim: Claim) => void; onReject: (claim: Claim, reason: string, note: string) => void; onRevert: (claim: Claim) => void; onDelete: (claim: Claim) => void; claimRejectionReasons: readonly string[] }) {
   const [query, setQuery] = useState("");
   const [status, setStatus] = useState("all");
   const [merchant, setMerchant] = useState("all");
@@ -90,7 +89,7 @@ export function CashbackClaims({ claims, onApprove, onReject, onRevert, onDelete
             <td className="pr-3 text-right"><div className="flex justify-end gap-1">
               <Dialog><DialogTrigger asChild><IconButton className="h-7 w-7" label={`View claim ${claim.id}`}><ExternalLink className="h-3.5 w-3.5" /></IconButton></DialogTrigger><DialogContent className="max-w-2xl bg-card"><DialogHeader><DialogTitle className="font-heading text-lg">{claim.merchant} · {claim.orderId}</DialogTitle><DialogDescription>Claim {claim.id} · {claim.claimDate}, {claim.claimTime}</DialogDescription></DialogHeader><ClaimDetails claim={claim} /></DialogContent></Dialog>
               <Button size="sm" className="h-7 px-2.5 text-xs" onClick={() => onApprove(claim)}><Check />Approve</Button>
-              <RejectClaimDialog claim={claim} onReject={onReject}><Button size="sm" variant="destructive" className="h-7 px-2.5 text-xs"><X />Reject</Button></RejectClaimDialog>
+              <RejectClaimDialog claim={claim} onReject={onReject} claimRejectionReasons={claimRejectionReasons}><Button size="sm" variant="destructive" className="h-7 px-2.5 text-xs"><X />Reject</Button></RejectClaimDialog>
             </div></td>
           </tr>)}</tbody></table></div></div>}
         </section>

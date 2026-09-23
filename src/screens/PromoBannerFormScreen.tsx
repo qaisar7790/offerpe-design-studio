@@ -4,14 +4,13 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
-import { promoSections } from "@/data/mockData";
 import { cn } from "@/lib/utils";
 import type { PromoBanner, PromoSection } from "@/types/admin";
 import { ChevronRight, Trash2, UploadCloud } from "lucide-react";
 import { useRef, useState } from "react";
 import { toast } from "sonner";
 
-export function PromoBannerFormPage({ banner, onCancel, onSave, onDelete }: { banner: PromoBanner | null; onCancel: () => void; onSave: (banner: PromoBanner) => void; onDelete: (banner: PromoBanner) => void }) {
+export function PromoBannerFormPage({ banner, onCancel, onSave, onDelete, promoSections }: { banner: PromoBanner | null; onCancel: () => void; onSave: (banner: PromoBanner) => void; onDelete: (banner: PromoBanner) => void; promoSections: readonly PromoSection[] }) {
   const isNew = !banner;
   const [form, setForm] = useState<PromoBanner>(() => banner ?? { id: `PB-${Date.now()}`, section: "HERO", headline: "", image: "", tag: "", ctaText: "", ctaTarget: "", order: 0, start: "2026-09-21T07:51", end: "", active: true });
   const [imageStatus, setImageStatus] = useState(""); const inputRef = useRef<HTMLInputElement>(null);

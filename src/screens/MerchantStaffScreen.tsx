@@ -8,8 +8,7 @@ import { Dialog, DialogClose, DialogContent, DialogDescription, DialogFooter, Di
 import { DropdownMenu, DropdownMenuCheckboxItem, DropdownMenuContent, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { merchants } from "@/data/mockData";
-import type { MerchantStaff } from "@/types/admin";
+import type { Merchant, MerchantStaff } from "@/types/admin";
 import { format } from "date-fns";
 import { Check, ChevronDown, Pencil, Plus, RefreshCw, RotateCcw, Search, Trash2 } from "lucide-react";
 import { useMemo, useState } from "react";
@@ -77,8 +76,8 @@ export function MerchantStaffDialog({ staff, merchantOptions, onSave, children }
   </Dialog>;
 }
 
-export function MerchantStaffPage({ staff, onSave, onDelete }: { staff: MerchantStaff[]; onSave: (member: MerchantStaff, isNew: boolean) => void; onDelete: (member: MerchantStaff) => void }) {
-  const merchantOptions = useMemo(() => Array.from(new Set(merchants.map((row) => row[0] as string))).sort(), []);
+export function MerchantStaffPage({ staff, onSave, onDelete, merchants }: { staff: MerchantStaff[]; onSave: (member: MerchantStaff, isNew: boolean) => void; onDelete: (member: MerchantStaff) => void; merchants: readonly Merchant[] }) {
+  const merchantOptions = useMemo(() => Array.from(new Set(merchants.map((row) => row[0] as string))).sort(), [merchants]);
   const [query, setQuery] = useState("");
   const [merchantFilters, setMerchantFilters] = useState<string[]>([]);
   const [statusFilters, setStatusFilters] = useState<MerchantStaff["status"][]>([]);

@@ -9,13 +9,12 @@ import { Button } from "@/components/ui/button";
 import { DropdownMenu, DropdownMenuCheckboxItem, DropdownMenuContent, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { merchants } from "@/data/mockData";
 import { downloadCsv, inr } from "@/lib/admin-utils";
-import type { LayoutMode, Offer, Status } from "@/types/admin";
+import type { LayoutMode, Merchant, Offer, Status } from "@/types/admin";
 import { ChevronDown, ChevronLeft, ChevronRight, Download, Filter, Pencil, Plus, Search, Store, Trash2 } from "lucide-react";
 import { useState } from "react";
 
-export function OffersPage({ offers, onEdit, onCreate, onDelete }: { offers: Offer[]; onEdit: (offer: Offer) => void; onCreate: () => void; onDelete: (offer: Offer) => void }) {
+export function OffersPage({ offers, onEdit, onCreate, onDelete, merchants }: { offers: Offer[]; onEdit: (offer: Offer) => void; onCreate: () => void; onDelete: (offer: Offer) => void; merchants: readonly Merchant[] }) {
   const [query, setQuery] = useState(""); const [statuses, setStatuses] = useState<Status[]>([]); const [merchantFilter, setMerchantFilter] = useState("all"); const [page, setPage] = useState(1); const [pageSize, setPageSize] = useState(10); const [layout, setLayout] = useState<LayoutMode>("list");
   const filtered = offers.filter((offer) => (!query || `${offer.headline} ${offer.merchant}`.toLowerCase().includes(query.toLowerCase())) && (!statuses.length || statuses.includes(offer.active ? "Active" : "Inactive")) && (merchantFilter === "all" || offer.merchant === merchantFilter));
   const pageCount = Math.max(1, Math.ceil(filtered.length / pageSize)); const currentPage = Math.min(page, pageCount); const start = (currentPage - 1) * pageSize; const rows = filtered.slice(start, start + pageSize);

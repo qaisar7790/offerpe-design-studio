@@ -5,14 +5,13 @@ import { StatusBadge } from "@/components/admin/StatusBadge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { promoSections } from "@/data/mockData";
 import { cn } from "@/lib/utils";
 import type { PromoBanner, PromoSection } from "@/types/admin";
 import { format } from "date-fns";
 import { ChevronDown, ChevronLeft, ChevronRight, Pencil, Plus, Search, Trash2 } from "lucide-react";
 import { useState } from "react";
 
-export function PromoBannersPage({ banners, onEdit, onCreate, onDelete }: { banners: PromoBanner[]; onEdit: (banner: PromoBanner) => void; onCreate: () => void; onDelete: (banner: PromoBanner) => void }) {
+export function PromoBannersPage({ banners, onEdit, onCreate, onDelete, promoSections }: { banners: PromoBanner[]; onEdit: (banner: PromoBanner) => void; onCreate: () => void; onDelete: (banner: PromoBanner) => void; promoSections: readonly PromoSection[] }) {
   const [query, setQuery] = useState(""); const [section, setSection] = useState("all"); const [status, setStatus] = useState("all"); const [ascending, setAscending] = useState(true); const [page, setPage] = useState(1); const pageSize = 6;
   const filtered = banners.filter((banner) => (!query || `${banner.headline} ${banner.tag} ${banner.ctaTarget}`.toLowerCase().includes(query.toLowerCase())) && (section === "all" || banner.section === section) && (status === "all" || (banner.active ? "Active" : "Inactive") === status)).sort((a, b) => ascending ? a.headline.localeCompare(b.headline) : b.headline.localeCompare(a.headline));
   const pageCount = Math.max(1, Math.ceil(filtered.length / pageSize)); const currentPage = Math.min(page, pageCount); const start = (currentPage - 1) * pageSize; const rows = filtered.slice(start, start + pageSize);

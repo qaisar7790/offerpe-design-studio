@@ -1,29 +1,28 @@
-import { Button } from "@/components/ui/button";
-import { Calendar } from "@/components/ui/calendar";
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { format } from "date-fns";
-import { CalendarDays } from "lucide-react";
+import { Input } from "@/components/ui/input";
 import { useState } from "react";
-import type { DateRange } from "react-day-picker";
 
 export function DateFilter() {
-  const [date, setDate] = useState<DateRange | undefined>({
-    from: new Date(2026, 8, 1),
-    to: new Date(2026, 8, 21),
-  });
+  const [from, setFrom] = useState("2026-09-01");
+  const [to, setTo] = useState("2026-09-21");
+
   return (
-    <Popover>
-      <PopoverTrigger asChild>
-        <Button variant="outline" className="min-w-52 justify-start font-normal">
-          <CalendarDays />
-          {date?.from
-            ? `${format(date.from, "dd MMM")} – ${date.to ? format(date.to, "dd MMM yyyy") : "…"}`
-            : "Choose dates"}
-        </Button>
-      </PopoverTrigger>
-      <PopoverContent className="pointer-events-auto w-auto p-0" align="end">
-        <Calendar mode="range" selected={date} onSelect={setDate} numberOfMonths={1} />
-      </PopoverContent>
-    </Popover>
+    <>
+      <Input
+        type="date"
+        aria-label="From date"
+        title="From date"
+        className="w-full shrink-0 lg:w-38"
+        value={from}
+        onChange={(event) => setFrom(event.target.value)}
+      />
+      <Input
+        type="date"
+        aria-label="To date"
+        title="To date"
+        className="w-full shrink-0 lg:w-38"
+        value={to}
+        onChange={(event) => setTo(event.target.value)}
+      />
+    </>
   );
 }

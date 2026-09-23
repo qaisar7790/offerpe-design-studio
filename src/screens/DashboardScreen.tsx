@@ -1,18 +1,177 @@
 import { PageHeader } from "@/components/admin/PageHeader";
 import { ChevronRight, ShieldCheck } from "lucide-react";
-import { Bar, BarChart, CartesianGrid, Cell, Pie, PieChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
+import {
+  Bar,
+  BarChart,
+  CartesianGrid,
+  Cell,
+  Pie,
+  PieChart,
+  ResponsiveContainer,
+  Tooltip,
+  XAxis,
+  YAxis,
+} from "recharts";
 
-export function DonutCard({ title, total, data }: { title: string; total: number; data: { name: string; value: number; fill: string }[] }) {
-  return <section className="rounded-lg border border-border bg-card p-5 shadow-card"><div className="flex items-start justify-between"><h2 className="font-heading text-sm font-semibold">{title}</h2><span className="font-heading text-2xl font-bold">{total}</span></div><div className="h-48"><ResponsiveContainer width="100%" height="100%"><PieChart><Pie data={data} dataKey="value" nameKey="name" innerRadius={52} outerRadius={76} paddingAngle={2} stroke="var(--card)" strokeWidth={3}>{data.map((item) => <Cell key={item.name} fill={item.fill} />)}</Pie><Tooltip formatter={(value) => [value, "Stores"]} /></PieChart></ResponsiveContainer></div><div className="flex justify-center gap-5">{data.map((item) => <div key={item.name} className="flex items-center gap-2 text-xs text-muted-foreground"><span className="h-2.5 w-2.5 rounded-full" style={{ background: item.fill }} />{item.name}</div>)}</div></section>;
+export function DonutCard({
+  title,
+  total,
+  data,
+}: {
+  title: string;
+  total: number;
+  data: { name: string; value: number; fill: string }[];
+}) {
+  return (
+    <section className="rounded-lg border border-border bg-card p-5 shadow-card">
+      <div className="flex items-start justify-between">
+        <h2 className="font-heading text-sm font-semibold">{title}</h2>
+        <span className="font-heading text-2xl font-bold">{total}</span>
+      </div>
+      <div className="h-48">
+        <ResponsiveContainer width="100%" height="100%">
+          <PieChart>
+            <Pie
+              data={data}
+              dataKey="value"
+              nameKey="name"
+              innerRadius={52}
+              outerRadius={76}
+              paddingAngle={2}
+              stroke="var(--card)"
+              strokeWidth={3}
+            >
+              {data.map((item) => (
+                <Cell key={item.name} fill={item.fill} />
+              ))}
+            </Pie>
+            <Tooltip formatter={(value) => [value, "Stores"]} />
+          </PieChart>
+        </ResponsiveContainer>
+      </div>
+      <div className="flex justify-center gap-5">
+        {data.map((item) => (
+          <div key={item.name} className="flex items-center gap-2 text-xs text-muted-foreground">
+            <span className="h-2.5 w-2.5 rounded-full" style={{ background: item.fill }} />
+            {item.name}
+          </div>
+        ))}
+      </div>
+    </section>
+  );
 }
 
-export function MetricCard({ title, total, data }: { title: string; total?: string; data: { name: string; value: number }[] }) {
-  return <section className="rounded-lg border border-border bg-card p-5 shadow-card"><div className="mb-4 flex items-start justify-between"><h2 className="font-heading text-sm font-semibold">{title}</h2>{total && <span className="font-heading text-xl font-bold">{total}</span>}</div><div className="h-40"><ResponsiveContainer width="100%" height="100%"><BarChart data={data} margin={{ top: 5, right: 0, left: -24, bottom: 0 }}><CartesianGrid vertical={false} stroke="var(--border)" strokeDasharray="3 3" /><XAxis dataKey="name" axisLine={false} tickLine={false} tick={{ fill: "var(--muted-foreground)", fontSize: 11 }} /><YAxis axisLine={false} tickLine={false} tick={{ fill: "var(--muted-foreground)", fontSize: 10 }} /><Tooltip cursor={{ fill: "var(--muted)" }} /><Bar dataKey="value" fill="var(--chart-1)" radius={[4, 4, 0, 0]} /></BarChart></ResponsiveContainer></div></section>;
+export function MetricCard({
+  title,
+  total,
+  data,
+}: {
+  title: string;
+  total?: string;
+  data: { name: string; value: number }[];
+}) {
+  return (
+    <section className="rounded-lg border border-border bg-card p-5 shadow-card">
+      <div className="mb-4 flex items-start justify-between">
+        <h2 className="font-heading text-sm font-semibold">{title}</h2>
+        {total && <span className="font-heading text-xl font-bold">{total}</span>}
+      </div>
+      <div className="h-40">
+        <ResponsiveContainer width="100%" height="100%">
+          <BarChart data={data} margin={{ top: 5, right: 0, left: -24, bottom: 0 }}>
+            <CartesianGrid vertical={false} stroke="var(--border)" strokeDasharray="3 3" />
+            <XAxis
+              dataKey="name"
+              axisLine={false}
+              tickLine={false}
+              tick={{ fill: "var(--muted-foreground)", fontSize: 11 }}
+            />
+            <YAxis
+              axisLine={false}
+              tickLine={false}
+              tick={{ fill: "var(--muted-foreground)", fontSize: 10 }}
+            />
+            <Tooltip cursor={{ fill: "var(--muted)" }} />
+            <Bar dataKey="value" fill="var(--chart-1)" radius={[4, 4, 0, 0]} />
+          </BarChart>
+        </ResponsiveContainer>
+      </div>
+    </section>
+  );
 }
 
 type ChartDataShape = { name: string; value: number }[];
-type ChartData = { users: ChartDataShape; clicks: ChartDataShape; transactions: ChartDataShape; withdrawals: ChartDataShape; claims: ChartDataShape };
+type ChartData = {
+  users: ChartDataShape;
+  clicks: ChartDataShape;
+  transactions: ChartDataShape;
+  withdrawals: ChartDataShape;
+  claims: ChartDataShape;
+};
 
 export function Dashboard({ chartData }: { chartData: ChartData }) {
-  return <><PageHeader title="Dashboard" description="As of 21 Sep 2026, 11:25 IST · Refreshed hourly. A concise operational snapshot across the OfferPe platform." /><section className="mb-4 flex flex-col gap-4 rounded-lg border border-border bg-card px-5 py-4 shadow-card sm:flex-row sm:items-center sm:justify-between"><div><h2 className="font-heading text-lg font-bold text-foreground">Welcome back, Qaisar <span className="font-semibold text-muted-foreground">(Owner)</span></h2><p className="mt-1 text-sm text-muted-foreground">Here’s the latest operational picture across OfferPe.</p></div><div className="inline-flex w-fit items-center gap-2 rounded-full border border-border bg-accent px-3 py-1.5 text-xs font-semibold text-accent-foreground"><ShieldCheck className="h-4 w-4 text-primary" /><span>All systems operational</span><span aria-hidden="true" className="text-muted-foreground">•</span><span className="font-normal text-muted-foreground">Last matview refresh 10:19 AM IST</span></div></section><div className="mb-4 grid gap-4 lg:grid-cols-2"><DonutCard title="Stores — Status" total={38} data={[{ name: "Live", value: 33, fill: "var(--chart-1)" }, { name: "Inactive", value: 5, fill: "var(--chart-2)" }]} /><DonutCard title="Stores — Channel" total={38} data={[{ name: "Online", value: 31, fill: "var(--chart-1)" }, { name: "Offline", value: 7, fill: "var(--chart-3)" }]} /></div><div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3"><MetricCard title="Users Joined" total="2,486" data={chartData.users} /><MetricCard title="Clicks" data={chartData.clicks} /><MetricCard title="Transactions" data={chartData.transactions} /><MetricCard title="Withdrawal Requests" data={chartData.withdrawals} /><button onClick={() => undefined} className="rounded-lg border border-border bg-card p-5 text-left shadow-card transition-shadow hover:shadow-card-hover"><div className="font-heading text-sm font-semibold">Withdrawals — Currently Pending</div><div className="mt-7 font-heading text-4xl font-bold">14</div><div className="mt-4 flex items-center gap-1 text-sm font-semibold text-primary">View pending <ChevronRight className="h-4 w-4" /></div></button><MetricCard title="Missing Claims" data={chartData.claims} /></div></>;
+  return (
+    <>
+      <PageHeader
+        title="Dashboard"
+        description="As of 21 Sep 2026, 11:25 IST · Refreshed hourly. A concise operational snapshot across the OfferPe platform."
+      />
+      <section className="mb-4 flex flex-col gap-4 rounded-lg border border-border bg-card px-5 py-4 shadow-card sm:flex-row sm:items-center sm:justify-between">
+        <div>
+          <h2 className="font-heading text-lg font-bold text-foreground">
+            Welcome back, Qaisar{" "}
+            <span className="font-semibold text-muted-foreground">(Owner)</span>
+          </h2>
+          <p className="mt-1 text-sm text-muted-foreground">
+            Here’s the latest operational picture across OfferPe.
+          </p>
+        </div>
+        <div className="inline-flex w-fit items-center gap-2 rounded-full border border-border bg-accent px-3 py-1.5 text-xs font-semibold text-accent-foreground">
+          <ShieldCheck className="h-4 w-4 text-primary" />
+          <span>All systems operational</span>
+          <span aria-hidden="true" className="text-muted-foreground">
+            •
+          </span>
+          <span className="font-normal text-muted-foreground">
+            Last matview refresh 10:19 AM IST
+          </span>
+        </div>
+      </section>
+      <div className="mb-4 grid gap-4 lg:grid-cols-2">
+        <DonutCard
+          title="Stores — Status"
+          total={38}
+          data={[
+            { name: "Live", value: 33, fill: "var(--chart-1)" },
+            { name: "Inactive", value: 5, fill: "var(--chart-2)" },
+          ]}
+        />
+        <DonutCard
+          title="Stores — Channel"
+          total={38}
+          data={[
+            { name: "Online", value: 31, fill: "var(--chart-1)" },
+            { name: "Offline", value: 7, fill: "var(--chart-3)" },
+          ]}
+        />
+      </div>
+      <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+        <MetricCard title="Users Joined" total="2,486" data={chartData.users} />
+        <MetricCard title="Clicks" data={chartData.clicks} />
+        <MetricCard title="Transactions" data={chartData.transactions} />
+        <MetricCard title="Withdrawal Requests" data={chartData.withdrawals} />
+        <button
+          onClick={() => undefined}
+          className="rounded-lg border border-border bg-card p-5 text-left shadow-card transition-shadow hover:shadow-card-hover"
+        >
+          <div className="font-heading text-sm font-semibold">Withdrawals — Currently Pending</div>
+          <div className="mt-7 font-heading text-4xl font-bold">14</div>
+          <div className="mt-4 flex items-center gap-1 text-sm font-semibold text-primary">
+            View pending <ChevronRight className="h-4 w-4" />
+          </div>
+        </button>
+        <MetricCard title="Missing Claims" data={chartData.claims} />
+      </div>
+    </>
+  );
 }

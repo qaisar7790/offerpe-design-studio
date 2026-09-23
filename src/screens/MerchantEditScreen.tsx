@@ -5,9 +5,22 @@ import { ReviewsPanel } from "@/components/admin/ReviewsPanel";
 import { SectionCard } from "@/components/admin/SectionCard";
 import { StatusBadge } from "@/components/admin/StatusBadge";
 import { Button } from "@/components/ui/button";
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Textarea } from "@/components/ui/textarea";
@@ -15,11 +28,35 @@ import { Textarea } from "@/components/ui/textarea";
 import { tabTriggerClass } from "@/lib/admin-utils";
 import { cn } from "@/lib/utils";
 import type { Banner, Merchant, Offer, Review } from "@/types/admin";
-import { ArrowDown, ArrowUp, ChevronLeft, ChevronRight, Eye, EyeOff, GripVertical, Image as ImageIcon, Pencil, Plus, Trash2, UploadCloud, X } from "lucide-react";
+import {
+  ArrowDown,
+  ArrowUp,
+  ChevronLeft,
+  ChevronRight,
+  Eye,
+  EyeOff,
+  GripVertical,
+  Image as ImageIcon,
+  Pencil,
+  Plus,
+  Trash2,
+  UploadCloud,
+  X,
+} from "lucide-react";
 import { useRef, useState } from "react";
 import { toast } from "sonner";
 
-export function AddBannerModal({ open, onOpenChange, nextPosition, onAdd }: { open: boolean; onOpenChange: (open: boolean) => void; nextPosition: number; onAdd: (banner: Banner, position: number) => void }) {
+export function AddBannerModal({
+  open,
+  onOpenChange,
+  nextPosition,
+  onAdd,
+}: {
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+  nextPosition: number;
+  onAdd: (banner: Banner, position: number) => void;
+}) {
   const [title, setTitle] = useState("");
   const [placement, setPlacement] = useState("Merchant Page Hero");
   const [target, setTarget] = useState("");
@@ -30,15 +67,183 @@ export function AddBannerModal({ open, onOpenChange, nextPosition, onAdd }: { op
   const [active, setActive] = useState(true);
   const inputRef = useRef<HTMLInputElement>(null);
   const add = () => {
-    if (!title.trim()) { toast.error("Banner title is required"); return; }
-    onAdd({ id: `BAN-${Date.now()}`, title: title.trim(), placement, target, image, start, end, active }, position);
-    toast.success("Banner added", { description: `${title.trim()} is now in position ${position}.` });
+    if (!title.trim()) {
+      toast.error("Banner title is required");
+      return;
+    }
+    onAdd(
+      {
+        id: `BAN-${Date.now()}`,
+        title: title.trim(),
+        placement,
+        target,
+        image,
+        start,
+        end,
+        active,
+      },
+      position,
+    );
+    toast.success("Banner added", {
+      description: `${title.trim()} is now in position ${position}.`,
+    });
     onOpenChange(false);
   };
-  return <Dialog open={open} onOpenChange={onOpenChange}><DialogContent className="max-h-[92vh] max-w-2xl overflow-y-auto bg-card p-0"><DialogHeader className="border-b border-border px-6 py-5"><DialogTitle className="font-heading text-xl">Add Banner</DialogTitle><DialogDescription>Create and schedule a promotional banner for this merchant.</DialogDescription></DialogHeader><div className="grid gap-4 px-6 sm:grid-cols-2"><label className="space-y-1.5 text-sm font-medium sm:col-span-2">Banner Title / Headline <span className="text-destructive">*</span><Input value={title} onChange={(event) => setTitle(event.target.value)} placeholder="Festive Gifting Collection" /></label><label className="space-y-1.5 text-sm font-medium">Placement / Slot<Select value={placement} onValueChange={setPlacement}><SelectTrigger><SelectValue /></SelectTrigger><SelectContent>{["Merchant Page Hero", "Category Carousel", "Store Footer"].map((slot) => <SelectItem key={slot} value={slot}>{slot}</SelectItem>)}</SelectContent></Select></label><label className="space-y-1.5 text-sm font-medium">Display Position<Input type="number" min="1" max={nextPosition} value={position} onChange={(event) => setPosition(Math.max(1, Number(event.target.value)))} /></label><label className="space-y-1.5 text-sm font-medium sm:col-span-2">Target / Deep link<Input value={target} onChange={(event) => setTarget(event.target.value)} placeholder="offerpe://merchants/theobroma/festive" /></label><div className="sm:col-span-2"><span className="text-sm font-medium">Banner Image</span><button type="button" onClick={() => inputRef.current?.click()} onDragOver={(event) => event.preventDefault()} onDrop={(event) => { event.preventDefault(); const file = event.dataTransfer.files[0]; if (file) setImage(file.name); }} className="mt-1.5 flex min-h-32 w-full flex-col items-center justify-center rounded-lg border border-dashed border-border bg-muted/30 p-4 hover:border-primary hover:bg-accent"><UploadCloud className="mb-2 h-7 w-7 text-primary" /><span className="text-sm font-semibold">{image || "Drop an image here or choose a file"}</span><span className="mt-1 text-xs text-muted-foreground">PNG, JPG or WebP</span><input ref={inputRef} type="file" accept="image/png,image/jpeg,image/webp" className="hidden" onChange={(event) => setImage(event.target.files?.[0]?.name ?? "")} /></button><Input className="mt-2" value={image} onChange={(event) => setImage(event.target.value)} placeholder="Or paste an image URL" /></div><label className="space-y-1.5 text-sm font-medium">Schedule Start<Input type="date" value={start} onChange={(event) => setStart(event.target.value)} /></label><label className="space-y-1.5 text-sm font-medium">Schedule End <span className="font-normal text-muted-foreground">(optional)</span><Input type="date" value={end} onChange={(event) => setEnd(event.target.value)} /></label><div className="flex items-center justify-between rounded-md border border-border bg-muted/30 px-3 py-2.5 sm:col-span-2"><div><p className="text-sm font-semibold">Active status</p><p className="text-xs text-muted-foreground">Show this banner during its scheduled period.</p></div><Switch checked={active} onCheckedChange={setActive} aria-label="Active banner" /></div></div><DialogFooter className="border-t border-border px-6 py-4"><Button variant="destructiveSoft" onClick={() => onOpenChange(false)}>Cancel</Button><Button onClick={add}><Plus />Add Banner</Button></DialogFooter></DialogContent></Dialog>;
+  return (
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent className="max-h-[92vh] max-w-2xl overflow-y-auto bg-card p-0">
+        <DialogHeader className="border-b border-border px-6 py-5">
+          <DialogTitle className="font-heading text-xl">Add Banner</DialogTitle>
+          <DialogDescription>
+            Create and schedule a promotional banner for this merchant.
+          </DialogDescription>
+        </DialogHeader>
+        <div className="grid gap-4 px-6 sm:grid-cols-2">
+          <label className="space-y-1.5 text-sm font-medium sm:col-span-2">
+            Banner Title / Headline <span className="text-destructive">*</span>
+            <Input
+              value={title}
+              onChange={(event) => setTitle(event.target.value)}
+              placeholder="Festive Gifting Collection"
+            />
+          </label>
+          <label className="space-y-1.5 text-sm font-medium">
+            Placement / Slot
+            <Select value={placement} onValueChange={setPlacement}>
+              <SelectTrigger>
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                {["Merchant Page Hero", "Category Carousel", "Store Footer"].map((slot) => (
+                  <SelectItem key={slot} value={slot}>
+                    {slot}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </label>
+          <label className="space-y-1.5 text-sm font-medium">
+            Display Position
+            <Input
+              type="number"
+              min="1"
+              max={nextPosition}
+              value={position}
+              onChange={(event) => setPosition(Math.max(1, Number(event.target.value)))}
+            />
+          </label>
+          <label className="space-y-1.5 text-sm font-medium sm:col-span-2">
+            Target / Deep link
+            <Input
+              value={target}
+              onChange={(event) => setTarget(event.target.value)}
+              placeholder="offerpe://merchants/theobroma/festive"
+            />
+          </label>
+          <div className="sm:col-span-2">
+            <span className="text-sm font-medium">Banner Image</span>
+            <button
+              type="button"
+              onClick={() => inputRef.current?.click()}
+              onDragOver={(event) => event.preventDefault()}
+              onDrop={(event) => {
+                event.preventDefault();
+                const file = event.dataTransfer.files[0];
+                if (file) setImage(file.name);
+              }}
+              className="mt-1.5 flex min-h-32 w-full flex-col items-center justify-center rounded-lg border border-dashed border-border bg-muted/30 p-4 hover:border-primary hover:bg-accent"
+            >
+              <UploadCloud className="mb-2 h-7 w-7 text-primary" />
+              <span className="text-sm font-semibold">
+                {image || "Drop an image here or choose a file"}
+              </span>
+              <span className="mt-1 text-xs text-muted-foreground">PNG, JPG or WebP</span>
+              <input
+                ref={inputRef}
+                type="file"
+                accept="image/png,image/jpeg,image/webp"
+                className="hidden"
+                onChange={(event) => setImage(event.target.files?.[0]?.name ?? "")}
+              />
+            </button>
+            <Input
+              className="mt-2"
+              value={image}
+              onChange={(event) => setImage(event.target.value)}
+              placeholder="Or paste an image URL"
+            />
+          </div>
+          <label className="space-y-1.5 text-sm font-medium">
+            Schedule Start
+            <Input type="date" value={start} onChange={(event) => setStart(event.target.value)} />
+          </label>
+          <label className="space-y-1.5 text-sm font-medium">
+            Schedule End <span className="font-normal text-muted-foreground">(optional)</span>
+            <Input type="date" value={end} onChange={(event) => setEnd(event.target.value)} />
+          </label>
+          <div className="flex items-center justify-between rounded-md border border-border bg-muted/30 px-3 py-2.5 sm:col-span-2">
+            <div>
+              <p className="text-sm font-semibold">Active status</p>
+              <p className="text-xs text-muted-foreground">
+                Show this banner during its scheduled period.
+              </p>
+            </div>
+            <Switch checked={active} onCheckedChange={setActive} aria-label="Active banner" />
+          </div>
+        </div>
+        <DialogFooter className="border-t border-border px-6 py-4">
+          <Button variant="destructiveSoft" onClick={() => onOpenChange(false)}>
+            Cancel
+          </Button>
+          <Button onClick={add}>
+            <Plus />
+            Add Banner
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  );
 }
 
-export function MerchantEditPage({ merchant, offers, reviews, rejectionReasons, merchantCitySeeds, merchantStepSeeds, merchantPageSectionSeeds, merchantBannerSeeds, initialTab, onBack, onDeleteMerchant, onEditOffer, onCreateOffer, onDeleteOffer, onApproveReview, onRejectReview, onRevertReview, onDeleteReview }: { merchant: Merchant; offers: Offer[]; reviews: Review[]; rejectionReasons: readonly string[]; merchantCitySeeds: readonly string[]; merchantStepSeeds: readonly string[]; merchantPageSectionSeeds: readonly { name: string; visible: boolean }[]; merchantBannerSeeds: readonly Banner[]; initialTab: "details" | "offers"; onApproveReview: (review: Review) => void; onRejectReview: (review: Review, reason: string, note: string) => void; onRevertReview: (review: Review) => void; onDeleteReview: (review: Review) => void; onBack: () => void; onDeleteMerchant: () => void; onEditOffer: (offer: Offer) => void; onCreateOffer: () => void; onDeleteOffer: (offer: Offer) => void }) {
+export function MerchantEditPage({
+  merchant,
+  offers,
+  reviews,
+  rejectionReasons,
+  merchantCitySeeds,
+  merchantStepSeeds,
+  merchantPageSectionSeeds,
+  merchantBannerSeeds,
+  initialTab,
+  onBack,
+  onDeleteMerchant,
+  onEditOffer,
+  onCreateOffer,
+  onDeleteOffer,
+  onApproveReview,
+  onRejectReview,
+  onRevertReview,
+  onDeleteReview,
+}: {
+  merchant: Merchant;
+  offers: Offer[];
+  reviews: Review[];
+  rejectionReasons: readonly string[];
+  merchantCitySeeds: readonly string[];
+  merchantStepSeeds: readonly string[];
+  merchantPageSectionSeeds: readonly { name: string; visible: boolean }[];
+  merchantBannerSeeds: readonly Banner[];
+  initialTab: "details" | "offers";
+  onApproveReview: (review: Review) => void;
+  onRejectReview: (review: Review, reason: string, note: string) => void;
+  onRevertReview: (review: Review) => void;
+  onDeleteReview: (review: Review) => void;
+  onBack: () => void;
+  onDeleteMerchant: () => void;
+  onEditOffer: (offer: Offer) => void;
+  onCreateOffer: () => void;
+  onDeleteOffer: (offer: Offer) => void;
+}) {
   const [active, setActive] = useState(merchant[4] === "Active");
   const [cities, setCities] = useState<string[]>([...merchantCitySeeds]);
   const [steps, setSteps] = useState<string[]>([...merchantStepSeeds]);
@@ -47,10 +252,618 @@ export function MerchantEditPage({ merchant, offers, reviews, rejectionReasons, 
   const [banners, setBanners] = useState<Banner[]>([...merchantBannerSeeds]);
   const [bannerModalOpen, setBannerModalOpen] = useState(false);
   const [draggedBanner, setDraggedBanner] = useState<number | null>(null);
-  const moveSection = (index: number, direction: -1 | 1) => setPageSections((current) => { const target = index + direction; if (target < 0 || target >= current.length) return current; const next = [...current]; const item = next[index]; const targetItem = next[target]; if (item && targetItem) { next[index] = targetItem; next[target] = item; } return next; });
-  const moveStep = (index: number, direction: -1 | 1) => setSteps((current) => { const target = index + direction; if (target < 0 || target >= current.length) return current; const next = [...current]; [next[index], next[target]] = [next[target] ?? "", next[index] ?? ""]; return next; });
-  const moveBanner = (from: number, to: number) => { if (from === to || to < 0 || to >= banners.length) return; setBanners((current) => { const next = [...current]; const [moved] = next.splice(from, 1); if (!moved) return current; next.splice(to, 0, moved); return next; }); toast.success("Banner order updated"); };
-  const addBanner = (banner: Banner, position: number) => setBanners((current) => { const next = [...current]; next.splice(Math.min(Math.max(position - 1, 0), next.length), 0, banner); return next; });
-  const save = () => { toast.success("Merchant updated", { description: `${merchant[0]} was saved successfully.` }); onBack(); };
-  return <div className="pb-20"><nav aria-label="Breadcrumb" className="mb-4 flex flex-wrap items-center gap-2 text-sm text-muted-foreground"><Button variant="link" className="h-auto p-0 text-muted-foreground" onClick={() => onBack()}>Dashboard</Button><ChevronRight className="h-3.5 w-3.5" /><Button variant="link" className="h-auto p-0 text-muted-foreground" onClick={onBack}>Merchants</Button><ChevronRight className="h-3.5 w-3.5" /><span className="font-medium text-foreground">{merchant[0]}</span></nav><header className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between"><div className="flex flex-wrap items-center gap-3"><h1 className="font-heading text-3xl font-bold">{merchant[0]}</h1><StatusBadge status={active ? "Active" : "Inactive"} /></div><div className="flex flex-wrap gap-2"><Button variant="outline" onClick={onBack}><ChevronLeft />Back to Merchants</Button><ConfirmDeleteDialog itemType="Merchant" name={merchant[0]} onConfirm={onDeleteMerchant}><Button variant="destructive"><Trash2 />Delete Merchant</Button></ConfirmDeleteDialog></div></header><Tabs defaultValue={initialTab}><TabsList className="mb-5 h-auto w-full justify-start gap-6 rounded-none border-b border-border bg-transparent p-0"><TabsTrigger value="details" className="rounded-none border-b-2 border-transparent px-1 py-3 shadow-none data-[state=active]:border-primary data-[state=active]:bg-transparent data-[state=active]:text-primary data-[state=active]:shadow-none">Details</TabsTrigger><TabsTrigger value="sections" className="rounded-none border-b-2 border-transparent px-1 py-3 shadow-none data-[state=active]:border-primary data-[state=active]:bg-transparent data-[state=active]:text-primary data-[state=active]:shadow-none">Page Sections</TabsTrigger><TabsTrigger value="banners" className="rounded-none border-b-2 border-transparent px-1 py-3 shadow-none data-[state=active]:border-primary data-[state=active]:bg-transparent data-[state=active]:text-primary data-[state=active]:shadow-none">Banners</TabsTrigger><TabsTrigger value="offers" className="rounded-none border-b-2 border-transparent px-1 py-3 shadow-none data-[state=active]:border-primary data-[state=active]:bg-transparent data-[state=active]:text-primary data-[state=active]:shadow-none">Offers</TabsTrigger><TabsTrigger value="reviews" className={tabTriggerClass}>Reviews</TabsTrigger></TabsList><TabsContent value="details" className="mt-0"><div className="grid gap-5 xl:grid-cols-2"><SectionCard title="Core Details" description="Primary merchant identity and publishing settings."><div className="grid gap-4 sm:grid-cols-2"><label className="space-y-1.5 text-sm font-medium sm:col-span-2">Name <span className="text-destructive">*</span><Input defaultValue={merchant[0]} /></label><label className="space-y-1.5 text-sm font-medium">Category <span className="text-destructive">*</span><Select defaultValue={merchant[2]}><SelectTrigger><SelectValue /></SelectTrigger><SelectContent><SelectItem value={merchant[2]}>{merchant[2]}</SelectItem><SelectItem value="Restaurants">Restaurants</SelectItem><SelectItem value="Fashion">Fashion</SelectItem></SelectContent></Select></label><label className="space-y-1.5 text-sm font-medium">Display Order <span className="text-destructive">*</span><Input type="number" defaultValue={merchant[3]} /></label><label className="space-y-1.5 text-sm font-medium">Website URL<Input type="url" placeholder="https://merchant.example" /></label><label className="space-y-1.5 text-sm font-medium">Affiliate Network<Select defaultValue="none"><SelectTrigger><SelectValue /></SelectTrigger><SelectContent><SelectItem value="none">None</SelectItem><SelectItem value="trackier">Trackier</SelectItem><SelectItem value="impact">Impact</SelectItem></SelectContent></Select></label><div className="flex items-center justify-between rounded-md border border-border bg-muted/40 px-3 py-2.5 sm:col-span-2"><div><p className="text-sm font-semibold">Active merchant</p><p className="text-xs text-muted-foreground">Visible to customers across OfferPe.</p></div><Switch checked={active} onCheckedChange={setActive} aria-label="Active merchant" /></div></div></SectionCard><SectionCard title="Operating Cities & Locations" description="Control where this merchant is available."><div className="grid gap-4 sm:grid-cols-2"><label className="space-y-1.5 text-sm font-medium">State<Select defaultValue="maharashtra"><SelectTrigger><SelectValue /></SelectTrigger><SelectContent><SelectItem value="maharashtra">Maharashtra</SelectItem><SelectItem value="karnataka">Karnataka</SelectItem></SelectContent></Select></label><label className="space-y-1.5 text-sm font-medium">City<Select defaultValue="mumbai"><SelectTrigger><SelectValue /></SelectTrigger><SelectContent><SelectItem value="mumbai">Mumbai</SelectItem><SelectItem value="bengaluru">Bengaluru</SelectItem></SelectContent></Select></label></div><div className="mt-4 flex flex-wrap gap-2">{cities.map((city) => <span key={city} className="inline-flex items-center gap-1.5 rounded-full border border-border bg-accent px-3 py-1 text-xs font-semibold text-accent-foreground">{city}<Button variant="ghost" size="icon" className="h-4 w-4" aria-label={`Remove ${city}`} onClick={() => setCities((current) => current.filter((item) => item !== city))}><X className="h-3 w-3" /></Button></span>)}</div><p className="mt-4 text-sm leading-6 text-muted-foreground">A chain can operate in more than one city — pick every city this merchant is live in.</p></SectionCard><SectionCard title="Brand & App Content" description="Customer-facing information and redemption guidance."><div className="space-y-5"><label className="block space-y-1.5 text-sm font-medium">About / Description<Textarea rows={4} defaultValue="Premium bakery and patisserie chain known for its brownies." /></label><div><span className="text-sm font-medium">Brand Logo</span><button type="button" className="mt-1.5 flex min-h-28 w-full flex-col items-center justify-center rounded-lg border border-dashed border-border bg-muted/30 p-4 text-center hover:border-primary hover:bg-accent"><UploadCloud className="mb-2 h-6 w-6 text-primary" /><span className="text-sm font-semibold">Upload brand logo</span><span className="mt-1 text-xs text-muted-foreground">Leave blank to keep the current logo or use the Trackier-synced logo.</span></button></div><div><div className="mb-2 flex items-center justify-between"><span className="text-sm font-medium">How to Avail</span><Button variant="ghost" size="sm" onClick={() => setSteps((current) => [...current, "New redemption step"])}><Plus />Add step</Button></div><div className="space-y-2">{steps.map((step, index) => <div key={`${step}-${index}`} className="flex items-center gap-2 rounded-md border border-border bg-muted/30 p-2"><span className="flex h-6 w-6 shrink-0 items-center justify-center rounded bg-accent text-xs font-bold text-primary">{index + 1}</span><Input value={step} onChange={(event) => setSteps((current) => current.map((item, itemIndex) => itemIndex === index ? event.target.value : item))} className="h-8 bg-card" /><div className="flex shrink-0"><IconButton label="Move step up" className="h-7 w-7" onClick={() => moveStep(index, -1)}><ArrowUp className="h-3.5 w-3.5" /></IconButton><IconButton label="Move step down" className="h-7 w-7" onClick={() => moveStep(index, 1)}><ArrowDown className="h-3.5 w-3.5" /></IconButton><ConfirmDeleteDialog itemType="Redemption Step" name={step} onConfirm={() => { setSteps((current) => current.filter((_, itemIndex) => itemIndex !== index)); toast.success("Redemption step deleted"); }}><Button variant="ghost" size="icon" className="h-7 w-7 text-destructive" aria-label="Delete step"><X className="h-3.5 w-3.5" /></Button></ConfirmDeleteDialog></div></div>)}</div></div></div></SectionCard><SectionCard title="Commission & Tracking Rules" description="Default calculations and expected processing windows."><div className="grid gap-4 sm:grid-cols-2"><label className="space-y-1.5 text-sm font-medium">Default Commission Type<Select defaultValue="percentage"><SelectTrigger><SelectValue /></SelectTrigger><SelectContent><SelectItem value="percentage">Percentage</SelectItem><SelectItem value="flat">Flat amount</SelectItem><SelectItem value="none">No default commission</SelectItem></SelectContent></Select></label><label className="space-y-1.5 text-sm font-medium">Default Commission Value<Input type="number" defaultValue="8" /></label><label className="space-y-1.5 text-sm font-medium">Expected Tracking Time (minutes)<Input type="number" defaultValue="30" /></label><label className="space-y-1.5 text-sm font-medium">Expected Approval Time (days)<Input type="number" defaultValue="45" /></label></div></SectionCard></div></TabsContent><TabsContent value="sections" className="mt-0"><SectionCard title="Customer Page Sections" description="Arrange and control the sections shown on this merchant’s customer-facing page."><div className="divide-y divide-border rounded-lg border border-border">{pageSections.map((section, index) => <div key={section.name} className="flex flex-col gap-3 px-4 py-3 sm:flex-row sm:items-center"><div className="flex min-w-0 flex-1 items-center gap-3"><span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-md bg-accent font-heading text-xs font-bold text-primary">{index + 1}</span><div><div className="font-heading text-sm font-bold">{section.name}</div><div className={cn("mt-0.5 inline-flex items-center gap-1 text-xs font-medium", section.visible ? "text-success" : "text-muted-foreground")}>{section.visible ? <Eye className="h-3 w-3" /> : <EyeOff className="h-3 w-3" />}{section.visible ? "Visible" : "Hidden"}</div></div></div><div className="flex items-center gap-1"><IconButton label={`Move ${section.name} up`} className="h-8 w-8" onClick={() => moveSection(index, -1)}><ArrowUp className="h-4 w-4" /></IconButton><IconButton label={`Move ${section.name} down`} className="h-8 w-8" onClick={() => moveSection(index, 1)}><ArrowDown className="h-4 w-4" /></IconButton><Button variant="outline" size="sm" onClick={() => setPageSections((current) => current.map((item, itemIndex) => itemIndex === index ? { ...item, visible: !item.visible } : item))}>{section.visible ? <EyeOff /> : <Eye />}{section.visible ? "Hide" : "Show"}</Button><ConfirmDeleteDialog itemType="Page Section" name={section.name} onConfirm={() => { setPageSections((current) => current.filter((_, itemIndex) => itemIndex !== index)); toast.success("Page section deleted"); }}><Button variant="destructiveSoft" size="sm"><Trash2 />Delete</Button></ConfirmDeleteDialog></div></div>)}</div><div className="mt-4 flex flex-col gap-2 rounded-lg border border-border bg-muted/30 p-3 sm:flex-row"><Select value={newSection} onValueChange={setNewSection}><SelectTrigger className="sm:flex-1"><SelectValue /></SelectTrigger><SelectContent>{["OTHER OFFERS", "SIMILAR STORES", "FAQS", "OUTLETS & LOCATIONS", "STORE HIGHLIGHTS"].map((option) => <SelectItem key={option} value={option}>{option}</SelectItem>)}</SelectContent></Select><Button onClick={() => { if (!pageSections.some((section) => section.name === newSection)) setPageSections((current) => [...current, { name: newSection, visible: true }]); }}><Plus />Add section</Button></div></SectionCard></TabsContent><TabsContent value="banners" className="mt-0"><SectionCard title="Promo Banners" description="Drag banners into priority order or use the position controls."><div className="mb-4 flex justify-end"><Button onClick={() => setBannerModalOpen(true)}><Plus />Add Banner</Button></div><div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">{banners.map((banner, index) => <article key={banner.id} draggable onDragStart={() => setDraggedBanner(index)} onDragEnd={() => setDraggedBanner(null)} onDragOver={(event) => event.preventDefault()} onDrop={() => { if (draggedBanner !== null) moveBanner(draggedBanner, index); setDraggedBanner(null); }} className={cn("overflow-hidden rounded-lg border border-border bg-card transition", draggedBanner === index && "opacity-50 ring-2 ring-primary")}><div className="relative flex aspect-[16/7] items-center justify-center bg-muted">{banner.image.startsWith("http") ? <img src={banner.image} alt="" className="h-full w-full object-cover" /> : <ImageIcon className="h-8 w-8 text-muted-foreground" />}<span className="absolute left-2 top-2 inline-flex items-center gap-1 rounded-md border border-border bg-card/95 px-2 py-1 text-xs font-bold shadow-sm"><GripVertical className="h-3.5 w-3.5" />Position #{index + 1}</span></div><div className="p-3"><div className="flex items-start justify-between gap-2"><div className="min-w-0"><p className="truncate text-sm font-semibold">{banner.title}</p><p className="mt-0.5 text-xs text-muted-foreground">{banner.placement} · {banner.active ? "Active" : "Inactive"}</p></div><span className="inline-flex"><IconButton label={`Edit ${banner.title}`}><Pencil className="h-4 w-4" /></IconButton><ConfirmDeleteDialog itemType="Banner" name={banner.title} onConfirm={() => { setBanners((current) => current.filter((item) => item.id !== banner.id)); toast.success("Banner deleted"); }}><Button variant="ghost" size="icon" className="h-8 w-8 text-destructive" aria-label={`Delete ${banner.title}`}><Trash2 className="h-4 w-4" /></Button></ConfirmDeleteDialog></span></div><div className="mt-3 flex items-center gap-1 border-t border-border pt-2"><IconButton label={`Move ${banner.title} left`} className="h-7 w-7" onClick={() => moveBanner(index, index - 1)}><ChevronLeft className="h-4 w-4" /></IconButton><IconButton label={`Move ${banner.title} right`} className="h-7 w-7" onClick={() => moveBanner(index, index + 1)}><ChevronRight className="h-4 w-4" /></IconButton><span className="ml-auto text-[11px] text-muted-foreground">Drag to reposition</span></div></div></article>)}</div></SectionCard><AddBannerModal key={bannerModalOpen ? `open-${banners.length}` : "closed"} open={bannerModalOpen} onOpenChange={setBannerModalOpen} nextPosition={banners.length + 1} onAdd={addBanner} /></TabsContent><TabsContent value="offers" className="mt-0"><SectionCard title="Cashback Offers" description="Active discounts and cashback rules for this merchant."><div className="mb-4 flex justify-end"><Button onClick={onCreateOffer}><Plus />Add Offer</Button></div><OfferTable offers={offers.filter((offer) => offer.merchant === merchant[0])} onEdit={onEditOffer} onDelete={onDeleteOffer} /></SectionCard></TabsContent><TabsContent value="reviews" className="mt-0"><ReviewsPanel rejectionReasons={rejectionReasons} reviews={reviews} merchantNames={[merchant[0]]} scopedMerchant={merchant[0]} onApprove={onApproveReview} onReject={onRejectReview} onRevert={onRevertReview} onDelete={onDeleteReview} /></TabsContent></Tabs><div className="fixed inset-x-0 bottom-0 z-20 border-t border-border bg-card/95 px-4 py-3 shadow-sticky-right backdrop-blur md:left-64"><div className="mx-auto flex max-w-400 justify-end gap-2"><Button variant="destructiveSoft" onClick={onBack}>Cancel</Button><Button onClick={save}>Save Changes</Button></div></div></div>;
+  const moveSection = (index: number, direction: -1 | 1) =>
+    setPageSections((current) => {
+      const target = index + direction;
+      if (target < 0 || target >= current.length) return current;
+      const next = [...current];
+      const item = next[index];
+      const targetItem = next[target];
+      if (item && targetItem) {
+        next[index] = targetItem;
+        next[target] = item;
+      }
+      return next;
+    });
+  const moveStep = (index: number, direction: -1 | 1) =>
+    setSteps((current) => {
+      const target = index + direction;
+      if (target < 0 || target >= current.length) return current;
+      const next = [...current];
+      [next[index], next[target]] = [next[target] ?? "", next[index] ?? ""];
+      return next;
+    });
+  const moveBanner = (from: number, to: number) => {
+    if (from === to || to < 0 || to >= banners.length) return;
+    setBanners((current) => {
+      const next = [...current];
+      const [moved] = next.splice(from, 1);
+      if (!moved) return current;
+      next.splice(to, 0, moved);
+      return next;
+    });
+    toast.success("Banner order updated");
+  };
+  const addBanner = (banner: Banner, position: number) =>
+    setBanners((current) => {
+      const next = [...current];
+      next.splice(Math.min(Math.max(position - 1, 0), next.length), 0, banner);
+      return next;
+    });
+  const save = () => {
+    toast.success("Merchant updated", { description: `${merchant[0]} was saved successfully.` });
+    onBack();
+  };
+  return (
+    <div className="pb-20">
+      <nav
+        aria-label="Breadcrumb"
+        className="mb-4 flex flex-wrap items-center gap-2 text-sm text-muted-foreground"
+      >
+        <Button
+          variant="link"
+          className="h-auto p-0 text-muted-foreground"
+          onClick={() => onBack()}
+        >
+          Dashboard
+        </Button>
+        <ChevronRight className="h-3.5 w-3.5" />
+        <Button variant="link" className="h-auto p-0 text-muted-foreground" onClick={onBack}>
+          Merchants
+        </Button>
+        <ChevronRight className="h-3.5 w-3.5" />
+        <span className="font-medium text-foreground">{merchant[0]}</span>
+      </nav>
+      <header className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+        <div className="flex flex-wrap items-center gap-3">
+          <h1 className="font-heading text-3xl font-bold">{merchant[0]}</h1>
+          <StatusBadge status={active ? "Active" : "Inactive"} />
+        </div>
+        <div className="flex flex-wrap gap-2">
+          <Button variant="outline" onClick={onBack}>
+            <ChevronLeft />
+            Back to Merchants
+          </Button>
+          <ConfirmDeleteDialog itemType="Merchant" name={merchant[0]} onConfirm={onDeleteMerchant}>
+            <Button variant="destructive">
+              <Trash2 />
+              Delete Merchant
+            </Button>
+          </ConfirmDeleteDialog>
+        </div>
+      </header>
+      <Tabs defaultValue={initialTab}>
+        <TabsList className="mb-5 h-auto w-full justify-start gap-6 rounded-none border-b border-border bg-transparent p-0">
+          <TabsTrigger
+            value="details"
+            className="rounded-none border-b-2 border-transparent px-1 py-3 shadow-none data-[state=active]:border-primary data-[state=active]:bg-transparent data-[state=active]:text-primary data-[state=active]:shadow-none"
+          >
+            Details
+          </TabsTrigger>
+          <TabsTrigger
+            value="sections"
+            className="rounded-none border-b-2 border-transparent px-1 py-3 shadow-none data-[state=active]:border-primary data-[state=active]:bg-transparent data-[state=active]:text-primary data-[state=active]:shadow-none"
+          >
+            Page Sections
+          </TabsTrigger>
+          <TabsTrigger
+            value="banners"
+            className="rounded-none border-b-2 border-transparent px-1 py-3 shadow-none data-[state=active]:border-primary data-[state=active]:bg-transparent data-[state=active]:text-primary data-[state=active]:shadow-none"
+          >
+            Banners
+          </TabsTrigger>
+          <TabsTrigger
+            value="offers"
+            className="rounded-none border-b-2 border-transparent px-1 py-3 shadow-none data-[state=active]:border-primary data-[state=active]:bg-transparent data-[state=active]:text-primary data-[state=active]:shadow-none"
+          >
+            Offers
+          </TabsTrigger>
+          <TabsTrigger value="reviews" className={tabTriggerClass}>
+            Reviews
+          </TabsTrigger>
+        </TabsList>
+        <TabsContent value="details" className="mt-0">
+          <div className="grid gap-5 xl:grid-cols-2">
+            <SectionCard
+              title="Core Details"
+              description="Primary merchant identity and publishing settings."
+            >
+              <div className="grid gap-4 sm:grid-cols-2">
+                <label className="space-y-1.5 text-sm font-medium sm:col-span-2">
+                  Name <span className="text-destructive">*</span>
+                  <Input defaultValue={merchant[0]} />
+                </label>
+                <label className="space-y-1.5 text-sm font-medium">
+                  Category <span className="text-destructive">*</span>
+                  <Select defaultValue={merchant[2]}>
+                    <SelectTrigger>
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value={merchant[2]}>{merchant[2]}</SelectItem>
+                      <SelectItem value="Restaurants">Restaurants</SelectItem>
+                      <SelectItem value="Fashion">Fashion</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </label>
+                <label className="space-y-1.5 text-sm font-medium">
+                  Display Order <span className="text-destructive">*</span>
+                  <Input type="number" defaultValue={merchant[3]} />
+                </label>
+                <label className="space-y-1.5 text-sm font-medium">
+                  Website URL
+                  <Input type="url" placeholder="https://merchant.example" />
+                </label>
+                <label className="space-y-1.5 text-sm font-medium">
+                  Affiliate Network
+                  <Select defaultValue="none">
+                    <SelectTrigger>
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="none">None</SelectItem>
+                      <SelectItem value="trackier">Trackier</SelectItem>
+                      <SelectItem value="impact">Impact</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </label>
+                <div className="flex items-center justify-between rounded-md border border-border bg-muted/40 px-3 py-2.5 sm:col-span-2">
+                  <div>
+                    <p className="text-sm font-semibold">Active merchant</p>
+                    <p className="text-xs text-muted-foreground">
+                      Visible to customers across OfferPe.
+                    </p>
+                  </div>
+                  <Switch
+                    checked={active}
+                    onCheckedChange={setActive}
+                    aria-label="Active merchant"
+                  />
+                </div>
+              </div>
+            </SectionCard>
+            <SectionCard
+              title="Operating Cities & Locations"
+              description="Control where this merchant is available."
+            >
+              <div className="grid gap-4 sm:grid-cols-2">
+                <label className="space-y-1.5 text-sm font-medium">
+                  State
+                  <Select defaultValue="maharashtra">
+                    <SelectTrigger>
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="maharashtra">Maharashtra</SelectItem>
+                      <SelectItem value="karnataka">Karnataka</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </label>
+                <label className="space-y-1.5 text-sm font-medium">
+                  City
+                  <Select defaultValue="mumbai">
+                    <SelectTrigger>
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="mumbai">Mumbai</SelectItem>
+                      <SelectItem value="bengaluru">Bengaluru</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </label>
+              </div>
+              <div className="mt-4 flex flex-wrap gap-2">
+                {cities.map((city) => (
+                  <span
+                    key={city}
+                    className="inline-flex items-center gap-1.5 rounded-full border border-border bg-accent px-3 py-1 text-xs font-semibold text-accent-foreground"
+                  >
+                    {city}
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="h-4 w-4"
+                      aria-label={`Remove ${city}`}
+                      onClick={() =>
+                        setCities((current) => current.filter((item) => item !== city))
+                      }
+                    >
+                      <X className="h-3 w-3" />
+                    </Button>
+                  </span>
+                ))}
+              </div>
+              <p className="mt-4 text-sm leading-6 text-muted-foreground">
+                A chain can operate in more than one city — pick every city this merchant is live
+                in.
+              </p>
+            </SectionCard>
+            <SectionCard
+              title="Brand & App Content"
+              description="Customer-facing information and redemption guidance."
+            >
+              <div className="space-y-5">
+                <label className="block space-y-1.5 text-sm font-medium">
+                  About / Description
+                  <Textarea
+                    rows={4}
+                    defaultValue="Premium bakery and patisserie chain known for its brownies."
+                  />
+                </label>
+                <div>
+                  <span className="text-sm font-medium">Brand Logo</span>
+                  <button
+                    type="button"
+                    className="mt-1.5 flex min-h-28 w-full flex-col items-center justify-center rounded-lg border border-dashed border-border bg-muted/30 p-4 text-center hover:border-primary hover:bg-accent"
+                  >
+                    <UploadCloud className="mb-2 h-6 w-6 text-primary" />
+                    <span className="text-sm font-semibold">Upload brand logo</span>
+                    <span className="mt-1 text-xs text-muted-foreground">
+                      Leave blank to keep the current logo or use the Trackier-synced logo.
+                    </span>
+                  </button>
+                </div>
+                <div>
+                  <div className="mb-2 flex items-center justify-between">
+                    <span className="text-sm font-medium">How to Avail</span>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => setSteps((current) => [...current, "New redemption step"])}
+                    >
+                      <Plus />
+                      Add step
+                    </Button>
+                  </div>
+                  <div className="space-y-2">
+                    {steps.map((step, index) => (
+                      <div
+                        key={`${step}-${index}`}
+                        className="flex items-center gap-2 rounded-md border border-border bg-muted/30 p-2"
+                      >
+                        <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded bg-accent text-xs font-bold text-primary">
+                          {index + 1}
+                        </span>
+                        <Input
+                          value={step}
+                          onChange={(event) =>
+                            setSteps((current) =>
+                              current.map((item, itemIndex) =>
+                                itemIndex === index ? event.target.value : item,
+                              ),
+                            )
+                          }
+                          className="h-8 bg-card"
+                        />
+                        <div className="flex shrink-0">
+                          <IconButton
+                            label="Move step up"
+                            className="h-7 w-7"
+                            onClick={() => moveStep(index, -1)}
+                          >
+                            <ArrowUp className="h-3.5 w-3.5" />
+                          </IconButton>
+                          <IconButton
+                            label="Move step down"
+                            className="h-7 w-7"
+                            onClick={() => moveStep(index, 1)}
+                          >
+                            <ArrowDown className="h-3.5 w-3.5" />
+                          </IconButton>
+                          <ConfirmDeleteDialog
+                            itemType="Redemption Step"
+                            name={step}
+                            onConfirm={() => {
+                              setSteps((current) =>
+                                current.filter((_, itemIndex) => itemIndex !== index),
+                              );
+                              toast.success("Redemption step deleted");
+                            }}
+                          >
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              className="h-7 w-7 text-destructive"
+                              aria-label="Delete step"
+                            >
+                              <X className="h-3.5 w-3.5" />
+                            </Button>
+                          </ConfirmDeleteDialog>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            </SectionCard>
+            <SectionCard
+              title="Commission & Tracking Rules"
+              description="Default calculations and expected processing windows."
+            >
+              <div className="grid gap-4 sm:grid-cols-2">
+                <label className="space-y-1.5 text-sm font-medium">
+                  Default Commission Type
+                  <Select defaultValue="percentage">
+                    <SelectTrigger>
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="percentage">Percentage</SelectItem>
+                      <SelectItem value="flat">Flat amount</SelectItem>
+                      <SelectItem value="none">No default commission</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </label>
+                <label className="space-y-1.5 text-sm font-medium">
+                  Default Commission Value
+                  <Input type="number" defaultValue="8" />
+                </label>
+                <label className="space-y-1.5 text-sm font-medium">
+                  Expected Tracking Time (minutes)
+                  <Input type="number" defaultValue="30" />
+                </label>
+                <label className="space-y-1.5 text-sm font-medium">
+                  Expected Approval Time (days)
+                  <Input type="number" defaultValue="45" />
+                </label>
+              </div>
+            </SectionCard>
+          </div>
+        </TabsContent>
+        <TabsContent value="sections" className="mt-0">
+          <SectionCard
+            title="Customer Page Sections"
+            description="Arrange and control the sections shown on this merchant’s customer-facing page."
+          >
+            <div className="divide-y divide-border rounded-lg border border-border">
+              {pageSections.map((section, index) => (
+                <div
+                  key={section.name}
+                  className="flex flex-col gap-3 px-4 py-3 sm:flex-row sm:items-center"
+                >
+                  <div className="flex min-w-0 flex-1 items-center gap-3">
+                    <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-md bg-accent font-heading text-xs font-bold text-primary">
+                      {index + 1}
+                    </span>
+                    <div>
+                      <div className="font-heading text-sm font-bold">{section.name}</div>
+                      <div
+                        className={cn(
+                          "mt-0.5 inline-flex items-center gap-1 text-xs font-medium",
+                          section.visible ? "text-success" : "text-muted-foreground",
+                        )}
+                      >
+                        {section.visible ? (
+                          <Eye className="h-3 w-3" />
+                        ) : (
+                          <EyeOff className="h-3 w-3" />
+                        )}
+                        {section.visible ? "Visible" : "Hidden"}
+                      </div>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-1">
+                    <IconButton
+                      label={`Move ${section.name} up`}
+                      className="h-8 w-8"
+                      onClick={() => moveSection(index, -1)}
+                    >
+                      <ArrowUp className="h-4 w-4" />
+                    </IconButton>
+                    <IconButton
+                      label={`Move ${section.name} down`}
+                      className="h-8 w-8"
+                      onClick={() => moveSection(index, 1)}
+                    >
+                      <ArrowDown className="h-4 w-4" />
+                    </IconButton>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() =>
+                        setPageSections((current) =>
+                          current.map((item, itemIndex) =>
+                            itemIndex === index ? { ...item, visible: !item.visible } : item,
+                          ),
+                        )
+                      }
+                    >
+                      {section.visible ? <EyeOff /> : <Eye />}
+                      {section.visible ? "Hide" : "Show"}
+                    </Button>
+                    <ConfirmDeleteDialog
+                      itemType="Page Section"
+                      name={section.name}
+                      onConfirm={() => {
+                        setPageSections((current) =>
+                          current.filter((_, itemIndex) => itemIndex !== index),
+                        );
+                        toast.success("Page section deleted");
+                      }}
+                    >
+                      <Button variant="destructiveSoft" size="sm">
+                        <Trash2 />
+                        Delete
+                      </Button>
+                    </ConfirmDeleteDialog>
+                  </div>
+                </div>
+              ))}
+            </div>
+            <div className="mt-4 flex flex-col gap-2 rounded-lg border border-border bg-muted/30 p-3 sm:flex-row">
+              <Select value={newSection} onValueChange={setNewSection}>
+                <SelectTrigger className="sm:flex-1">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  {[
+                    "OTHER OFFERS",
+                    "SIMILAR STORES",
+                    "FAQS",
+                    "OUTLETS & LOCATIONS",
+                    "STORE HIGHLIGHTS",
+                  ].map((option) => (
+                    <SelectItem key={option} value={option}>
+                      {option}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              <Button
+                onClick={() => {
+                  if (!pageSections.some((section) => section.name === newSection))
+                    setPageSections((current) => [...current, { name: newSection, visible: true }]);
+                }}
+              >
+                <Plus />
+                Add section
+              </Button>
+            </div>
+          </SectionCard>
+        </TabsContent>
+        <TabsContent value="banners" className="mt-0">
+          <SectionCard
+            title="Promo Banners"
+            description="Drag banners into priority order or use the position controls."
+          >
+            <div className="mb-4 flex justify-end">
+              <Button onClick={() => setBannerModalOpen(true)}>
+                <Plus />
+                Add Banner
+              </Button>
+            </div>
+            <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+              {banners.map((banner, index) => (
+                <article
+                  key={banner.id}
+                  draggable
+                  onDragStart={() => setDraggedBanner(index)}
+                  onDragEnd={() => setDraggedBanner(null)}
+                  onDragOver={(event) => event.preventDefault()}
+                  onDrop={() => {
+                    if (draggedBanner !== null) moveBanner(draggedBanner, index);
+                    setDraggedBanner(null);
+                  }}
+                  className={cn(
+                    "overflow-hidden rounded-lg border border-border bg-card transition",
+                    draggedBanner === index && "opacity-50 ring-2 ring-primary",
+                  )}
+                >
+                  <div className="relative flex aspect-[16/7] items-center justify-center bg-muted">
+                    {banner.image.startsWith("http") ? (
+                      <img src={banner.image} alt="" className="h-full w-full object-cover" />
+                    ) : (
+                      <ImageIcon className="h-8 w-8 text-muted-foreground" />
+                    )}
+                    <span className="absolute left-2 top-2 inline-flex items-center gap-1 rounded-md border border-border bg-card/95 px-2 py-1 text-xs font-bold shadow-sm">
+                      <GripVertical className="h-3.5 w-3.5" />
+                      Position #{index + 1}
+                    </span>
+                  </div>
+                  <div className="p-3">
+                    <div className="flex items-start justify-between gap-2">
+                      <div className="min-w-0">
+                        <p className="truncate text-sm font-semibold">{banner.title}</p>
+                        <p className="mt-0.5 text-xs text-muted-foreground">
+                          {banner.placement} · {banner.active ? "Active" : "Inactive"}
+                        </p>
+                      </div>
+                      <span className="inline-flex">
+                        <IconButton label={`Edit ${banner.title}`}>
+                          <Pencil className="h-4 w-4" />
+                        </IconButton>
+                        <ConfirmDeleteDialog
+                          itemType="Banner"
+                          name={banner.title}
+                          onConfirm={() => {
+                            setBanners((current) =>
+                              current.filter((item) => item.id !== banner.id),
+                            );
+                            toast.success("Banner deleted");
+                          }}
+                        >
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className="h-8 w-8 text-destructive"
+                            aria-label={`Delete ${banner.title}`}
+                          >
+                            <Trash2 className="h-4 w-4" />
+                          </Button>
+                        </ConfirmDeleteDialog>
+                      </span>
+                    </div>
+                    <div className="mt-3 flex items-center gap-1 border-t border-border pt-2">
+                      <IconButton
+                        label={`Move ${banner.title} left`}
+                        className="h-7 w-7"
+                        onClick={() => moveBanner(index, index - 1)}
+                      >
+                        <ChevronLeft className="h-4 w-4" />
+                      </IconButton>
+                      <IconButton
+                        label={`Move ${banner.title} right`}
+                        className="h-7 w-7"
+                        onClick={() => moveBanner(index, index + 1)}
+                      >
+                        <ChevronRight className="h-4 w-4" />
+                      </IconButton>
+                      <span className="ml-auto text-[11px] text-muted-foreground">
+                        Drag to reposition
+                      </span>
+                    </div>
+                  </div>
+                </article>
+              ))}
+            </div>
+          </SectionCard>
+          <AddBannerModal
+            key={bannerModalOpen ? `open-${banners.length}` : "closed"}
+            open={bannerModalOpen}
+            onOpenChange={setBannerModalOpen}
+            nextPosition={banners.length + 1}
+            onAdd={addBanner}
+          />
+        </TabsContent>
+        <TabsContent value="offers" className="mt-0">
+          <SectionCard
+            title="Cashback Offers"
+            description="Active discounts and cashback rules for this merchant."
+          >
+            <div className="mb-4 flex justify-end">
+              <Button onClick={onCreateOffer}>
+                <Plus />
+                Add Offer
+              </Button>
+            </div>
+            <OfferTable
+              offers={offers.filter((offer) => offer.merchant === merchant[0])}
+              onEdit={onEditOffer}
+              onDelete={onDeleteOffer}
+            />
+          </SectionCard>
+        </TabsContent>
+        <TabsContent value="reviews" className="mt-0">
+          <ReviewsPanel
+            rejectionReasons={rejectionReasons}
+            reviews={reviews}
+            merchantNames={[merchant[0]]}
+            scopedMerchant={merchant[0]}
+            onApprove={onApproveReview}
+            onReject={onRejectReview}
+            onRevert={onRevertReview}
+            onDelete={onDeleteReview}
+          />
+        </TabsContent>
+      </Tabs>
+      <div className="fixed inset-x-0 bottom-0 z-20 border-t border-border bg-card/95 px-4 py-3 shadow-sticky-right backdrop-blur md:left-64">
+        <div className="mx-auto flex max-w-400 justify-end gap-2">
+          <Button variant="destructiveSoft" onClick={onBack}>
+            Cancel
+          </Button>
+          <Button onClick={save}>Save Changes</Button>
+        </div>
+      </div>
+    </div>
+  );
 }

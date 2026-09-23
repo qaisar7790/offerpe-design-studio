@@ -1,4 +1,4 @@
-import type { AdminRole, Merchant, AdminUser, AffiliateNetwork, AnalyticsEvent, AppBuild, Application, Category, CityRecord, Claim, ClickRecord, CommunicationDispatch, CommunicationTemplate, Conversion, LedgerEntry, LegalPage, MerchantStaff, NotificationLog, Offer, OfflineTransaction, OnboardingSlide, OnlineTransaction, Permission, PermissionGroupName, PromoBanner, PromoSection, RawMapping, RejectionCategory, RejectionReason, ResolutionQueueItem, Review, StagedCampaign, SyncRun, TemplateChannel, UserRecord, View, Withdrawal } from "@/types/admin";
+import type { AdminRole, Banner, Merchant, AdminUser, AffiliateNetwork, AnalyticsEvent, AppBuild, Application, Category, CityRecord, Claim, ClickRecord, CommunicationDispatch, CommunicationTemplate, Conversion, LedgerEntry, LegalPage, MerchantStaff, NotificationLog, Offer, OfflineTransaction, OnboardingSlide, OnlineTransaction, Permission, PermissionGroupName, PromoBanner, PromoSection, RawMapping, RejectionCategory, RejectionReason, ResolutionQueueItem, Review, StagedCampaign, SyncRun, TemplateChannel, UserRecord, View, Withdrawal } from "@/types/admin";
 import { ArrowDown, BadgeIndianRupee, Bell, Building2, CircleDollarSign, ClipboardCheck, DownloadCloud, FileText, Flag, Image as ImageIcon, Mail, Megaphone, MessageSquare, MousePointerClick, RotateCcw, Settings2, Share2, ShieldCheck, ShoppingBag, SlidersHorizontal, Smartphone, Star, Store, Tag, Users, WalletCards } from "lucide-react";
 
 export const groups = [
@@ -592,4 +592,16 @@ export const initialAppBuilds: AppBuild[] = [
   { id: "consumer-android", app: "Consumer", platform: "Android", minVersion: "3.4.0", latestVersion: "3.6.1", message: "Update OfferPe to keep earning cashback without interruptions.", storeUrl: "https://play.google.com/store/apps/details?id=com.offerpe.consumer", forceUpdate: true, updatedAt: "18 Sep 2026, 11:44 AM", updatedBy: "Qaisar Farooq" },
   { id: "merchant-ios", app: "Merchant", platform: "iOS", minVersion: "2.1.0", latestVersion: "2.3.0", message: "New billing and settlement screens are available in this release.", storeUrl: "", forceUpdate: false, updatedAt: "02 Sep 2026, 04:10 PM", updatedBy: "Test Admin" },
   { id: "merchant-android", app: "Merchant", platform: "Android", minVersion: "2.1.0", latestVersion: "2.3.0", message: "New billing and settlement screens are available in this release.", storeUrl: "https://play.google.com/store/apps/details?id=com.offerpe.merchant", forceUpdate: false, updatedAt: "02 Sep 2026, 04:12 PM", updatedBy: "Test Admin" },
+];
+
+export const merchantCitySeeds: readonly string[] = ["Mumbai, Maharashtra", "Bengaluru, Karnataka"];
+
+export const merchantStepSeeds: readonly string[] = ["Show your OfferPe QR code at billing", "Merchant scans and confirms the amount", "Cashback credits to your wallet instantly"];
+
+export const merchantPageSectionSeeds: readonly { name: string; visible: boolean }[] = [{ name: "ABOUT", visible: true }, { name: "HOW TO AVAIL", visible: true }, { name: "OFFER DETAILS", visible: true }, { name: "TERMS CONDITIONS", visible: true }];
+
+export const merchantBannerSeeds: readonly Banner[] = [
+  { id: "BAN-101", title: "Festive gifting collection", placement: "Merchant Page Hero", target: "offerpe://merchants/theobroma/festive", image: "", start: "2026-09-21", end: "2026-10-31", active: true },
+  { id: "BAN-102", title: "Brownie celebration box", placement: "Category Carousel", target: "offerpe://merchants/theobroma/brownies", image: "", start: "2026-09-21", end: "", active: true },
+  { id: "BAN-103", title: "Weekend store offer", placement: "Store Footer", target: "offerpe://merchants/theobroma/weekend", image: "", start: "2026-09-21", end: "", active: true },
 ];

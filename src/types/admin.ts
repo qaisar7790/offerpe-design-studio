@@ -115,3 +115,5 @@ export type ResolutionQueueItem = { id: string; orderId: string; merchant: strin
 export type CityRecord = { id: string; name: string; state: string; lat: number; lng: number; active: boolean };
 
 export type AppBuild = { id: string; app: "Consumer" | "Merchant"; platform: "iOS" | "Android"; minVersion: string; latestVersion: string; message: string; storeUrl: string; forceUpdate: boolean; updatedAt: string; updatedBy: string };
+
+export type SettingsSeeds = { onboarding: { interval: string; skip: boolean }; withdrawal: { minimum: string }; referral: { referrer: string; referred: string; active: boolean }; sync: { passthrough: string; hours: string; enabled: boolean } };

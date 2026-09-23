@@ -1,3 +1,4 @@
+import type { SettingsSeeds } from "@/types/admin";
 import { ConfirmSaveDialog } from "@/components/admin/ConfirmSaveDialog";
 import { PageHeader } from "@/components/admin/PageHeader";
 import { Button } from "@/components/ui/button";
@@ -20,9 +21,9 @@ export function SettingsCard({ title, description, children, footer }: { title: 
   </section>;
 }
 
-export function OnboardingAppCard({ app }: { app: string }) {
-  const [state, setState] = useState({ interval: "3", skip: true });
-  const [saved, setSaved] = useState({ interval: "3", skip: true });
+export function OnboardingAppCard({ app, settingsSeeds }: { app: string; settingsSeeds: SettingsSeeds }) {
+  const [state, setState] = useState({ ...settingsSeeds.onboarding });
+  const [saved, setSaved] = useState({ ...settingsSeeds.onboarding });
   const dirty = JSON.stringify(state) !== JSON.stringify(saved);
   return <div className="rounded-lg border border-border bg-background p-4">
     <h3 className="font-heading text-sm font-bold">{app}</h3>
@@ -42,12 +43,12 @@ export function OnboardingAppCard({ app }: { app: string }) {
   </div>;
 }
 
-export function SettingsPage() {
-  const [withdrawal, setWithdrawal] = useState({ minimum: "100", saved: "100" });
-  const [referral, setReferral] = useState({ referrer: "50", referred: "50", active: true });
-  const [referralSaved, setReferralSaved] = useState({ referrer: "50", referred: "50", active: true });
-  const [sync, setSync] = useState({ passthrough: "60", hours: "2", enabled: false });
-  const [syncSaved, setSyncSaved] = useState({ passthrough: "60", hours: "2", enabled: false });
+export function SettingsPage({ settingsSeeds }: { settingsSeeds: SettingsSeeds }) {
+  const [withdrawal, setWithdrawal] = useState({ minimum: settingsSeeds.withdrawal.minimum, saved: settingsSeeds.withdrawal.minimum });
+  const [referral, setReferral] = useState({ ...settingsSeeds.referral });
+  const [referralSaved, setReferralSaved] = useState({ ...settingsSeeds.referral });
+  const [sync, setSync] = useState({ ...settingsSeeds.sync });
+  const [syncSaved, setSyncSaved] = useState({ ...settingsSeeds.sync });
 
   const withdrawalDirty = withdrawal.minimum !== withdrawal.saved;
   const referralDirty = JSON.stringify(referral) !== JSON.stringify(referralSaved);
@@ -121,8 +122,8 @@ export function SettingsPage() {
           <p className="mt-1 max-w-2xl text-sm leading-6 text-muted-foreground">Per-app auto-swipe timing and whether the Skip button is offered on the onboarding carousel.</p>
         </div>
         <div className="grid gap-4 p-5 sm:grid-cols-2">
-          <OnboardingAppCard app="Consumer App" />
-          <OnboardingAppCard app="Merchant App" />
+          <OnboardingAppCard settingsSeeds={settingsSeeds} app="Consumer App" />
+          <OnboardingAppCard settingsSeeds={settingsSeeds} app="Merchant App" />
         </div>
       </section>
     </div>

@@ -605,3 +605,10 @@ export const merchantBannerSeeds: readonly Banner[] = [
   { id: "BAN-102", title: "Brownie celebration box", placement: "Category Carousel", target: "offerpe://merchants/theobroma/brownies", image: "", start: "2026-09-21", end: "", active: true },
   { id: "BAN-103", title: "Weekend store offer", placement: "Store Footer", target: "offerpe://merchants/theobroma/weekend", image: "", start: "2026-09-21", end: "", active: true },
 ];
+
+export const settingsSeeds = {
+  onboarding: { interval: "3", skip: true },
+  withdrawal: { minimum: "100" },
+  referral: { referrer: "50", referred: "50", active: true },
+  sync: { passthrough: "60", hours: "2", enabled: false },
+};

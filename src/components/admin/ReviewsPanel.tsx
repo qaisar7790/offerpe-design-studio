@@ -18,7 +18,7 @@ import type { LayoutMode, Review } from "@/types/admin";
 import { Check, Download, RotateCcw, Store, Trash2, UploadCloud, X } from "lucide-react";
 import { useMemo, useState } from "react";
 
-export function ReviewsPanel({ reviews, merchantNames, scopedMerchant, onApprove, onReject, onRevert, onDelete }: { reviews: Review[]; merchantNames: string[]; scopedMerchant?: string; onApprove: (review: Review) => void; onReject: (review: Review, reason: string, note: string) => void; onRevert: (review: Review) => void; onDelete: (review: Review) => void }) {
+export function ReviewsPanel({ reviews, merchantNames, rejectionReasons, scopedMerchant, onApprove, onReject, onRevert, onDelete }: { reviews: Review[]; merchantNames: string[]; rejectionReasons: readonly string[]; scopedMerchant?: string; onApprove: (review: Review) => void; onReject: (review: Review, reason: string, note: string) => void; onRevert: (review: Review) => void; onDelete: (review: Review) => void }) {
   const [tab, setTab] = useState("pending");
   const [status, setStatus] = useState("all");
   const [merchantFilter, setMerchantFilter] = useState("all");
@@ -47,7 +47,7 @@ export function ReviewsPanel({ reviews, merchantNames, scopedMerchant, onApprove
     <td className="whitespace-nowrap text-xs text-muted-foreground">{review.submitted}</td>
     <td><ReviewStatusBadge review={review} /></td>
     <td className="pr-3 text-right"><div className="flex justify-end gap-1">{mode === "pending"
-      ? <><Button size="sm" className="h-7 px-2.5 text-xs" onClick={() => onApprove(review)}><Check />Approve</Button><RejectReviewDialog review={review} onReject={onReject}><Button size="sm" variant="destructive" className="h-7 px-2.5 text-xs"><X />Reject</Button></RejectReviewDialog></>
+      ? <><Button size="sm" className="h-7 px-2.5 text-xs" onClick={() => onApprove(review)}><Check />Approve</Button><RejectReviewDialog review={review} rejectionReasons={rejectionReasons} onReject={onReject}><Button size="sm" variant="destructive" className="h-7 px-2.5 text-xs"><X />Reject</Button></RejectReviewDialog></>
       : <><IconButton className="h-7 w-7" label={`Re-evaluate review ${review.id}`} onClick={() => onRevert(review)}><RotateCcw className="h-3.5 w-3.5" /></IconButton><ConfirmDeleteDialog itemType="Review" name={`${review.user} — ${review.merchant}`} onConfirm={() => onDelete(review)}><Button variant="ghost" size="icon" className="h-7 w-7 text-destructive" aria-label={`Delete review ${review.id}`}><Trash2 className="h-3.5 w-3.5" /></Button></ConfirmDeleteDialog></>}</div></td>
   </tr>)}</tbody></table></div></div>;
   return <Tabs value={tab} onValueChange={setTab}>
@@ -67,7 +67,7 @@ export function ReviewsPanel({ reviews, merchantNames, scopedMerchant, onApprove
     <TabsContent value="pending" className="mt-4">
       {pending.length === 0 ? <p className="text-sm text-muted-foreground">No reviews waiting for review.</p>
         : layout === "list" ? reviewTable(pending, "pending")
-        : <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">{pending.map((review) => <PendingReviewCard key={review.id} review={review} showMerchant={!scopedMerchant} onApprove={onApprove} onReject={onReject} />)}</div>}
+        : <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">{pending.map((review) => <PendingReviewCard rejectionReasons={rejectionReasons} key={review.id} review={review} showMerchant={!scopedMerchant} onApprove={onApprove} onReject={onReject} />)}</div>}
     </TabsContent>
     <TabsContent value="reviewed" className="mt-4">
       {reviewed.length === 0 ? <p className="text-sm text-muted-foreground">Nothing reviewed yet.</p>

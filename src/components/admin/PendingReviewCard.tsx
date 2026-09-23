@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import type { Review } from "@/types/admin";
 import { Check, ShieldCheck, Store, X } from "lucide-react";
 
-export function PendingReviewCard({ review, showMerchant, onApprove, onReject }: { review: Review; showMerchant: boolean; onApprove: (review: Review) => void; onReject: (review: Review, reason: string, note: string) => void }) {
+export function PendingReviewCard({ review, showMerchant, rejectionReasons, onApprove, onReject }: { review: Review; showMerchant: boolean; rejectionReasons: readonly string[]; onApprove: (review: Review) => void; onReject: (review: Review, reason: string, note: string) => void }) {
   return <article className="flex min-h-88 flex-col overflow-hidden rounded-lg border border-border bg-card shadow-card">
     <div className="flex h-40 items-center justify-center border-b border-border bg-muted/40"><MerchantLogo name={review.merchant} /></div>
     <div className="flex flex-1 flex-col p-4"><div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
@@ -24,7 +24,7 @@ export function PendingReviewCard({ review, showMerchant, onApprove, onReject }:
       </div>
       <div className="flex shrink-0 gap-2">
         <Button size="sm" onClick={() => onApprove(review)}><Check />Approve</Button>
-        <RejectReviewDialog review={review} onReject={onReject}><Button size="sm" variant="destructive"><X />Reject</Button></RejectReviewDialog>
+        <RejectReviewDialog review={review} rejectionReasons={rejectionReasons} onReject={onReject}><Button size="sm" variant="destructive"><X />Reject</Button></RejectReviewDialog>
       </div>
     </div>
     <p className="mt-3 line-clamp-3 text-sm leading-6 text-muted-foreground">{review.comment}</p>

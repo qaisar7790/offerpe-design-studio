@@ -1,7 +1,0 @@
-import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
-import type { Review } from "@/types/admin";
-import { Check } from "lucide-react";
-
-export function ConfirmSaveDialog({ title, summary, onConfirm, disabled, children }: { title: string; summary: { label: string; value: string }[]; onConfirm: () => void; disabled?: boolean; children: React.ReactNode }) {
-  return <AlertDialog><AlertDialogTrigger asChild disabled={disabled}>{children}</AlertDialogTrigger><AlertDialogContent className="border-border bg-card"><AlertDialogHeader><AlertDialogTitle className="font-heading">{title}</AlertDialogTitle><AlertDialogDescription>These values apply to every user immediately. Review the change before confirming.</AlertDialogDescription></AlertDialogHeader><dl className="divide-y divide-border rounded-md border border-border bg-muted/30 text-sm">{summary.map((row) => <div key={row.label} className="flex items-center justify-between gap-4 px-3 py-2"><dt className="text-muted-foreground">{row.label}</dt><dd className="font-semibold">{row.value}</dd></div>)}</dl><AlertDialogFooter><AlertDialogCancel>Cancel</AlertDialogCancel><AlertDialogAction onClick={onConfirm}><Check className="h-4 w-4" />Confirm &amp; Save</AlertDialogAction></AlertDialogFooter></AlertDialogContent></AlertDialog>;
-}

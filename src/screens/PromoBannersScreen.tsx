@@ -1,0 +1,264 @@
+import { ConfirmDeleteDialog } from "@/components/admin/ConfirmDeleteDialog";
+import { IconButton } from "@/components/admin/IconButton";
+import { PageHeader } from "@/components/admin/PageHeader";
+import { StatusBadge } from "@/components/admin/StatusBadge";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { cn } from "@/lib/utils";
+import type { PromoBanner, PromoSection } from "@/types/admin";
+import { format } from "date-fns";
+import { ChevronDown, ChevronLeft, ChevronRight, Pencil, Plus, Search, Trash2 } from "lucide-react";
+import { useState } from "react";
+
+export function PromoBannersPage({
+  banners,
+  onEdit,
+  onCreate,
+  onDelete,
+  promoSections,
+}: {
+  banners: PromoBanner[];
+  onEdit: (banner: PromoBanner) => void;
+  onCreate: () => void;
+  onDelete: (banner: PromoBanner) => void;
+  promoSections: readonly PromoSection[];
+}) {
+  const [query, setQuery] = useState("");
+  const [section, setSection] = useState("all");
+  const [status, setStatus] = useState("all");
+  const [ascending, setAscending] = useState(true);
+  const [page, setPage] = useState(1);
+  const pageSize = 6;
+  const filtered = banners
+    .filter(
+      (banner) =>
+        (!query ||
+          `${banner.headline} ${banner.tag} ${banner.ctaTarget}`
+            .toLowerCase()
+            .includes(query.toLowerCase())) &&
+        (section === "all" || banner.section === section) &&
+        (status === "all" || (banner.active ? "Active" : "Inactive") === status),
+    )
+    .sort((a, b) =>
+      ascending ? a.headline.localeCompare(b.headline) : b.headline.localeCompare(a.headline),
+    );
+  const pageCount = Math.max(1, Math.ceil(filtered.length / pageSize));
+  const currentPage = Math.min(page, pageCount);
+  const start = (currentPage - 1) * pageSize;
+  const rows = filtered.slice(start, start + pageSize);
+  const sectionClass = (value: PromoSection) =>
+    value === "HERO"
+      ? "bg-accent text-accent-foreground"
+      : value === "PREMIUM DEALS"
+        ? "bg-info-soft text-info"
+        : value === "FLASH OFFERS"
+          ? "status-pending"
+          : "bg-muted text-muted-foreground";
+  return (
+    <>
+      <PageHeader
+        title="Promo Banners"
+        description="Manage customer-facing promotional banners, placement, scheduling, and visibility."
+        actions={
+          <Button onClick={onCreate}>
+            <Plus />
+            Add new
+          </Button>
+        }
+      />
+      <div className="mb-5 flex flex-col gap-3 rounded-lg border border-border bg-card p-3 shadow-card lg:flex-row">
+        <div className="relative flex-1">
+          <Search className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground" />
+          <Input
+            className="pl-9"
+            value={query}
+            onChange={(event) => {
+              setQuery(event.target.value);
+              setPage(1);
+            }}
+            placeholder="Search headline, tag, or CTA target…"
+          />
+        </div>
+        <Select
+          value={section}
+          onValueChange={(value) => {
+            setSection(value);
+            setPage(1);
+          }}
+        >
+          <SelectTrigger className="lg:w-52">
+            <SelectValue />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">All sections</SelectItem>
+            {promoSections.map((item) => (
+              <SelectItem key={item} value={item}>
+                {item}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+        <Select
+          value={status}
+          onValueChange={(value) => {
+            setStatus(value);
+            setPage(1);
+          }}
+        >
+          <SelectTrigger className="lg:w-40">
+            <SelectValue />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">All statuses</SelectItem>
+            <SelectItem value="Active">Active</SelectItem>
+            <SelectItem value="Inactive">Inactive</SelectItem>
+          </SelectContent>
+        </Select>
+      </div>
+      <div className="overflow-hidden rounded-lg border border-border bg-card shadow-card">
+        <div className="table-scrollbar overflow-x-auto">
+          <table className="w-full min-w-310 text-left text-sm">
+            <thead className="bg-muted/70 text-[11px] uppercase text-muted-foreground">
+              <tr>
+                <th>Section</th>
+                <th>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="-ml-3 h-7 text-[11px] uppercase"
+                    onClick={() => setAscending(!ascending)}
+                  >
+                    Headline
+                    <ChevronDown
+                      className={cn("transition-transform", !ascending && "rotate-180")}
+                    />
+                  </Button>
+                </th>
+                <th>Tag / CTA</th>
+                <th>
+                  <Button variant="ghost" size="sm" className="-ml-3 h-7 text-[11px] uppercase">
+                    Order
+                    <ChevronDown />
+                  </Button>
+                </th>
+                <th>Schedule</th>
+                <th>Status</th>
+                <th className="text-right">Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              {rows.map((banner) => (
+                <tr key={banner.id} className="border-t border-border hover:bg-muted/50">
+                  <td>
+                    <span
+                      className={cn(
+                        "inline-flex rounded-full px-2 py-0.5 text-[11px] font-bold",
+                        sectionClass(banner.section),
+                      )}
+                    >
+                      {banner.section}
+                    </span>
+                  </td>
+                  <td className="font-semibold">{banner.headline}</td>
+                  <td>
+                    <div className="flex items-center gap-2">
+                      <span className="rounded-full border border-border bg-muted px-2 py-0.5 text-[10px] font-bold">
+                        {banner.tag || "NO TAG"}
+                      </span>
+                      <div
+                        className="max-w-48 truncate text-xs text-muted-foreground"
+                        title={banner.ctaTarget}
+                      >
+                        {banner.ctaText || "No CTA"}
+                        {banner.ctaTarget ? ` · ${banner.ctaTarget}` : ""}
+                      </div>
+                    </div>
+                  </td>
+                  <td className="font-semibold">{banner.order}</td>
+                  <td className="whitespace-nowrap text-xs text-muted-foreground">
+                    {format(new Date(banner.start), "dd MMM yyyy, HH:mm")}
+                    <span className="mx-1">–</span>
+                    {banner.end ? format(new Date(banner.end), "dd MMM yyyy, HH:mm") : "Open ended"}
+                  </td>
+                  <td>
+                    <StatusBadge status={banner.active ? "Active" : "Inactive"} />
+                  </td>
+                  <td className="text-right">
+                    <span className="inline-flex">
+                      <IconButton
+                        className="h-7 w-7"
+                        label={`Edit ${banner.headline}`}
+                        onClick={() => onEdit(banner)}
+                      >
+                        <Pencil className="h-3.5 w-3.5" />
+                      </IconButton>
+                      <ConfirmDeleteDialog
+                        itemType="Promo Banner"
+                        name={banner.headline}
+                        onConfirm={() => onDelete(banner)}
+                      >
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className="h-7 w-7 text-destructive"
+                          aria-label={`Delete ${banner.headline}`}
+                        >
+                          <Trash2 className="h-3.5 w-3.5" />
+                        </Button>
+                      </ConfirmDeleteDialog>
+                    </span>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </div>
+      <div className="mt-4 flex flex-col gap-3 rounded-lg border border-border bg-card p-3 text-sm text-muted-foreground sm:flex-row sm:items-center sm:justify-between">
+        <span>
+          Showing <strong className="text-foreground">{filtered.length ? start + 1 : 0}</strong> to{" "}
+          <strong className="text-foreground">{Math.min(start + pageSize, filtered.length)}</strong>{" "}
+          of <strong className="text-foreground">{filtered.length}</strong> results
+        </span>
+        <div className="flex gap-1">
+          <Button
+            variant="outline"
+            size="sm"
+            disabled={currentPage === 1}
+            onClick={() => setPage(currentPage - 1)}
+          >
+            <ChevronLeft />
+            Previous
+          </Button>
+          {Array.from({ length: pageCount }, (_, index) => index + 1).map((item) => (
+            <Button
+              key={item}
+              variant={item === currentPage ? "default" : "outline"}
+              size="icon"
+              className="h-8 w-8"
+              onClick={() => setPage(item)}
+            >
+              {item}
+            </Button>
+          ))}
+          <Button
+            variant="outline"
+            size="sm"
+            disabled={currentPage === pageCount}
+            onClick={() => setPage(currentPage + 1)}
+          >
+            Next
+            <ChevronRight />
+          </Button>
+        </div>
+      </div>
+    </>
+  );
+}

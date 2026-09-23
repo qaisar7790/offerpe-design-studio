@@ -53,3 +53,10 @@
 - [x] Standardize Import and Export CSV placement inside screen and tab filter bars
 - [x] Replace Withdrawals inline CSV controls with the shared Import Report dialog
 - [x] Standardize Cashback Claims Reviewed filters to the Merchant Onboarding compact pattern
+
+## Architecture refactor (data as props)
+- [x] One component per file: 34 screen files in `src/screens/`, 21 shared pieces in `src/components/admin/`, shell in `src/components/AdminPlayground.tsx`
+- [x] All sample data lives only in `src/data/mockData.ts`; no screen or shared component imports it — every dataset arrives as a typed prop from the shell
+- [x] `src/types/admin.ts` is data-independent (no `typeof` on mock arrays)
+- [x] Purely client-rendered: no loaders, no server functions (`ssr: false` route)
+- [x] Verified: typecheck clean, all 28 modules + detail pages/dialogs render with zero console errors

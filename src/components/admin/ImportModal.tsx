@@ -1,0 +1,84 @@
+import { Button } from "@/components/ui/button";
+import {
+  Dialog,
+  DialogClose,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+
+import { UploadCloud } from "lucide-react";
+import { useRef, useState } from "react";
+
+export function ImportModal({
+  open,
+  onOpenChange,
+  title = "Import Offline Report",
+  description = "Upload a CSV to create and resolve offline conversions in one step.",
+  requiredColumns = "click_token, order_id, order_amount, reported_commission, status",
+  onImport,
+}: {
+  open: boolean;
+  onOpenChange: (v: boolean) => void;
+  title?: string;
+  description?: string;
+  requiredColumns?: string;
+  onImport?: (file: File) => void;
+}) {
+  const [file, setFile] = useState<File | null>(null);
+  const inputRef = useRef<HTMLInputElement>(null);
+  const importFile = () => {
+    if (!file) return;
+    onImport?.(file);
+    setFile(null);
+    onOpenChange(false);
+  };
+  return (
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent className="max-w-xl">
+        <DialogHeader>
+          <DialogTitle className="font-heading text-xl">{title}</DialogTitle>
+          <DialogDescription>{description}</DialogDescription>
+        </DialogHeader>
+        <div className="rounded-md bg-muted p-3 text-sm leading-6 text-muted-foreground">
+          <span className="mr-2 inline-flex rounded bg-info-soft px-2 py-0.5 text-xs font-semibold text-info">
+            Required columns
+          </span>
+          <code>{requiredColumns}</code>
+        </div>
+        <button
+          type="button"
+          onClick={() => inputRef.current?.click()}
+          onDragOver={(e) => e.preventDefault()}
+          onDrop={(e) => {
+            e.preventDefault();
+            setFile(e.dataTransfer.files[0] ?? null);
+          }}
+          className="flex min-h-40 w-full flex-col items-center justify-center rounded-lg border border-dashed border-strong bg-muted/40 px-6 text-center hover:border-primary hover:bg-accent"
+        >
+          <UploadCloud className="mb-3 h-8 w-8 text-primary" />
+          <span className="font-semibold text-primary">{file ? file.name : "Choose a file"}</span>
+          <span className="mt-1 text-sm text-muted-foreground">or drag and drop a CSV here</span>
+          <input
+            ref={inputRef}
+            className="hidden"
+            type="file"
+            accept=".csv"
+            onChange={(e) => setFile(e.target.files?.[0] ?? null)}
+          />
+        </button>
+        <DialogFooter>
+          <DialogClose asChild>
+            <Button variant="destructiveSoft">Cancel</Button>
+          </DialogClose>
+          <Button disabled={!file} onClick={importFile}>
+            <UploadCloud />
+            Import Report
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  );
+}

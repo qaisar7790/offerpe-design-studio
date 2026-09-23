@@ -1,0 +1,592 @@
+import { PageHeader } from "@/components/admin/PageHeader";
+import { TransactionPagination } from "@/components/admin/TransactionPagination";
+import { Button } from "@/components/ui/button";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { Input } from "@/components/ui/input";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { tabTriggerClass } from "@/lib/admin-utils";
+import { cn } from "@/lib/utils";
+import type {
+  AnalyticsEvent,
+  CommunicationDispatch,
+  CommunicationTab,
+  DispatchDelivery,
+  NotificationLog,
+  TemplateChannel,
+} from "@/types/admin";
+import {
+  ArrowDown,
+  ArrowUp,
+  Bell,
+  ChevronDown,
+  Download,
+  Filter,
+  MessageSquare,
+  RotateCcw,
+  Search,
+} from "lucide-react";
+import { useState } from "react";
+import { toast } from "sonner";
+
+export function DeliveryBadge({ delivery }: { delivery: DispatchDelivery }) {
+  return (
+    <span
+      className={cn(
+        "inline-flex rounded-full px-2 py-0.5 text-[11px] font-bold",
+        delivery === "DELIVERED" || delivery === "SENT"
+          ? "status-approved"
+          : delivery === "FAILED"
+            ? "status-rejected"
+            : "status-pending",
+      )}
+    >
+      {delivery}
+    </span>
+  );
+}
+
+export function JsonPropertiesDialog({
+  title,
+  properties,
+}: {
+  title: string;
+  properties: Record<string, string | number>;
+}) {
+  return (
+    <Dialog>
+      <DialogTrigger asChild>
+        <Button variant="link" size="sm" className="h-auto p-0 font-semibold text-info">
+          View JSON
+        </Button>
+      </DialogTrigger>
+      <DialogContent className="max-w-lg bg-card">
+        <DialogHeader>
+          <DialogTitle className="font-heading text-lg">{title}</DialogTitle>
+          <DialogDescription>Recorded event properties for this row.</DialogDescription>
+        </DialogHeader>
+        <pre className="max-h-80 overflow-auto rounded-lg border border-border bg-muted p-4 font-mono text-xs leading-5 text-foreground">
+          {JSON.stringify(properties, null, 2)}
+        </pre>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
+export function CommunicationLogs({
+  analyticsEvents,
+  communicationDispatches,
+  notificationLogs,
+  templateChannels,
+}: {
+  analyticsEvents: AnalyticsEvent[];
+  communicationDispatches: CommunicationDispatch[];
+  notificationLogs: NotificationLog[];
+  templateChannels: TemplateChannel[];
+}) {
+  const [tab, setTab] = useState<CommunicationTab>("analytics");
+  const [query, setQuery] = useState("");
+  const [eventGroup, setEventGroup] = useState("all");
+  const [channel, setChannel] = useState<TemplateChannel | "all">("all");
+  const [delivery, setDelivery] = useState<DispatchDelivery | "all">("all");
+  const [read, setRead] = useState<"all" | "Yes" | "No">("all");
+  const [from, setFrom] = useState("");
+  const [to, setTo] = useState("");
+  const [sortDesc, setSortDesc] = useState(true);
+  const search = query.toLowerCase();
+  const inDateRange = (date: string) => (!from || date >= from) && (!to || date <= to);
+  const analyticsRows = analyticsEvents
+    .filter(
+      (row) =>
+        (!search ||
+          `${row.event} ${row.screen} ${row.userId} ${row.session}`
+            .toLowerCase()
+            .includes(search)) &&
+        (eventGroup === "all" || row.group === eventGroup) &&
+        inDateRange(row.date),
+    )
+    .sort((a, b) => (sortDesc ? b.id.localeCompare(a.id) : a.id.localeCompare(b.id)));
+  const dispatchRows = communicationDispatches
+    .filter(
+      (row) =>
+        (!search ||
+          `${row.type} ${row.template} ${row.title} ${row.body} ${row.userId}`
+            .toLowerCase()
+            .includes(search)) &&
+        (channel === "all" || row.channel === channel) &&
+        (delivery === "all" || row.delivery === delivery) &&
+        (read === "all" || row.read === read) &&
+        inDateRange(row.date),
+    )
+    .sort((a, b) => (sortDesc ? b.id.localeCompare(a.id) : a.id.localeCompare(b.id)));
+  const notificationRows = notificationLogs
+    .filter(
+      (row) =>
+        (!search ||
+          `${row.type} ${row.title} ${row.body} ${row.userId} ${row.session}`
+            .toLowerCase()
+            .includes(search)) &&
+        (delivery === "all" || row.delivery === delivery) &&
+        (read === "all" || row.read === read) &&
+        inDateRange(row.date),
+    )
+    .sort((a, b) => (sortDesc ? b.id.localeCompare(a.id) : a.id.localeCompare(b.id)));
+  const count =
+    tab === "analytics"
+      ? analyticsRows.length
+      : tab === "dispatches"
+        ? dispatchRows.length
+        : notificationRows.length;
+  const reset = () => {
+    setQuery("");
+    setEventGroup("all");
+    setChannel("all");
+    setDelivery("all");
+    setRead("all");
+    setFrom("");
+    setTo("");
+  };
+  const hasFilters = Boolean(
+    query ||
+    eventGroup !== "all" ||
+    channel !== "all" ||
+    delivery !== "all" ||
+    read !== "all" ||
+    from ||
+    to,
+  );
+  const csvCell = (cell: string | number | null) => `"${String(cell ?? "").replaceAll('"', '""')}"`;
+  const exportRows = () => {
+    const rows =
+      tab === "analytics"
+        ? [
+            ["Event", "Screen", "User ID", "Properties", "Session", "Occurred"],
+            ...analyticsRows.map((row) => [
+              row.event,
+              row.screen,
+              row.userId,
+              row.properties ? JSON.stringify(row.properties) : "",
+              row.session,
+              row.occurred,
+            ]),
+          ]
+        : tab === "dispatches"
+          ? [
+              [
+                "Type",
+                "Template",
+                "Channel",
+                "Title",
+                "Body",
+                "Read",
+                "Delivery",
+                "User ID",
+                "Occurred",
+              ],
+              ...dispatchRows.map((row) => [
+                row.type,
+                row.template,
+                row.channel,
+                row.title,
+                row.body,
+                row.read,
+                row.delivery,
+                row.userId,
+                row.occurred,
+              ]),
+            ]
+          : [
+              ["Type", "Title", "Body", "Read", "Delivery", "User ID", "Session", "Occurred"],
+              ...notificationRows.map((row) => [
+                row.type,
+                row.title,
+                row.body,
+                row.read,
+                row.delivery,
+                row.userId,
+                row.session,
+                row.occurred,
+              ]),
+            ];
+    const csv = rows.map((line) => line.map(csvCell).join(",")).join("\n");
+    const url = URL.createObjectURL(new Blob([csv], { type: "text/csv;charset=utf-8" }));
+    const anchor = document.createElement("a");
+    anchor.href = url;
+    anchor.download = `offerpe-${tab}.csv`;
+    anchor.click();
+    URL.revokeObjectURL(url);
+    toast.success("Export ready", {
+      description: `${count} ${tab === "analytics" ? "events" : tab === "dispatches" ? "dispatches" : "notifications"} downloaded as CSV.`,
+    });
+  };
+  return (
+    <>
+      <PageHeader
+        title="Dispatches & Notifications"
+        description="High-density audit tables for app analytics events, outbound communication dispatches, and delivered notification records."
+      />
+      <Tabs
+        value={tab}
+        onValueChange={(value) => {
+          setTab(value as CommunicationTab);
+          reset();
+        }}
+      >
+        <TabsList className="mb-5 h-auto w-full justify-start gap-6 overflow-x-auto rounded-none border-b border-border bg-transparent p-0">
+          <TabsTrigger value="analytics" className={tabTriggerClass}>
+            Analytics Events
+          </TabsTrigger>
+          <TabsTrigger value="dispatches" className={tabTriggerClass}>
+            Communication Dispatches
+          </TabsTrigger>
+          <TabsTrigger value="notifications" className={tabTriggerClass}>
+            Notifications
+          </TabsTrigger>
+        </TabsList>
+        <div className="mb-5 flex flex-col gap-3 rounded-lg border border-border bg-card p-3 shadow-card lg:flex-row lg:flex-wrap lg:items-center">
+          <div className="relative min-w-[280px] flex-1">
+            <Search className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground" />
+            <Input
+              className="w-full pl-9"
+              value={query}
+              onChange={(event) => setQuery(event.target.value)}
+              placeholder={
+                tab === "analytics"
+                  ? "Search event, screen, User ID, or session…"
+                  : "Search type, title, body, template, or User ID…"
+              }
+            />
+          </div>
+          {tab === "analytics" && (
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="outline" className="shrink-0">
+                  <Filter className="mr-2 h-4 w-4 text-muted-foreground" />
+                  Group: {eventGroup === "all" ? "All" : eventGroup}
+                  <ChevronDown className="ml-2 h-3.5 w-3.5 opacity-60" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="w-48 border-border bg-card">
+                <DropdownMenuItem onSelect={() => setEventGroup("all")}>
+                  Group: All
+                </DropdownMenuItem>
+                {["Session", "Screen", "Action", "Engagement"].map((item) => (
+                  <DropdownMenuItem key={item} onSelect={() => setEventGroup(item)}>
+                    Group: {item}
+                  </DropdownMenuItem>
+                ))}
+              </DropdownMenuContent>
+            </DropdownMenu>
+          )}
+          {tab === "dispatches" && (
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="outline" className="shrink-0">
+                  <MessageSquare className="mr-2 h-4 w-4 text-muted-foreground" />
+                  Channel: {channel === "all" ? "All" : channel}
+                  <ChevronDown className="ml-2 h-3.5 w-3.5 opacity-60" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="w-52 border-border bg-card">
+                <DropdownMenuItem onSelect={() => setChannel("all")}>Channel: All</DropdownMenuItem>
+                {templateChannels.map((item) => (
+                  <DropdownMenuItem key={item} onSelect={() => setChannel(item)}>
+                    Channel: {item}
+                  </DropdownMenuItem>
+                ))}
+              </DropdownMenuContent>
+            </DropdownMenu>
+          )}
+          {tab !== "analytics" && (
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="outline" className="shrink-0">
+                  <Filter className="mr-2 h-4 w-4 text-muted-foreground" />
+                  Delivery: {delivery === "all" ? "All" : delivery}
+                  <ChevronDown className="ml-2 h-3.5 w-3.5 opacity-60" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="w-48 border-border bg-card">
+                <DropdownMenuItem onSelect={() => setDelivery("all")}>
+                  Delivery: All
+                </DropdownMenuItem>
+                {["SENT", "DELIVERED", "FAILED", "QUEUED"].map((item) => (
+                  <DropdownMenuItem
+                    key={item}
+                    onSelect={() => setDelivery(item as DispatchDelivery)}
+                  >
+                    Delivery: {item}
+                  </DropdownMenuItem>
+                ))}
+              </DropdownMenuContent>
+            </DropdownMenu>
+          )}
+          {tab !== "analytics" && (
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="outline" className="shrink-0">
+                  Read: {read}
+                  <ChevronDown className="ml-2 h-3.5 w-3.5 opacity-60" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="w-36 border-border bg-card">
+                <DropdownMenuItem onSelect={() => setRead("all")}>Read: all</DropdownMenuItem>
+                <DropdownMenuItem onSelect={() => setRead("Yes")}>Read: Yes</DropdownMenuItem>
+                <DropdownMenuItem onSelect={() => setRead("No")}>Read: No</DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          )}
+          <Input
+            aria-label="From date"
+            title="From date"
+            type="date"
+            value={from}
+            onChange={(event) => setFrom(event.target.value)}
+            className="w-full shrink-0 lg:w-38"
+          />
+          <Input
+            aria-label="To date"
+            title="To date"
+            type="date"
+            value={to}
+            onChange={(event) => setTo(event.target.value)}
+            className="w-full shrink-0 lg:w-38"
+          />
+          {hasFilters && (
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={reset}
+              className="shrink-0 text-muted-foreground hover:text-foreground"
+            >
+              <RotateCcw className="mr-1 h-3.5 w-3.5" />
+              Reset
+            </Button>
+          )}
+          <Button variant="outline" size="sm" className="shrink-0" onClick={exportRows}>
+            <Download className="mr-1 h-3.5 w-3.5" />
+            Export CSV
+          </Button>
+        </div>
+        <TabsContent value="analytics" className="mt-0">
+          <div className="min-w-0 overflow-hidden rounded-lg border border-border bg-card shadow-card">
+            <div className="table-scrollbar overflow-x-auto">
+              <table className="w-full min-w-320 text-left text-sm">
+                <thead className="text-[11px] uppercase text-muted-foreground">
+                  <tr>
+                    {["Event", "Screen", "User ID", "Properties", "Session", "Occurred"].map(
+                      (label) => (
+                        <th
+                          key={label}
+                          className="sticky top-0 border-b border-border bg-muted/95 py-2 backdrop-blur"
+                        >
+                          {label === "Occurred" ? (
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              className="-ml-3 h-7 text-[11px] uppercase"
+                              onClick={() => setSortDesc(!sortDesc)}
+                            >
+                              Occurred{" "}
+                              {sortDesc ? (
+                                <ArrowDown className="h-3.5 w-3.5" />
+                              ) : (
+                                <ArrowUp className="h-3.5 w-3.5" />
+                              )}
+                            </Button>
+                          ) : (
+                            label
+                          )}
+                        </th>
+                      ),
+                    )}
+                  </tr>
+                </thead>
+                <tbody>
+                  {analyticsRows.map((row) => (
+                    <tr key={row.id} className="border-t border-border hover:bg-muted/50">
+                      <td className="font-mono text-xs font-semibold">{row.event}</td>
+                      <td className="font-semibold">{row.screen}</td>
+                      <td className="font-mono text-xs text-muted-foreground">{row.userId}</td>
+                      <td>
+                        {row.properties ? (
+                          <JsonPropertiesDialog title={row.event} properties={row.properties} />
+                        ) : (
+                          <span className="text-muted-foreground">—</span>
+                        )}
+                      </td>
+                      <td className="font-mono text-xs text-muted-foreground">{row.session}</td>
+                      <td className="whitespace-nowrap text-xs font-semibold">{row.occurred}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+              {!analyticsRows.length && <EmptyCommunicationState />}
+            </div>
+          </div>
+          <TransactionPagination count={analyticsRows.length} />
+        </TabsContent>
+        <TabsContent value="dispatches" className="mt-0">
+          <div className="min-w-0 overflow-hidden rounded-lg border border-border bg-card shadow-card">
+            <div className="table-scrollbar overflow-x-auto">
+              <table className="w-full min-w-390 text-left text-sm">
+                <thead className="text-[11px] uppercase text-muted-foreground">
+                  <tr>
+                    {[
+                      "Type",
+                      "Template",
+                      "Channel",
+                      "Title",
+                      "Body",
+                      "Read",
+                      "Delivery",
+                      "User ID",
+                      "Occurred",
+                    ].map((label) => (
+                      <th
+                        key={label}
+                        className="sticky top-0 border-b border-border bg-muted/95 py-2 backdrop-blur"
+                      >
+                        {label === "Occurred" ? (
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            className="-ml-3 h-7 text-[11px] uppercase"
+                            onClick={() => setSortDesc(!sortDesc)}
+                          >
+                            Occurred{" "}
+                            {sortDesc ? (
+                              <ArrowDown className="h-3.5 w-3.5" />
+                            ) : (
+                              <ArrowUp className="h-3.5 w-3.5" />
+                            )}
+                          </Button>
+                        ) : (
+                          label
+                        )}
+                      </th>
+                    ))}
+                  </tr>
+                </thead>
+                <tbody>
+                  {dispatchRows.map((row) => (
+                    <tr key={row.id} className="border-t border-border hover:bg-muted/50">
+                      <td className="font-mono text-xs font-semibold">{row.type}</td>
+                      <td>{row.template}</td>
+                      <td>
+                        <span className="inline-flex rounded-full bg-muted px-2 py-0.5 text-[11px] font-semibold text-muted-foreground">
+                          {row.channel}
+                        </span>
+                      </td>
+                      <td className="font-semibold">{row.title}</td>
+                      <td className="max-w-150 truncate text-muted-foreground" title={row.body}>
+                        {row.body}
+                      </td>
+                      <td>{row.read}</td>
+                      <td>
+                        <DeliveryBadge delivery={row.delivery} />
+                      </td>
+                      <td className="font-mono text-xs text-muted-foreground">{row.userId}</td>
+                      <td className="whitespace-nowrap text-xs font-semibold">{row.occurred}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+              {!dispatchRows.length && <EmptyCommunicationState />}
+            </div>
+          </div>
+          <TransactionPagination count={dispatchRows.length} />
+        </TabsContent>
+        <TabsContent value="notifications" className="mt-0">
+          <div className="min-w-0 overflow-hidden rounded-lg border border-border bg-card shadow-card">
+            <div className="table-scrollbar overflow-x-auto">
+              <table className="w-full min-w-360 text-left text-sm">
+                <thead className="text-[11px] uppercase text-muted-foreground">
+                  <tr>
+                    {[
+                      "Type",
+                      "Title",
+                      "Body",
+                      "Read",
+                      "Delivery",
+                      "User ID",
+                      "Session",
+                      "Occurred",
+                    ].map((label) => (
+                      <th
+                        key={label}
+                        className="sticky top-0 border-b border-border bg-muted/95 py-2 backdrop-blur"
+                      >
+                        {label === "Occurred" ? (
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            className="-ml-3 h-7 text-[11px] uppercase"
+                            onClick={() => setSortDesc(!sortDesc)}
+                          >
+                            Occurred{" "}
+                            {sortDesc ? (
+                              <ArrowDown className="h-3.5 w-3.5" />
+                            ) : (
+                              <ArrowUp className="h-3.5 w-3.5" />
+                            )}
+                          </Button>
+                        ) : (
+                          label
+                        )}
+                      </th>
+                    ))}
+                  </tr>
+                </thead>
+                <tbody>
+                  {notificationRows.map((row) => (
+                    <tr key={row.id} className="border-t border-border hover:bg-muted/50">
+                      <td className="font-mono text-xs font-semibold">{row.type}</td>
+                      <td className="font-semibold">{row.title}</td>
+                      <td className="max-w-150 truncate text-muted-foreground" title={row.body}>
+                        {row.body}
+                      </td>
+                      <td>{row.read}</td>
+                      <td>
+                        <DeliveryBadge delivery={row.delivery} />
+                      </td>
+                      <td className="font-mono text-xs text-muted-foreground">{row.userId}</td>
+                      <td className="font-mono text-xs text-muted-foreground">{row.session}</td>
+                      <td className="whitespace-nowrap text-xs font-semibold">{row.occurred}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+              {!notificationRows.length && <EmptyCommunicationState />}
+            </div>
+          </div>
+          <TransactionPagination count={notificationRows.length} />
+        </TabsContent>
+      </Tabs>
+    </>
+  );
+}
+
+export function EmptyCommunicationState() {
+  return (
+    <div className="px-6 py-14 text-center">
+      <Bell className="mx-auto h-8 w-8 text-muted-foreground" />
+      <h3 className="mt-3 font-heading font-semibold">No records found</h3>
+      <p className="mt-1 text-sm text-muted-foreground">
+        Try changing or resetting the current filters.
+      </p>
+    </div>
+  );
+}

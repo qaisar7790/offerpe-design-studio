@@ -12,8 +12,8 @@ import { Textarea } from "@/components/ui/textarea";
 import { onboardingRejectionReasons } from "@/data/mockData";
 import { tabTriggerClass } from "@/lib/admin-utils";
 import { cn } from "@/lib/utils";
-import type { Application, Category, LayoutMode, Merchant, Review, Status, View } from "@/types/admin";
-import { Check, Download, ExternalLink, FileText, RotateCcw, Search, Store, Tag, Trash2, X } from "lucide-react";
+import type { Application, LayoutMode } from "@/types/admin";
+import { Check, Download, ExternalLink, FileText, RotateCcw, Search, Tag, Trash2, X } from "lucide-react";
 import { useMemo, useState } from "react";
 import { toast } from "sonner";
 

@@ -8,7 +8,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { analyticsEvents, communicationDispatches, notificationLogs, templateChannels } from "@/data/mockData";
 import { tabTriggerClass } from "@/lib/admin-utils";
 import { cn } from "@/lib/utils";
-import type { CommunicationTab, DispatchDelivery, TemplateChannel, View } from "@/types/admin";
+import type { CommunicationTab, DispatchDelivery, TemplateChannel } from "@/types/admin";
 import { ArrowDown, ArrowUp, Bell, ChevronDown, Download, Filter, MessageSquare, RotateCcw, Search } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";

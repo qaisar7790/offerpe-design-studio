@@ -9,7 +9,7 @@ import { DropdownMenu, DropdownMenuCheckboxItem, DropdownMenuContent, DropdownMe
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { merchants } from "@/data/mockData";
-import type { Merchant, MerchantStaff, Status } from "@/types/admin";
+import type { MerchantStaff } from "@/types/admin";
 import { format } from "date-fns";
 import { Check, ChevronDown, Pencil, Plus, RefreshCw, RotateCcw, Search, Trash2 } from "lucide-react";
 import { useMemo, useState } from "react";

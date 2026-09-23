@@ -15,7 +15,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { conversions } from "@/data/mockData";
 import { dateFromDisplay, downloadCsv, formatInrInput } from "@/lib/admin-utils";
 import { cn } from "@/lib/utils";
-import type { Conversion, Merchant, Review, Status, Withdrawal } from "@/types/admin";
+import type { Conversion, Status } from "@/types/admin";
 import { format } from "date-fns";
 import { CalendarDays, ChevronLeft, ChevronRight, Download, ExternalLink, Lock, MoreHorizontal, Pencil, Store, Trash2, UploadCloud } from "lucide-react";
 import { useState } from "react";

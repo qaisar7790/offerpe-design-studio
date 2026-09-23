@@ -8,10 +8,10 @@ import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Textarea } from "@/components/ui/textarea";
-import { claimRejectionReasons, merchants } from "@/data/mockData";
+import { claimRejectionReasons } from "@/data/mockData";
 import { downloadCsv, inr, tabTriggerClass } from "@/lib/admin-utils";
 import { cn } from "@/lib/utils";
-import type { Claim, Merchant, Review, Status, View } from "@/types/admin";
+import type { Claim } from "@/types/admin";
 import { Check, Download, ExternalLink, Image as ImageIcon, RotateCcw, Search, Trash2, UploadCloud, X } from "lucide-react";
 import { useMemo, useState } from "react";
 

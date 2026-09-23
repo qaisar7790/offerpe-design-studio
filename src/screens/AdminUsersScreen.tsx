@@ -9,7 +9,7 @@ import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { allPermissionKeys } from "@/data/mockData";
 import { cn } from "@/lib/utils";
-import type { AdminRole, AdminUser, AdminUserStatus, Status } from "@/types/admin";
+import type { AdminRole, AdminUser, AdminUserStatus } from "@/types/admin";
 import { ArrowDown, ArrowUp, Check, ChevronDown, Filter, Mail, Pencil, Plus, RotateCcw, Search, ShieldCheck, Trash2, Users } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";

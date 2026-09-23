@@ -4,8 +4,8 @@ import { Input } from "@/components/ui/input";
 import { Switch } from "@/components/ui/switch";
 import { Textarea } from "@/components/ui/textarea";
 import { compareVersions, semverPattern } from "@/lib/admin-utils";
-import type { AppBuild, Merchant } from "@/types/admin";
-import { AlertTriangle, Check, Smartphone, Store, Users } from "lucide-react";
+import type { AppBuild } from "@/types/admin";
+import { AlertTriangle, Check, Smartphone } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
 

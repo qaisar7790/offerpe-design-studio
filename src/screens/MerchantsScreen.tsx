@@ -6,7 +6,7 @@ import { PageHeader } from "@/components/admin/PageHeader";
 import { StatusBadge } from "@/components/admin/StatusBadge";
 import { Button } from "@/components/ui/button";
 import { Tooltip as UiTooltip, TooltipContent as UiTooltipContent, TooltipProvider, TooltipTrigger as UiTooltipTrigger } from "@/components/ui/tooltip";
-import { merchants } from "@/data/mockData";
+
 import { downloadCsv } from "@/lib/admin-utils";
 import { cn } from "@/lib/utils";
 import type { Category, LayoutMode, Merchant, Status } from "@/types/admin";

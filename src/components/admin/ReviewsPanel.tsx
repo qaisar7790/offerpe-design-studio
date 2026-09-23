@@ -12,9 +12,9 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { merchants } from "@/data/mockData";
+
 import { downloadCsv, tabTriggerClass } from "@/lib/admin-utils";
-import type { LayoutMode, Merchant, Review, Status } from "@/types/admin";
+import type { LayoutMode, Review } from "@/types/admin";
 import { Check, Download, RotateCcw, Store, Trash2, UploadCloud, X } from "lucide-react";
 import { useMemo, useState } from "react";
 

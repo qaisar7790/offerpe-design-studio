@@ -6,8 +6,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Switch } from "@/components/ui/switch";
 import { promoSections } from "@/data/mockData";
 import { cn } from "@/lib/utils";
-import type { Banner, PromoBanner, PromoSection } from "@/types/admin";
-import { Check, ChevronRight, Tag, Trash2, UploadCloud } from "lucide-react";
+import type { PromoBanner, PromoSection } from "@/types/admin";
+import { ChevronRight, Trash2, UploadCloud } from "lucide-react";
 import { useRef, useState } from "react";
 import { toast } from "sonner";
 

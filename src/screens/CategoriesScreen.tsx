@@ -6,10 +6,10 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { merchants } from "@/data/mockData";
+
 import { tabTriggerClass } from "@/lib/admin-utils";
 import { cn } from "@/lib/utils";
-import type { Category, RawMapping, Status } from "@/types/admin";
+import type { Category, RawMapping } from "@/types/admin";
 import { ChevronDown, Pencil, Plus, Search, Store, Trash2 } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";

@@ -2,7 +2,7 @@ import { DateFilter } from "@/components/admin/DateFilter";
 import { Button } from "@/components/ui/button";
 import { DropdownMenu, DropdownMenuCheckboxItem, DropdownMenuContent, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { Input } from "@/components/ui/input";
-import { merchants } from "@/data/mockData";
+
 import type { Status } from "@/types/admin";
 import { ChevronDown, Filter, Search } from "lucide-react";
 

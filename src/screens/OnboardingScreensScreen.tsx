@@ -5,7 +5,7 @@ import { StatusBadge } from "@/components/admin/StatusBadge";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { tabTriggerClass } from "@/lib/admin-utils";
-import type { LayoutMode, Merchant, OnboardingApp, OnboardingSlide } from "@/types/admin";
+import type { LayoutMode, OnboardingApp, OnboardingSlide } from "@/types/admin";
 import { ArrowDown, ArrowUp, Image as ImageIcon, Pencil, Plus, Trash2 } from "lucide-react";
 import { useState } from "react";
 

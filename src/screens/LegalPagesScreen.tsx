@@ -7,7 +7,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { legalContentToHtml } from "@/lib/admin-utils";
-import type { LegalPage, Merchant } from "@/types/admin";
+import type { LegalPage } from "@/types/admin";
 import { Bold, Check, FileText, Heading2, Italic, List, ListOrdered, Redo2, Trash2, Undo2 } from "lucide-react";
 import { Fragment, useRef, useState } from "react";
 

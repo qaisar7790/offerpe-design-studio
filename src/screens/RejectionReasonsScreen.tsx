@@ -9,8 +9,8 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigge
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
-import { conversions, rejectionCategories, rejectionCategoryShort } from "@/data/mockData";
-import type { Category, RejectionCategory, RejectionReason, Status } from "@/types/admin";
+import { rejectionCategories, rejectionCategoryShort } from "@/data/mockData";
+import type { RejectionCategory, RejectionReason } from "@/types/admin";
 import { ArrowDown, ArrowUp, Check, ChevronDown, Filter, Flag, Pencil, Plus, RotateCcw, Search } from "lucide-react";
 import { useState } from "react";
 

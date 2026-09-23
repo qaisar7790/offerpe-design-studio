@@ -10,7 +10,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { initialWithdrawals } from "@/data/mockData";
 import { inr } from "@/lib/admin-utils";
 import { cn } from "@/lib/utils";
-import type { Review, Status, Withdrawal, WithdrawalStatus } from "@/types/admin";
+import type { Withdrawal, WithdrawalStatus } from "@/types/admin";
 import { ArrowDown, ArrowUp, BadgeIndianRupee, Check, ChevronDown, Download, Filter, RotateCcw, Search, UploadCloud, WalletCards, X } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";

@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
 import { Switch } from "@/components/ui/switch";
-import type { Merchant, Withdrawal } from "@/types/admin";
+
 import { Check } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";

@@ -1,7 +1,7 @@
 import { PageHeader } from "@/components/admin/PageHeader";
 import { chartData } from "@/data/mockData";
-import type { Status, View, Withdrawal } from "@/types/admin";
-import { ChevronRight, ShieldCheck, Users } from "lucide-react";
+
+import { ChevronRight, ShieldCheck } from "lucide-react";
 import { Bar, BarChart, CartesianGrid, Cell, Pie, PieChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
 
 export function DonutCard({ title, total, data }: { title: string; total: number; data: { name: string; value: number; fill: string }[] }) {

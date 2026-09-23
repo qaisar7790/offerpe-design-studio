@@ -1,5 +1,5 @@
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
-import type { Review } from "@/types/admin";
+
 import { Check } from "lucide-react";
 
 export function ConfirmSaveDialog({ title, summary, onConfirm, disabled, children }: { title: string; summary: { label: string; value: string }[]; onConfirm: () => void; disabled?: boolean; children: React.ReactNode }) {

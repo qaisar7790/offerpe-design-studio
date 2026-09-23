@@ -4,7 +4,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Textarea } from "@/components/ui/textarea";
 import { rejectionReasons } from "@/data/mockData";
 import type { Review } from "@/types/admin";
-import { Store } from "lucide-react";
+
 import { useState } from "react";
 
 export function RejectReviewDialog({ review, onReject, children }: { review: Review; onReject: (review: Review, reason: string, note: string) => void; children: React.ReactNode }) {

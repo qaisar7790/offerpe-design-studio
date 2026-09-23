@@ -10,7 +10,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { campaignRejectionReasons } from "@/data/mockData";
 import { tabTriggerClass } from "@/lib/admin-utils";
 import { cn } from "@/lib/utils";
-import type { Category, Review, StagedCampaign, Status, SyncRun } from "@/types/admin";
+import type { Category, StagedCampaign, SyncRun } from "@/types/admin";
 import { AlertTriangle, Check, ChevronDown, Filter, Lock, RefreshCw, RotateCcw, Search, Store, X } from "lucide-react";
 import { useState } from "react";
 

@@ -7,9 +7,9 @@ import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { promoSections } from "@/data/mockData";
 import { cn } from "@/lib/utils";
-import type { Banner, PromoBanner, PromoSection, Status } from "@/types/admin";
+import type { PromoBanner, PromoSection } from "@/types/admin";
 import { format } from "date-fns";
-import { ChevronDown, ChevronLeft, ChevronRight, Pencil, Plus, Search, Tag, Trash2 } from "lucide-react";
+import { ChevronDown, ChevronLeft, ChevronRight, Pencil, Plus, Search, Trash2 } from "lucide-react";
 import { useState } from "react";
 
 export function PromoBannersPage({ banners, onEdit, onCreate, onDelete }: { banners: PromoBanner[]; onEdit: (banner: PromoBanner) => void; onCreate: () => void; onDelete: (banner: PromoBanner) => void }) {

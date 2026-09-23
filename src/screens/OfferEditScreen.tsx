@@ -7,7 +7,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Textarea } from "@/components/ui/textarea";
 import { merchants } from "@/data/mockData";
 import { createBlankOffer } from "@/lib/admin-utils";
-import type { Merchant, Offer, OfferOrigin } from "@/types/admin";
+import type { Offer, OfferOrigin } from "@/types/admin";
 import { CalendarDays, ChevronLeft, ChevronRight, Trash2 } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";

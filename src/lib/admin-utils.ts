@@ -1,5 +1,5 @@
 import type { Offer } from "@/types/admin";
-import { Download } from "lucide-react";
+
 import { toast } from "sonner";
 
 export function createBlankOffer(merchant: string): Offer {

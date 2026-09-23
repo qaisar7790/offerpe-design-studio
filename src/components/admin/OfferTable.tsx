@@ -4,7 +4,7 @@ import { IconButton } from "@/components/admin/IconButton";
 import { StatusBadge } from "@/components/admin/StatusBadge";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
-import type { Merchant, Offer, Status } from "@/types/admin";
+import type { Offer } from "@/types/admin";
 import { format } from "date-fns";
 import { Pencil, Store, Trash2 } from "lucide-react";
 

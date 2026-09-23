@@ -1,6 +1,6 @@
 import { IconButton } from "@/components/admin/IconButton";
 import { Button } from "@/components/ui/button";
-import { groups, merchants } from "@/data/mockData";
+import { groups } from "@/data/mockData";
 import { cn } from "@/lib/utils";
 import type { View } from "@/types/admin";
 import { ChevronLeft, ChevronRight, LayoutDashboard, X } from "lucide-react";

@@ -10,7 +10,7 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigge
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { cityDirectory, cityStates, initialCities } from "@/data/mockData";
-import type { CityRecord, Status } from "@/types/admin";
+import type { CityRecord } from "@/types/admin";
 import { Building2, Check, ChevronDown, Filter, Pencil, Plus, RotateCcw, Search, Trash2 } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";

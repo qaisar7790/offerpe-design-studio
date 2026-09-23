@@ -3,10 +3,10 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Switch } from "@/components/ui/switch";
 import { Textarea } from "@/components/ui/textarea";
-import { merchants } from "@/data/mockData";
+
 import { affiliateMacroNote } from "@/lib/admin-utils";
 import type { AffiliateNetwork } from "@/types/admin";
-import { ChevronRight, Store, Trash2 } from "lucide-react";
+import { ChevronRight, Trash2 } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
 

@@ -10,7 +10,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { initialUsers } from "@/data/mockData";
 import { downloadCsv, inr } from "@/lib/admin-utils";
 import { cn } from "@/lib/utils";
-import type { DeletedFilter, Status, UserDateField, UserRecord, UserStatus, View } from "@/types/admin";
+import type { DeletedFilter, UserDateField, UserRecord, UserStatus } from "@/types/admin";
 import { ArrowDown, ArrowUp, CalendarDays, ChevronDown, ChevronLeft, ChevronRight, Download, Eye, FileText, Filter, MoreHorizontal, MousePointerClick, RotateCcw, Search, ShieldCheck, Trash2, UploadCloud, Users } from "lucide-react";
 import { useRef, useState } from "react";
 import { toast } from "sonner";

@@ -1,4 +1,4 @@
-import { conversions, merchants, rejectionCategories } from "@/data/mockData";
+import { merchants, rejectionCategories } from "@/data/mockData";
 
 export type Merchant = (typeof merchants)[number];
 

@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
-import type { AffiliateNetwork, Status } from "@/types/admin";
+import type { AffiliateNetwork } from "@/types/admin";
 import { ChevronDown, ChevronLeft, ChevronRight, Filter, Pencil, Plus, RotateCcw, Search, Trash2 } from "lucide-react";
 import { useState } from "react";
 

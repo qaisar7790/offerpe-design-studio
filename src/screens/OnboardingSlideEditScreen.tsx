@@ -6,7 +6,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Switch } from "@/components/ui/switch";
 import { Textarea } from "@/components/ui/textarea";
 import { cn } from "@/lib/utils";
-import type { Merchant, OnboardingApp, OnboardingSlide } from "@/types/admin";
+import type { OnboardingApp, OnboardingSlide } from "@/types/admin";
 import { Check, ChevronRight, Trash2, UploadCloud, X } from "lucide-react";
 import { useRef, useState } from "react";
 import { toast } from "sonner";

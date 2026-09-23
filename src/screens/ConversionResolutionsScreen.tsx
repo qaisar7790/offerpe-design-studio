@@ -11,7 +11,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { resolutionQueueSeeds } from "@/data/mockData";
 import { inr, tabTriggerClass } from "@/lib/admin-utils";
 import { cn } from "@/lib/utils";
-import type { Conversion, Merchant, RejectionReason, ResolutionOutcome, ResolutionQueueItem, Review, Status } from "@/types/admin";
+import type { RejectionReason, ResolutionOutcome, ResolutionQueueItem } from "@/types/admin";
 import { format } from "date-fns";
 import { Check, ChevronDown, Download, FileSpreadsheet, Filter, RotateCcw, Search, ShieldCheck, Store, UploadCloud, X } from "lucide-react";
 import { useRef, useState } from "react";

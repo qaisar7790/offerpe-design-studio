@@ -9,7 +9,6 @@ import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Textarea } from "@/components/ui/textarea";
-import { onboardingRejectionReasons } from "@/data/mockData";
 import { tabTriggerClass } from "@/lib/admin-utils";
 import { cn } from "@/lib/utils";
 import type { Application, LayoutMode } from "@/types/admin";
@@ -26,7 +25,7 @@ export function ApplicationDetails({ application }: { application: Application }
   </div>;
 }
 
-export function RejectApplicationDialog({ application, onReject, children }: { application: Application; onReject: (application: Application, reason: string, note: string) => void; children: React.ReactNode }) {
+export function RejectApplicationDialog({ application, onReject, children, onboardingRejectionReasons }: { application: Application; onReject: (application: Application, reason: string, note: string) => void; children: React.ReactNode; onboardingRejectionReasons: readonly string[] }) {
   const [open, setOpen] = useState(false);
   const [reason, setReason] = useState(onboardingRejectionReasons[0] as string);
   const [note, setNote] = useState("");
@@ -43,7 +42,7 @@ export function ApplicationHeadline({ application }: { application: Application 
   </div>;
 }
 
-export function OnboardingQueue({ applications, onApprove, onReject, onRevert, onDelete }: { applications: Application[]; onApprove: (application: Application) => void; onReject: (application: Application, reason: string, note: string) => void; onRevert: (application: Application) => void; onDelete: (application: Application) => void }) {
+export function OnboardingQueue({ applications, onApprove, onReject, onRevert, onDelete, onboardingRejectionReasons }: { applications: Application[]; onApprove: (application: Application) => void; onReject: (application: Application, reason: string, note: string) => void; onRevert: (application: Application) => void; onDelete: (application: Application) => void; onboardingRejectionReasons: readonly string[] }) {
   const [tab, setTab] = useState("pending");
   const [query, setQuery] = useState("");
   const [status, setStatus] = useState("all");
@@ -85,7 +84,7 @@ export function OnboardingQueue({ applications, onApprove, onReject, onRevert, o
     <td className="pr-3 text-right"><div className="flex justify-end gap-1">
       <Dialog><DialogTrigger asChild><IconButton className="h-7 w-7" label={`View application ${application.id}`}><ExternalLink className="h-3.5 w-3.5" /></IconButton></DialogTrigger><DialogContent className="max-w-2xl bg-card"><DialogHeader><DialogTitle className="font-heading text-lg">{application.store}</DialogTitle><DialogDescription>Application {application.id} · submitted {application.submitted}</DialogDescription></DialogHeader><ApplicationDetails application={application} /></DialogContent></Dialog>
       {mode === "pending"
-        ? <><Button size="sm" className="h-7 px-2.5 text-xs" onClick={() => onApprove(application)}><Check />Approve</Button><RejectApplicationDialog application={application} onReject={onReject}><Button size="sm" variant="destructive" className="h-7 px-2.5 text-xs"><X />Reject</Button></RejectApplicationDialog></>
+        ? <><Button size="sm" className="h-7 px-2.5 text-xs" onClick={() => onApprove(application)}><Check />Approve</Button><RejectApplicationDialog application={application} onReject={onReject} onboardingRejectionReasons={onboardingRejectionReasons}><Button size="sm" variant="destructive" className="h-7 px-2.5 text-xs"><X />Reject</Button></RejectApplicationDialog></>
         : <><IconButton className="h-7 w-7" label={`Re-evaluate application ${application.id}`} onClick={() => onRevert(application)}><RotateCcw className="h-3.5 w-3.5" /></IconButton><ConfirmDeleteDialog itemType="Application" name={application.store} onConfirm={() => onDelete(application)}><Button variant="ghost" size="icon" className="h-7 w-7 text-destructive" aria-label={`Delete application ${application.id}`}><Trash2 className="h-3.5 w-3.5" /></Button></ConfirmDeleteDialog></>}
     </div></td>
   </tr>)}</tbody></table></div></div>;
@@ -114,7 +113,7 @@ export function OnboardingQueue({ applications, onApprove, onReject, onRevert, o
               <ApplicationHeadline application={application} />
               <div className="mt-auto flex shrink-0 gap-2 pt-3">
                 <Button size="sm" onClick={() => onApprove(application)}><Check />Approve</Button>
-                <RejectApplicationDialog application={application} onReject={onReject}><Button size="sm" variant="destructive"><X />Reject</Button></RejectApplicationDialog>
+                <RejectApplicationDialog application={application} onReject={onReject} onboardingRejectionReasons={onboardingRejectionReasons}><Button size="sm" variant="destructive"><X />Reject</Button></RejectApplicationDialog>
               </div>
             </div>
             <div className="mt-4 grid gap-3 border-t border-border pt-3 text-xs sm:grid-cols-2">

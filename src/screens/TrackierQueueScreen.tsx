@@ -7,14 +7,13 @@ import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Textarea } from "@/components/ui/textarea";
-import { campaignRejectionReasons } from "@/data/mockData";
 import { tabTriggerClass } from "@/lib/admin-utils";
 import { cn } from "@/lib/utils";
 import type { Category, StagedCampaign, SyncRun } from "@/types/admin";
 import { AlertTriangle, Check, ChevronDown, Filter, Lock, RefreshCw, RotateCcw, Search, Store, X } from "lucide-react";
 import { useState } from "react";
 
-export function RejectCampaignDialog({ campaign, onReject, children }: { campaign: StagedCampaign; onReject: (campaign: StagedCampaign, reason: string, note: string) => void; children: React.ReactNode }) {
+export function RejectCampaignDialog({ campaign, onReject, children, campaignRejectionReasons }: { campaign: StagedCampaign; onReject: (campaign: StagedCampaign, reason: string, note: string) => void; children: React.ReactNode; campaignRejectionReasons: readonly string[] }) {
   const [open, setOpen] = useState(false);
   const [reason, setReason] = useState(campaignRejectionReasons[0] as string);
   const [note, setNote] = useState("");
@@ -25,7 +24,7 @@ export function StagedField({ label, children }: { label: string; children: Reac
   return <label className="block space-y-1.5 text-xs font-semibold uppercase text-muted-foreground">{label}<div className="font-sans text-sm normal-case">{children}</div></label>;
 }
 
-export function CampaignCard({ campaign, categories, onChange, onApprove, onReject }: { campaign: StagedCampaign; categories: Category[]; onChange: (campaign: StagedCampaign) => void; onApprove: (campaign: StagedCampaign) => void; onReject: (campaign: StagedCampaign, reason: string, note: string) => void }) {
+export function CampaignCard({ campaign, categories, onChange, onApprove, onReject, campaignRejectionReasons }: { campaign: StagedCampaign; categories: Category[]; onChange: (campaign: StagedCampaign) => void; onApprove: (campaign: StagedCampaign) => void; onReject: (campaign: StagedCampaign, reason: string, note: string) => void; campaignRejectionReasons: readonly string[] }) {
   const set = <K extends keyof StagedCampaign>(key: K, value: StagedCampaign[K]) => onChange({ ...campaign, [key]: value });
   const mapped = Boolean(campaign.categoryId);
   return <article className="rounded-lg border border-border bg-card p-4 shadow-card">
@@ -62,7 +61,7 @@ export function CampaignCard({ campaign, categories, onChange, onApprove, onReje
     </div>
     <div className="mt-4 flex flex-wrap gap-2 border-t border-border pt-3">
       <Button size="sm" onClick={() => onApprove(campaign)}><Check />Approve</Button>
-      <RejectCampaignDialog campaign={campaign} onReject={onReject}><Button size="sm" variant="destructive"><X />Reject</Button></RejectCampaignDialog>
+      <RejectCampaignDialog campaign={campaign} onReject={onReject} campaignRejectionReasons={campaignRejectionReasons}><Button size="sm" variant="destructive"><X />Reject</Button></RejectCampaignDialog>
     </div>
   </article>;
 }
@@ -94,7 +93,7 @@ export function SyncConfirmDialog({ syncing, onSync, children }: { syncing: bool
   return <AlertDialog><AlertDialogTrigger asChild>{children}</AlertDialogTrigger><AlertDialogContent className="border-border bg-card"><AlertDialogHeader><AlertDialogTitle className="font-heading">Trigger Trackier campaign sync?</AlertDialogTitle><AlertDialogDescription>This will query the Trackier API for newly active and updated campaigns. Staged campaigns and pending reviews will be updated. Do you want to proceed?</AlertDialogDescription></AlertDialogHeader><AlertDialogFooter><AlertDialogCancel>Cancel</AlertDialogCancel><AlertDialogAction className="bg-teal-600 text-white hover:bg-teal-700" onClick={onSync}><RefreshCw className={cn("h-4 w-4", syncing && "animate-spin")} />Confirm &amp; Sync</AlertDialogAction></AlertDialogFooter></AlertDialogContent></AlertDialog>;
 }
 
-export function TrackierQueue({ campaigns, runs, categories, syncing, onSync, onChange, onApprove, onReject }: { campaigns: StagedCampaign[]; runs: SyncRun[]; categories: Category[]; syncing: boolean; onSync: () => void; onChange: (campaign: StagedCampaign) => void; onApprove: (campaign: StagedCampaign) => void; onReject: (campaign: StagedCampaign, reason: string, note: string) => void }) {
+export function TrackierQueue({ campaigns, runs, categories, syncing, onSync, onChange, onApprove, onReject, campaignRejectionReasons }: { campaigns: StagedCampaign[]; runs: SyncRun[]; categories: Category[]; syncing: boolean; onSync: () => void; onChange: (campaign: StagedCampaign) => void; onApprove: (campaign: StagedCampaign) => void; onReject: (campaign: StagedCampaign, reason: string, note: string) => void; campaignRejectionReasons: readonly string[] }) {
   const [tab, setTab] = useState("pending");
   const [query, setQuery] = useState("");
   const [mapping, setMapping] = useState("all");
@@ -112,7 +111,7 @@ export function TrackierQueue({ campaigns, runs, categories, syncing, onSync, on
           {(query || mapping !== "all") && <Button variant="ghost" size="sm" onClick={() => { setQuery(""); setMapping("all"); }} className="shrink-0 text-muted-foreground hover:text-foreground"><RotateCcw className="mr-1 h-3.5 w-3.5" />Reset</Button>}
         </div>
         {pending.length === 0 ? <p className="text-sm text-muted-foreground">No staged campaigns waiting for review.</p>
-          : <div className="space-y-4">{pending.map((campaign) => <CampaignCard key={campaign.id} campaign={campaign} categories={categories} onChange={onChange} onApprove={onApprove} onReject={onReject} />)}</div>}
+          : <div className="space-y-4">{pending.map((campaign) => <CampaignCard key={campaign.id} campaign={campaign} categories={categories} onChange={onChange} onApprove={onApprove} onReject={onReject} campaignRejectionReasons={campaignRejectionReasons} />)}</div>}
       </TabsContent>
       <TabsContent value="runs" className="mt-0"><SyncRunsTable runs={runs} /></TabsContent>
     </Tabs>

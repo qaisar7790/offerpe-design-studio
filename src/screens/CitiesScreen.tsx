@@ -14,7 +14,7 @@ import { Building2, Check, ChevronDown, Filter, Pencil, Plus, RotateCcw, Search,
 import { useState } from "react";
 import { toast } from "sonner";
 
-export function CityDialog({ city, onClose, onSave }: { city: CityRecord | null; onClose: () => void; onSave: (city: CityRecord) => void }) {
+export function CityDialog({ city, onClose, onSave, cityDirectory, cityStates }: { city: CityRecord | null; onClose: () => void; onSave: (city: CityRecord) => void; readonly cityDirectory: Record<string, { name: string; lat: number; lng: number }[]>; readonly cityStates: string[] }) {
   const [stateName, setStateName] = useState(city?.state ?? "");
   const [cityName, setCityName] = useState(city?.name ?? "");
   const [manual, setManual] = useState(false);
@@ -56,6 +56,6 @@ export function CitiesPage({ cityDirectory, cityStates, initialCities }: { reado
     </div>
     <div className="min-w-0 overflow-hidden rounded-lg border border-border bg-card shadow-card"><div className="table-scrollbar overflow-x-auto"><table className="w-full min-w-175 text-left text-sm"><thead className="text-[11px] uppercase text-muted-foreground"><tr><th className="sticky top-0 bg-muted/95 py-2">City</th><th className="sticky top-0 bg-muted/95 py-2">State</th><th className="sticky top-0 bg-muted/95 py-2">Latitude</th><th className="sticky top-0 bg-muted/95 py-2">Longitude</th><th className="sticky top-0 bg-muted/95 py-2">Status</th><th className="sticky top-0 bg-muted/95 py-2 text-right">Actions</th></tr></thead><tbody>{rows.map((item) => <tr key={item.id} className="border-t border-border hover:bg-muted/50"><td className="font-semibold">{item.name}</td><td className="text-muted-foreground">{item.state}</td><td className="font-mono text-xs">{item.lat}</td><td className="font-mono text-xs">{item.lng}</td><td><StatusBadge status={item.active ? "Active" : "Inactive"} /></td><td className="text-right"><span className="inline-flex"><IconButton className="h-7 w-7" label={`Edit ${item.name}`} onClick={() => { setEditing(item); setDialogOpen(true); }}><Pencil className="h-3.5 w-3.5" /></IconButton><ConfirmDeleteDialog itemType="City" name={item.name} onConfirm={() => { setRowsState((current) => current.filter((row) => row.id !== item.id)); toast.success("City deleted", { description: `${item.name} was removed.` }); }}><Button variant="ghost" size="icon" className="h-7 w-7 text-destructive" aria-label={`Delete ${item.name}`}><Trash2 className="h-3.5 w-3.5" /></Button></ConfirmDeleteDialog></span></td></tr>)}</tbody></table>{!rows.length && <div className="px-6 py-14 text-center"><Building2 className="mx-auto h-8 w-8 text-muted-foreground" /><h3 className="mt-3 font-heading font-semibold">No cities found</h3><p className="mt-1 text-sm text-muted-foreground">Try changing or resetting the current filters.</p></div>}</div></div>
     <TransactionPagination count={rows.length} />
-    {dialogOpen && <CityDialog key={editing?.id ?? "new"} city={editing} onClose={() => setDialogOpen(false)} onSave={save} />}
+    {dialogOpen && <CityDialog key={editing?.id ?? "new"} city={editing} onClose={() => setDialogOpen(false)} onSave={save} cityDirectory={cityDirectory} cityStates={cityStates} />}
   </>;
 }

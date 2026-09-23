@@ -1,12 +1,11 @@
 import { IconButton } from "@/components/admin/IconButton";
 import { Button } from "@/components/ui/button";
-import { groups } from "@/data/mockData";
 import { cn } from "@/lib/utils";
-import type { View } from "@/types/admin";
+import type { NavGroup, View } from "@/types/admin";
 import { ChevronLeft, ChevronRight, LayoutDashboard, X } from "lucide-react";
 import { useState } from "react";
 
-export function Sidebar({ view, setView, open, setOpen }: { view: View; setView: (v: View) => void; open: boolean; setOpen: (v: boolean) => void }) {
+export function Sidebar({ groups, view, setView, open, setOpen }: { groups: readonly NavGroup[]; view: View; setView: (v: View) => void; open: boolean; setOpen: (v: boolean) => void }) {
   const [expanded, setExpanded] = useState<string | null>(() => {
     const activeView = view === "merchant-edit" ? "merchants" : view === "offer-edit" ? "offers" : view === "promo-banner-edit" || view === "promo-banner-new" ? "promo-banners" : view === "category-edit" || view === "category-new" ? "categories" : view === "affiliate-network-edit" || view === "affiliate-network-new" ? "affiliate-networks" : view === "role-edit" ? "roles" : view === "onboarding-slide-edit" || view === "onboarding-slide-new" ? "onboarding-screens" : view;
     const activeGroup = groups.find((group) => group.items.some((item) => item.view === activeView));

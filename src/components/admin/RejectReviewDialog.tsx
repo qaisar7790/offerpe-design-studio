@@ -2,12 +2,11 @@ import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
-import { rejectionReasons } from "@/data/mockData";
 import type { Review } from "@/types/admin";
 
 import { useState } from "react";
 
-export function RejectReviewDialog({ review, onReject, children }: { review: Review; onReject: (review: Review, reason: string, note: string) => void; children: React.ReactNode }) {
+export function RejectReviewDialog({ review, rejectionReasons, onReject, children }: { review: Review; rejectionReasons: readonly string[]; onReject: (review: Review, reason: string, note: string) => void; children: React.ReactNode }) {
   const [open, setOpen] = useState(false);
   const [reason, setReason] = useState(rejectionReasons[0] as string);
   const [note, setNote] = useState("");
